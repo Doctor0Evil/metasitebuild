@@ -118,7 +118,7 @@ jobs:
           echo "nothing_to_commit=false" >> "$GITHUB_OUTPUT"
 
       # === NEW: Ensure aln-analyze exists ===
-      - name: Install aln-analyze if missing
+      - name: Ensure aln-analyze CLI
         run: |
           if command -v aln-analyze >/dev/null 2>&1; then
             echo "aln-analyze already available" | tee -a "$FIX_LOG"
@@ -127,8 +127,10 @@ jobs:
             set +e
             python3 -m pip install --upgrade pip && pip install aln-analyze
             if ! command -v aln-analyze >/dev/null 2>&1; then
-              echo "::warning::Unable to install aln-analyze via pip" | tee -a "$FIX_LOG"
-              curl -sL -o aln-analyze https://github.com/Doctor0Evil/ALN_ProgrammingLanguage/releases/latest/download/aln-analyze-linux-x64 && chmod +x aln-analyze && sudo mv aln-analyze /usr/local/bin/ || true
+              echo "::warning::Unable to install via pip, trying binary fetch" | tee -a "$FIX_LOG"
+              curl -sL -o aln-analyze https://github.com/Doctor0Evil/ALN_ProgrammingLanguage/releases/latest/download/aln-analyze-linux-x64 \
+                && chmod +x aln-analyze \
+                && sudo mv aln-analyze /usr/local/bin/ || true
             fi
             set -e
           fi
@@ -136,7 +138,8 @@ jobs:
       - name: Run aln-analyze (safe mode)
         run: |
           if command -v aln-analyze >/dev/null 2>&1; then
-            aln-analyze --input /github/logs --output /tmp/failure.lst --profane-allow 'fuck,shit,bitch,asshole,cunt' || echo "::warning::aln-analyze exited with error"
+            aln-analyze --input /github/logs --output /tmp/failure.lst --profane-allow 'fuck,shit,bitch,asshole,cunt' \
+              || echo "::warning::aln-analyze exited with an error"
           else
             echo "::error::aln-analyze not found — skipping analysis"
           fi
