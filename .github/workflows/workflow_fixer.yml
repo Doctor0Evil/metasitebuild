@@ -1,0 +1,176 @@
+name: Workflow Fixer
+
+on:
+  workflow_call:
+    inputs:
+      caller:
+        description: "Who invoked the fixer"
+        required: false
+        type: string
+        default: "unknown"
+      depth:
+        description: "Loop guard (remaining hops)"
+        required: false
+        type: number
+        default: 2
+      bot_name:
+        description: "Commit author name"
+        required: false
+        type: string
+        default: "github-actions[bot]"
+      bot_email:
+        description: "Commit author email"
+        required: false
+        type: string
+        default: "41898282+github-actions[bot]@users.noreply.github.com"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: fixer-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    env:
+      LOG_DIR: logs
+      FIX_LOG: logs/fixer.log
+      LOOP_DEPTH: ${{ inputs.depth }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Init logs
+        run: |
+          mkdir -p "$LOG_DIR"
+          echo "=== Fixer start | caller=${{ inputs.caller }} depth=${LOOP_DEPTH} sha=${GITHUB_SHA} ===" | tee -a "$FIX_LOG"
+
+      - name: Determine default branch
+        id: branch
+        run: |
+          default_branch="$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's@^origin/@@')"
+          [ -z "$default_branch" ] && default_branch="main"
+          echo "default_branch=$default_branch" | tee -a "$FIX_LOG"
+          echo "default_branch=$default_branch" >> "$GITHUB_OUTPUT"
+
+      - name: Normalize .gitattributes
+        run: |
+          if [ -f .gitattributes ]; then
+            cp .gitattributes .gitattributes.bak
+            sed -i 's/^[[:space:]]*#/#/' .gitattributes
+            sed -i 's/\r$//' .gitattributes
+            if ! diff -q .gitattributes.bak .gitattributes >/dev/null; then
+              echo "Normalized .gitattributes" | tee -a "$FIX_LOG"
+              git add .gitattributes
+            else
+              echo "No .gitattributes changes needed" | tee -a "$FIX_LOG"
+            fi
+          else
+            echo ".gitattributes not present; skipping" | tee -a "$FIX_LOG"
+          fi
+
+      - name: Resolve workflow conflicts safely
+        run: |
+          if ls .github/workflows/*.yml >/dev/null 2>&1; then
+            files="$(grep -lR '<<<<<<<\|=======\|>>>>>>>' .github/workflows || true)"
+            if [ -n "$files" ]; then
+              echo "Conflict markers found in:" | tee -a "$FIX_LOG"
+              echo "$files" | tee -a "$FIX_LOG"
+              for f in $files; do
+                echo "Resolving $f with --ours" | tee -a "$FIX_LOG"
+                git checkout --ours "$f" || true
+                git add "$f" || true
+              done
+            else
+              echo "No workflow conflicts" | tee -a "$FIX_LOG"
+            fi
+          else
+            echo "No workflow files found" | tee -a "$FIX_LOG"
+          fi
+
+      - name: Stage unstaged changes
+        run: |
+          if ! git diff --quiet; then
+            echo "Staging unstaged changes..." | tee -a "$FIX_LOG"
+            git add -A
+          else
+            echo "No unstaged changes" | tee -a "$FIX_LOG"
+          fi
+
+      - name: Commit if staged
+        id: commit
+        run: |
+          if git diff --cached --quiet; then
+            echo "nothing_to_commit=true" >> "$GITHUB_OUTPUT"
+            echo "No staged changes to commit" | tee -a "$FIX_LOG"
+            exit 0
+          fi
+          git config --global user.name  "${{ inputs.bot_name }}"
+          git config --global user.email "${{ inputs.bot_email }}"
+          git commit -m "ci(fixer): normalize attributes, resolve workflow conflicts (caller=${{ inputs.caller }})" | tee -a "$FIX_LOG"
+          echo "nothing_to_commit=false" >> "$GITHUB_OUTPUT"
+
+      # === NEW: Ensure aln-analyze exists ===
+      - name: Install aln-analyze if missing
+        run: |
+          if command -v aln-analyze >/dev/null 2>&1; then
+            echo "aln-analyze already available" | tee -a "$FIX_LOG"
+          else
+            echo "Installing aln-analyze..." | tee -a "$FIX_LOG"
+            set +e
+            python3 -m pip install --upgrade pip && pip install aln-analyze
+            if ! command -v aln-analyze >/dev/null 2>&1; then
+              echo "::warning::Unable to install aln-analyze via pip" | tee -a "$FIX_LOG"
+              curl -sL -o aln-analyze https://github.com/Doctor0Evil/ALN_ProgrammingLanguage/releases/latest/download/aln-analyze-linux-x64 && chmod +x aln-analyze && sudo mv aln-analyze /usr/local/bin/ || true
+            fi
+            set -e
+          fi
+
+      - name: Run aln-analyze (safe mode)
+        run: |
+          if command -v aln-analyze >/dev/null 2>&1; then
+            aln-analyze --input /github/logs --output /tmp/failure.lst --profane-allow 'fuck,shit,bitch,asshole,cunt' || echo "::warning::aln-analyze exited with error"
+          else
+            echo "::error::aln-analyze not found — skipping analysis"
+          fi
+
+      - name: Rebase and push
+        id: push
+        continue-on-error: true
+        run: |
+          target="${{ steps.branch.outputs.default_branch }}"
+          git fetch origin "$target" | tee -a "$FIX_LOG"
+          if ! git rev-parse --abbrev-ref HEAD | grep -qv '^HEAD$'; then
+            git checkout -b "fixer/${GITHUB_RUN_ID}" | tee -a "$FIX_LOG"
+          fi
+          git pull --rebase origin "$target" || true
+          git push origin HEAD:"$target" | tee -a "$FIX_LOG"
+
+      - name: Fallback to PR if push failed
+        if: steps.push.outcome == 'failure'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "Fixer PR: normalize workflows (run ${{ github.run_id }})"
+          commit-message: "ci(fixer): normalize attributes, resolve workflow conflicts"
+          branch: "fixer/autofix-${{ github.run_id }}"
+          body: |
+            Automated fixes by Workflow Fixer.
+            - Caller: `${{ inputs.caller }}`
+            - Depth: `${{ inputs.depth }}`
+            - SHA: `${{ github.sha }}`
+          delete-branch: true
+
+      - name: Upload fixer logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixer-logs-${{ github.run_id }}
+          path: ${{ env.FIX_LOG }}
+          if-no-files-found: warn
