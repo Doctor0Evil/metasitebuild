@@ -1,0 +1,23 @@
+name: BitBot Queue Pending Workflows
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  queue_pending:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Pending Workflows
+        run: |
+          python bithub/scripts/get_pending_workflows.py > pending_wfs.json
+
+      - name: Deploy BitBot Agents for Pending
+        run: |
+          python bithub/scripts/deploy_bitbot_agent.py --input pending_wfs.json --pattern ml.patterns.learn.bitbot.bit
+
+      - name: Run Pending Workflows on BitBot
+        run: |
+          python bithub/scripts/run_pending_with_bitbot.py --input pending_wfs.json
