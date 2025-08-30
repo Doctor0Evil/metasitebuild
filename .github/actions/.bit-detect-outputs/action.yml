@@ -1,0 +1,39 @@
+name: .bit-detect-outputs
+description: Detects build output paths and emits a newline-separated list for artifact uploads.
+author: bithub
+inputs:
+  globs:
+    description: Newline-separated glob patterns to search
+    required: false
+    default: |
+      **/dist/**
+      **/build/**
+      **/out/**
+      **/target/**
+      **/bin/**
+      **/release/**
+outputs:
+  paths:
+    description: Newline-separated, de-duplicated file paths
+    value: ${{ steps.detect.outputs.paths }}
+runs:
+  using: composite
+  steps:
+    - id: detect
+      shell: bash
+      run: |
+        set -euo pipefail
+        TMP="$(mktemp)"
+        echo -n > "$TMP"
+        while IFS= read -r pattern; do
+          [ -z "$pattern" ] && continue
+          while IFS= read -r -d '' f; do
+            echo "$f" >> "$TMP"
+          done < <(bash -lc "shopt -s globstar dotglob nullglob; printf '%s\0' $pattern")
+        done <<< "${{ inputs.globs }}"
+        # Deduplicate and keep only files (not directories)
+        OUT="$(mktemp)"
+        awk '!a[$0]++' "$TMP" | while read -r p; do
+          [ -f "$p" ] && echo "$p"
+        done | tr -d '\r' > "$OUT"
+        echo "paths=$(cat "$OUT")" >> "$GITHUB_OUTPUT"
