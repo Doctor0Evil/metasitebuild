@@ -1,0 +1,33 @@
+# 1. Create the .bit/ structure for bot manifests
+mkdir -p .bit/bots
+mkdir -p .bithub/state
+mkdir -p .github/workflows
+
+# 2. Create the bot manifest
+cat > .bit/bots/git.bit.yml <<'EOF'
+apiVersion: bitbot/v1
+kind: Bot
+metadata:
+  name: git.bit
+  description: >
+    BitBot agent for GitOps-style repo orchestration.
+spec:
+  triggers:
+    - push
+    - pull_request
+  permissions:
+    contents: write
+    pull-requests: write
+  actions:
+    - type: sync
+      target: manifests
+    - type: validate
+      target: workflows
+EOF
+
+# 3. Commit the manifest
+git add .bit/bots/git.bit.yml
+git commit -m "Add git.bit bot manifest"
+
+# 4. Push to origin
+git push origin main
