@@ -1,23 +1,101 @@
-name: BitBot Queue Pending Workflows
+name: Meta Orchestrator with Livingroom Runner
+
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+  push:
+    branches: [ "main" ]
+    paths:
+      - ".github/workflows/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: orchestrator-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  queue_pending:
-    runs-on: ubuntu-latest
+  preflight-fix:
+    name: Preflight Fix (Ubuntu)
+    uses: ./.github/workflows/workflow_fixer.yml
+    with:
+      caller: orchestrator
+      depth: 2
+      bot_name: "github-actions[bot]"
+      bot_email: "41898282+github-actions[bot]@users.noreply.github.com"
+
+  generator:
+    name: Workflow Generator (Ubuntu)
+    needs: preflight-fix
+    uses: ./.github/workflows/workflow_generator.yml
+    with:
+      create_samples: true
+      bot_name: "actions-user"
+      bot_email: "actions-user@users.noreply.github.com"
+
+  validator:
+    name: Workflow Validator (Ubuntu)
+    needs: [preflight-fix, generator]
+    uses: ./.github/workflows/workflow_validator.yml
+    with:
+      caller: orchestrator-validator
+      bot_name: "github-actions[bot]"
+      bot_email: "41898282+github-actions[bot]@users.noreply.github.com"
+
+  windows-tests:
+    name: Livingroom Runner Tasks (Self‑hosted Windows)
+    needs: validator
+    runs-on: [self-hosted, Windows, X64]
+    if: success()
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Get Pending Workflows
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Confirm Runner Context
+        shell: pwsh
         run: |
-          python bithub/scripts/get_pending_workflows.py > pending_wfs.json
-
-      - name: Deploy BitBot Agents for Pending
+          Write-Host "Runner Name: $env:RUNNER_NAME"
+          Write-Host "Runner OS: $env:RUNNER_OS $env:RUNNER_ARCH"
+          Write-Host "Running on Livingroom self-hosted Windows runner."
+      - name: Ensure aln-analyze on Windows
+        shell: pwsh
         run: |
-          python bithub/scripts/deploy_bitbot_agent.py --input pending_wfs.json --pattern ml.patterns.learn.bitbot.bit
-
-      - name: Run Pending Workflows on BitBot
+          if (Get-Command aln-analyze -ErrorAction SilentlyContinue) {
+            Write-Host "aln-analyze already available"
+          } else {
+            Write-Host "Installing aln-analyze..."
+            try {
+              pip install --upgrade pip
+              pip install aln-analyze
+            } catch {
+              Write-Warning "Unable to install via pip — please ensure a Windows binary is available."
+            }
+          }
+      - name: Run aln-analyze (safe mode on Windows)
+        shell: pwsh
         run: |
-          python bithub/scripts/run_pending_with_bitbot.py --input pending_wfs.json
+          if (Get-Command aln-analyze -ErrorAction SilentlyContinue) {
+            aln-analyze --input "$env:GITHUB_WORKSPACE\logs" --output "C:\temp\failure.lst" --profane-allow 'fuck,shit,bitch,asshole,cunt'
+          } else {
+            Write-Warning "aln-analyze not found — skipping."
+          }
+      - name: Build or Test on Windows
+        shell: pwsh
+        run: |
+          if (Test-Path .\scripts\windows_build.ps1) {
+            pwsh .\scripts\windows_build.ps1
+          } else {
+            Write-Host "No Windows build script found — skipping."
+
+  recovery:
+    name: Recovery Path (Ubuntu)
+    needs: [validator, windows-tests]
+    if: failure()
+    uses: ./.github/workflows/workflow_fixer.yml
+    with:
+      caller: orchestrator-recovery
+      depth: 1
+      bot_name: "github-actions[bot]"
+      bot_email: "41898282+github-actions[bot]@users.noreply.github.com"
