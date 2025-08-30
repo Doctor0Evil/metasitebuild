@@ -1,0 +1,40 @@
+name: Register git.bit Bot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check if bot manifest requires Java
+        id: check_java
+        run: |
+          echo "🔍 Inspecting bot manifest for Java requirement..."
+          if grep -qi "requires:.*java" ".bit/bots/git.bit.yml"; then
+            echo "✅ Java requirement found in manifest."
+            echo "needs_java=true" >> $GITHUB_OUTPUT
+          else
+            echo "ℹ️ No Java requirement found in manifest."
+            echo "needs_java=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Java JDK
+        if: steps.check_java.outputs.needs_java == 'true'
+        uses: actions/setup-java@v5.0.0
+        with:
+          java-version: "17"          # adjust if manifest specifies a version
+          distribution: "temurin"     # adjust if manifest specifies a distribution
+
+      - name: Skip Java setup (not required)
+        if: steps.check_java.outputs.needs_java == 'false'
+        run: echo "⏭ Skipping Java setup — manifest does not require it."
+
+      - name: Call reusable bot registration workflow
+        uses: ./.github/workflows/workflow_register_bot.yml
+        with:
+          bot_manifest: ".bit/bots/git.bit.yml"
+          bot_name: "git.bit"
