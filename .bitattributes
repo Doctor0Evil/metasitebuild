@@ -1,0 +1,80 @@
+# .bitattributes — Bit.Hub agent + storage attributes
+
+# === Pattern Stores & Compliance ===
+.bithub/ml_patterns.json:
+  type: pattern-store
+  optimize-focus:
+    - network.storage
+    - virtual.emulations
+    - ml.workflows.bit
+    - rhythmic-adapt
+  backup-dir: .bithub/backups/
+  audit: true
+  policy: .bit/policy.json
+
+# === Workflow & Manifest Files ===
+.github/workflows/**/*.yml:
+  type: workflow
+  lint: yaml
+  enforce-eol: lf
+  agent: agentic-bitbot.build
+
+.bit/**/*.create:
+  type: bitbot-manifest
+  schema: bitbot.create.v1
+  validate: true
+
+# === Source Code ===
+*.aln:
+  language: ALN
+  enforce-eol: lf
+  diff: text
+
+*.lisp:
+  language: Lisp
+  enforce-eol: lf
+  diff: text
+
+*.py:
+  language: Python
+  enforce-eol: lf
+  exec: true
+
+*.sh:
+  language: Shell
+  enforce-eol: lf
+  exec: true
+
+# === Binary Assets ===
+game-assets/**:
+  storage: secure
+  gdpr: true
+  banter-filter: true
+  binary: true
+
+bithub_datalake/**:
+  storage: persistent
+  binary: true
+
+# === Virtual Emulation Assets ===
+virta_env/**:
+  storage: virtual
+  binary: true
+  sync-with: virta-net
+
+# === Ignore/Exclude from Pattern Sync ===
+.bithub/backups/**:
+  sync: false
+  export-ignore: true
+
+.github/cache/**:
+  sync: false
+  export-ignore: true
+
+loop_state.json:
+  sync: false
+  export-ignore: true
+
+corrected.aln:
+  sync: false
+  export-ignore: true
