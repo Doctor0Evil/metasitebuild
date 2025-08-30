@@ -1,0 +1,32 @@
+name: Analysis .NET
+on:
+  push:
+    paths:
+      - "**/*.sln"
+      - "**/*.csproj"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dotnet-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  call-preflight:
+    uses: ./.bithub-actions/templates/preflight.yml
+  run-analysis:
+    needs: call-preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3.4.2
+        with:
+          dotnet-version: 8.0.x
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Inspect solutions
+        run: |
+          dotnet --info
+          for f in $(git ls-files "**/*.sln"); do
+            echo "Discovered solution: $f"
+          done
