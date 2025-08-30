@@ -1,0 +1,39 @@
+bitbot.create:
+  id: agentic-url-resolver
+  description: >
+    Resolves .bit / Bit.Hub style repository URLs into valid GitHub or
+    self‑hosted endpoints, using ALN's framework for compliance and routing.
+    Ensures that .bitworkflows cards can be invoked directly from .bit URLs.
+  triggers:
+    - on: workflow_dispatch
+    - on: workflow_start
+  actions:
+    - parse_url:
+        script: bithub/scripts/parse_bit_url.py
+        input: .bit/url_map.json
+        output: /tmp/resolved_urls.json
+    - validate_resolution:
+        script: bithub/scripts/validate_url_resolution.py
+        input: /tmp/resolved_urls.json
+        policy: .bit/policy.json
+    - update_bitworkflows_card:
+        script: bithub/scripts/update_bitworkflows.py
+        input: /tmp/resolved_urls.json
+        card: .bit/.bitworkflows
+    - commit_changes:
+        message: "Updated .bitworkflows card with resolved Bit.Hub URLs"
+  compliance:
+    policy: .bit/policy.json
+    audit: true
+
+.bitworkflows:
+  version: 1.0
+  workflows:
+    - name: URL Resolution & Sync
+      description: >
+        Automatically resolve and sync .bit URLs to their GitHub equivalents
+        or configured mirrors, ensuring ALN agents can run without redirect loops.
+      steps:
+        - run: parse_url
+        - run: validate_resolution
+        - run: update_bitworkflows_card
