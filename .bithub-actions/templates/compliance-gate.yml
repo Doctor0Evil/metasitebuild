@@ -1,0 +1,72 @@
+name: Compliance Gate
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: compliance-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    outputs:
+      compliant: ${{ steps.check.outputs.compliant }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install yq and jq
+        run: sudo apt-get update && sudo apt-get install -y yq jq
+      - name: Validate workflows against policy
+        id: check
+        run: |
+          set -e
+          POLICY=".bithub-actions/security.policy.yml"
+          mkdir -p .bithub-actions/logs
+          COMPLIANT=true
+
+          for wf in .github/workflows/*.yml; do
+            echo "Checking $wf"
+
+            # Required triggers present
+            for t in $(yq -r '.rules.required_triggers[]' "$POLICY"); do
+              if ! yq -e ".on.$t" "$wf" >/dev/null 2>&1; then
+                echo "::error file=$wf::Missing required trigger: $t"
+                COMPLIANT=false
+              fi
+            done
+
+            # Forbidden triggers absent
+            for t in $(yq -r '.rules.forbidden_triggers[]' "$POLICY"); do
+              if yq -e ".on.$t" "$wf" >/dev/null 2>&1; then
+                echo "::error file=$wf::Forbidden trigger present: $t"
+                COMPLIANT=false
+              fi
+            done
+
+            # Allowed actions only
+            while read -r action; do
+              if ! yq -r '.rules.allowlist_actions[]' "$POLICY" | grep -qx "$action"; then
+                echo "::error file=$wf::Action not allowlisted: $action"
+                COMPLIANT=false
+              fi
+            done < <(grep -oE '[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+@v[0-9][0-9.]*' "$wf" || true)
+
+            # Enforce pinned checkout v3
+            if ! grep -q "${{ fromJson('\"' + 'actions/checkout@v3' + '\"') }}" "$wf"; then
+              echo "::error file=$wf::Checkout must be actions/checkout@v3"
+              COMPLIANT=false
+            fi
+          done
+
+          echo "{\"timestamp\":\"$(date -u +%FT%TZ)\",\"compliant\":$COMPLIANT}" >> .bithub-actions/logs/compliance-$(date +%F).json
+          echo "compliant=$COMPLIANT" >> "$GITHUB_OUTPUT"
+      - name: Upload compliance log
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: compliance-log
+          path: .bithub-actions/logs/compliance-*.json
+          if-no-files-found: warn
+          retention-days: 30
