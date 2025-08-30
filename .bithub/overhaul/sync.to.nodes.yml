@@ -1,0 +1,21 @@
+version: 1
+nodes:
+  - name: staging-vsc
+    api: https://vsc.example.net/bithub/sync
+    auth:
+      header: Authorization
+      tokenRef: env:BITHUB_TOKEN
+    accept:
+      - ".bithub/**/*.json"
+      - "**/*.bit"
+  - name: prod-vsc
+    api: https://vsc-prod.example.net/bithub/sync
+    auth:
+      header: Authorization
+      tokenRef: env:BITHUB_TOKEN
+    accept:
+      - ".bithub/**/*.json"
+      - "**/*.bit"
+retries:
+  attempts: 3
+  backoffSeconds: 5
