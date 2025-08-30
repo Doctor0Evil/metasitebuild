@@ -1,0 +1,92 @@
+name: Genius Workflow All-Fixer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - ".bit/**"
+      - ".github/workflows/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: all-fixer-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ensure-bit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          clean: false
+
+      - name: Ensure .bit scaffold
+        run: |
+          mkdir -p .bit/bots .bit/policies
+          [ -f .bit/README.md ] || cat > .bit/README.md << 'EOF'
+          # .bit
+          Home for Bit.Hub manifests, bot contracts, and compliance policies.
+          Everything here is versioned, auditable, and enforced by workflows.
+          EOF
+          [ -f .bit/policies/compliance.yml ] || cat > .bit/policies/compliance.yml << 'EOF'
+          version: 1
+          rules:
+            - id: bots-manifests-present
+              description: Require at least one bot manifest in .bit/bots
+              severity: error
+          EOF
+
+      - name: Ensure default bot manifests
+        shell: bash
+        run: |
+          declare -A bots
+          bots["git.bit"]="GitOps-style repo orchestration bot"
+          bots["compliance.bit"]="Compliance enforcement and audit bot"
+          bots["orchestrator.bit"]="Meta-orchestration and workflow generator bot"
+          for bot in "${!bots[@]}"; do
+            file=".bit/bots/$bot.yml"
+            if [ ! -f "$file" ]; then
+              cat > "$file" <<EOF
+apiVersion: bitbot/v1
+kind: Bot
+metadata:
+  name: $bot
+  description: ${bots[$bot]}
+spec:
+  triggers: [push, pull_request]
+  permissions:
+    contents: write
+    pull-requests: write
+  actions:
+    - type: sync
+      target: manifests
+    - type: validate
+      target: workflows
+EOF
+              echo "Created $file"
+            else
+              echo "Exists $file"
+            fi
+          done
+
+      - name: Ensure .bit is tracked by Git
+        run: |
+          if [ -f .gitignore ] && grep -qE '^\s*\.bit/?\s*$' .gitignore; then
+            sed -i '/^\s*\.bit\/\?\s*$/d' .gitignore
+            echo "Removed .bit ignore rule from .gitignore"
+          fi
+
+      - name: Commit and push if changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .bit .gitignore || true
+          git diff --cached --quiet && echo "No changes to commit." || git commit -m "Bob the Builder · Genius Workflow All-Fixer #238: ensure .bit scaffold [skip ci]"
+          git pull --rebase origin main
+          git push origin main
