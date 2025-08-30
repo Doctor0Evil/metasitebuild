@@ -1,0 +1,127 @@
+name: .bithub Master Orchestration
+
+on:
+  push:
+    paths:
+      - ".bitlinks/**"
+      - ".github/workflows/**"
+      - "scripts/**"
+      - "src/**"
+      - "config/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: master-orch-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROFANITY_ALLOW: "fuck,shit,bitch,asshole,cunt"
+
+jobs:
+  compliance-gate:
+    uses: ./.bithub-actions/templates/compliance-gate.yml
+
+  preflight:
+    needs: compliance-gate
+    if: needs.compliance-gate.outputs.compliant == 'true'
+    uses: ./.bithub-actions/templates/preflight.yml
+
+  index:
+    name: Locate and build work matrix
+    needs: preflight
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.make.outputs.matrix }}
+      has_units: ${{ steps.make.outputs.has_units }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install jq and yq
+        run: sudo apt-get update && sudo apt-get install -y jq yq
+      - name: Discover files by handler globs
+        id: discover
+        run: |
+          set -e
+          TMP=$(mktemp)
+          echo '[]' > "$TMP"
+          add() { jq --arg f "$1" --arg t "$2" --arg r "$3" '. + [{file:$f,type:$t,runner:$r}]' "$TMP" > "${TMP}.n"; mv "${TMP}.n" "$TMP"; }
+          for type in $(yq -r '.handlers | keys | .[]' .bitlinks/handlers.yml); do
+            runner=$(yq -r ".handlers.$type.runner" .bitlinks/handlers.yml)
+            for g in $(yq -r ".handlers.$type.globs[]?" .bitlinks/handlers.yml); do
+              while IFS= read -r f; do [ -n "$f" ] && add "$f" "$type" "$runner"; done < <(git ls-files "$g" 2>/dev/null || true)
+            done
+          done
+          jq 'unique_by(.file + ":" + .type)' "$TMP" > units.json
+          echo "units<<JSON" >> $GITHUB_OUTPUT
+          cat units.json >> $GITHUB_OUTPUT
+          echo "JSON" >> $GITHUB_OUTPUT
+      - name: Build matrix
+        id: make
+        run: |
+          UNITS='${{ steps.discover.outputs.units }}'
+          if [ -z "$UNITS" ] || [ "$UNITS" = "null" ]; then
+            echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
+            echo "has_units=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "$UNITS" | jq -c '{include: .}' > matrix.json
+          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+          [ "$(jq '.include | length' matrix.json)" -gt 0 ] && echo "has_units=true" >> $GITHUB_OUTPUT || echo "has_units=false" >> $GITHUB_OUTPUT
+
+  connect-correct:
+    name: Connect and correct
+    needs: index
+    if: needs.index.outputs.has_units == 'true'
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.index.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare env (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y jq yq
+
+      - name: Install toolchain (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          TYPE='${{ matrix.type }}'
+          eval "$(yq -r ".handlers[$TYPE].install.linux // \"\"" .bitlinks/handlers.yml)"
+
+      - name: Analyze (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          set -e
+          export FILE='${{ matrix.file }}'
+          TYPE='${{ matrix.type }}'
+          cmd=$(yq -r ".handlers[$TYPE].analyze // \"echo 'No analyzer for $TYPE'\"" .bitlinks/handlers.yml)
+          bash -lc "$cmd"
+
+      - name: Analyze (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:FILE = "${{ matrix.file }}"
+          $type = "${{ matrix.type }}"
+          if ($type -eq "batchfile") {
+            cmd /c "echo Analyzing %FILE%"
+          } elseif ($type -eq "powershell") {
+            pwsh -NoLogo -Command "Write-Host \"Analyzing $env:FILE\"; \$PSVersionTable.PSVersion"
+          } else {
+            Write-Host "No Windows analyzer for $type"
+          }
+
+      - name: Correct (all)
+        if: always()
+        run: |
+          set -e
+          export FILE='${{ matrix.file }}'
+          TYPE='${{ matrix.type }}'
+          fix=$(yq -r ".handlers[$TYPE].correct // \"\"" .bitlinks/handlers.yml)
+          [ -n "$fix" ] && bash -lc "$fix" || echo "No corrections for $TYPE"
