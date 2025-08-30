@@ -1,0 +1,27 @@
+name: Analysis Lisp
+on:
+  push:
+    paths:
+      - "**/*.lisp"
+      - "**/*.cl"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lisp-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  call-preflight:
+    uses: ./.bithub-actions/templates/preflight.yml
+  run-analysis:
+    needs: call-preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: SBCL presence
+        run: sbcl --version
+      - name: Placeholder static check
+        run: |
+          for f in $(git ls-files "**/*.lisp" "**/*.cl"); do
+            echo "Linting $f"
+          done
