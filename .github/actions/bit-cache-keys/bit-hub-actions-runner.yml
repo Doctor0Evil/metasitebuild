@@ -1,0 +1,86 @@
+name: Bit.Hub Actions Runner
+
+on:
+  push:
+    paths:
+      - ".bit-actions/**"
+      - ".bithub/policies/**"
+      - "bithub/scripts/**"
+      - ".github/actions/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bit-actions-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  run-pipeline:
+    needs: [ ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Toolchains (from registry)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3.4.2
+        with: { dotnet-version: '6.0.x' }
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Caches (NuGet + Maven)
+      - name: Cache NuGet
+        id: nuget
+        uses: ./.github/actions/bit-cache-keys
+        with: { kind: nuget }
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.nuget.outputs.paths }}
+          key: ${{ steps.nuget.outputs.key }}
+          restore-keys: ${{ steps.nuget.outputs.restore }}
+
+      - name: Cache Maven
+        id: maven
+        uses: ./.github/actions/bit-cache-keys
+        with: { kind: maven }
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.maven.outputs.paths }}
+          key: ${{ steps.maven.outputs.key }}
+          restore-keys: ${{ steps.maven.outputs.restore }}
+
+      # Execute Bit.Actions pipeline
+      - name: Run Bit.Actions pipeline
+        run: |
+          sudo apt-get update && sudo apt-get install -y yq jq
+          .bit/loaders/bit_actions_runner.sh
+
+      # Upload site status artifact (declared in pipeline)
+      - name: Upload site status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site_status
+          path: site_status.json
+          if-no-files-found: warn
+          retention-days: 7
+### How to run and extend
+
+- **Direct run**:
+  - Commit all files, push, and watch “Bit.Hub Actions Runner”.
+- **Add pipelines**:
+  - Drop more manifests under .bit-actions/pipelines/*.aln.yml.
+  - The same runner will execute them if referenced by the loader (you can parameterize pipeline selection via an input env).
+- **Tighten policies**:
+  - Extend Rego to enforce step naming, required artifacts, and stricter safelists.
+- **Speed upgrades**:
+  - Prewarm .bithub/cache on self‑hosted Bit.Hub.runners and add a secondary cache restore phase in the runner script if you want even faster cold starts.
