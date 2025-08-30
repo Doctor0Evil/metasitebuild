@@ -1,0 +1,190 @@
+name: Contributors + Policy Audit
+
+on:
+  push:
+    paths:
+      - '.bit/platform.yaml'
+      - '.bit/policy/**'
+      - '.bit/terms-of-service.*'
+  pull_request:
+    paths:
+      - '.bit/platform.yaml'
+      - '.bit/policy/**'
+      - '.bit/terms-of-service.*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: contrib-policy-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BITHUB_TRACE_FILE: trace.jsonl
+  BITHUB_AUDIT_DIR: .bit/audit
+  BITHUB_CONTEXT: .bit/context.json
+  BITHUB_TOS_PATH: .bit/terms-of-service.md
+
+jobs:
+  validate-and-gate:
+    name: Bit.Hub Validation and OPA Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Prep audit dir
+        run: |
+          set -euo pipefail
+          mkdir -p "$BITHUB_AUDIT_DIR"
+
+      - name: Install prerequisites (yamllint, opa, python deps)
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y yamllint jq
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa && sudo mv opa /usr/local/bin/opa
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pyyaml
+
+      - name: Lint platform spec
+        id: lint
+        run: |
+          set -euo pipefail
+          yamllint .bit/platform.yaml | tee "$BITHUB_AUDIT_DIR/yamllint.txt"
+
+      - name: Generate Bit.Hub context.json
+        id: context
+        run: |
+          set -euo pipefail
+          python3 - << 'PY'
+          import os, json, yaml, hashlib, sys
+          with open('.bit/platform.yaml','r') as f:
+              platform = yaml.safe_load(f)
+          tos_path = os.environ.get('BITHUB_TOS_PATH', '.bit/terms-of-service.md')
+          tos_hash, tos_present = None, os.path.exists(tos_path)
+          if tos_present:
+              h = hashlib.sha256()
+              with open(tos_path,'rb') as tf: h.update(tf.read())
+              tos_hash = 'sha256:'+h.hexdigest()
+          ctx = {
+              "repo": {
+                  "owner": os.environ.get("GITHUB_REPOSITORY","").split('/')[0],
+                  "name": os.environ.get("GITHUB_REPOSITORY","").split('/')[-1],
+                  "ref": os.environ.get("GITHUB_REF"),
+                  "sha": os.environ.get("GITHUB_SHA"),
+                  "run_id": os.environ.get("GITHUB_RUN_ID"),
+                  "event": os.environ.get("GITHUB_EVENT_NAME"),
+              },
+              "platform": platform,
+              "compliance": {
+                  "tos_present": tos_present,
+                  "tos_hash": tos_hash,
+              }
+          }
+          os.makedirs('.bit', exist_ok=True)
+          with open(os.environ.get('BITHUB_CONTEXT','.bit/context.json'),'w') as out:
+              json.dump(ctx, out, indent=2)
+          print("WROTE", os.environ.get('BITHUB_CONTEXT','.bit/context.json'))
+          PY
+          cat "$BITHUB_CONTEXT"
+
+      - name: Verify key fields in platform spec
+        run: |
+          set -euo pipefail
+          grep -q '^platform:' .bit/platform.yaml
+          grep -q '^economy:' .bit/platform.yaml
+          grep -q '^contributors:' .bit/platform.yaml
+          echo "Core sections present."
+
+      - name: OPA evaluate Bit.Hub policies
+        id: opa
+        run: |
+          set -euo pipefail
+          # Evaluate denies and allow; tolerate missing policy dir by providing a trivial default
+          if [ ! -d ".bit/policy" ]; then
+            echo 'package bithub; allow := true; denies := []' > .bit/policy.default.rego
+            policy_args="-d .bit/policy.default.rego"
+          else
+            policy_args="-d .bit/policy"
+          fi
+
+          opa eval -f json $policy_args -i "$BITHUB_CONTEXT" "data.bithub.denies" \
+            | tee "$BITHUB_AUDIT_DIR/opa_denies.json"
+          opa eval -f json $policy_args -i "$BITHUB_CONTEXT" "data.bithub.allow" \
+            | tee "$BITHUB_AUDIT_DIR/opa_allow.json"
+
+          # Extract decision values
+          DENIES_COUNT=$(jq '[..|.[]? | select(type=="string" or type=="object" or type=="number")] | length' "$BITHUB_AUDIT_DIR/opa_denies.json" || echo 0)
+          ALLOW_VAL=$(jq -r '..|.[]? | select(type=="boolean") | tostring' "$BITHUB_AUDIT_DIR/opa_allow.json" | head -n1)
+          echo "denies_count=$DENIES_COUNT" >> $GITHUB_OUTPUT
+          echo "allow_val=$ALLOW_VAL" >> $GITHUB_OUTPUT
+
+          # Fail fast on denies
+          if [ "${DENIES_COUNT:-0}" -gt 0 ]; then
+            echo "Bit.Hub policy denies detected: $DENIES_COUNT"
+            exit 2
+          fi
+          # If no explicit allow boolean returned, treat as soft-allow
+          echo "Bit.Hub policy gate passed."
+
+      - name: Produce audit summary
+        if: always()
+        run: |
+          set -euo pipefail
+          {
+            echo "## Bit.Hub Contributors + Policy Audit"
+            echo ""
+            echo "**Repository:** $GITHUB_REPOSITORY"
+            echo "**Commit:** \`$GITHUB_SHA\`"
+            echo "**Run:** $GITHUB_RUN_ID"
+            echo ""
+            echo "### Results"
+            echo "- **YAML lint:** see artifact yamllint.txt"
+            echo "- **TOS present:** $(jq -r '.compliance.tos_present' "$BITHUB_CONTEXT")"
+            echo "- **OPA denies:** ${{ steps.opa.outputs.denies_count }}"
+            echo "- **OPA allow:** ${{ steps.opa.outputs.allow_val }}"
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Write sticky trigger audit trail
+        run: |
+          set -euo pipefail
+          {
+            echo "{"
+            echo "  \"sticky_trigger\": \"github:${GITHUB_RUN_ID}\","
+            echo "  \"ref\": \"${GITHUB_REF}\","
+            echo "  \"sha\": \"${GITHUB_SHA}\","
+            echo "  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
+            echo "  \"opa_denies\": ${{
+              steps.opa.outputs.denies_count
+            }},"
+            echo "  \"opa_allow\": \"${{ steps.opa.outputs.allow_val }}\""
+            echo "}"
+          } > "$BITHUB_AUDIT_DIR/sticky.trigger.audit.trail.json"
+
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bithub-audit-${{ github.run_id }}
+          path: |
+            ${{ env.BITHUB_AUDIT_DIR }}/
+            ${{ env.BITHUB_CONTEXT }}
+
+      - name: Optional ALNFantasia celebration
+        if: success() && env.BITBOT_TOKEN != '' # set BITBOT_TOKEN secret to enable
+        env:
+          BITBOT_TOKEN: ${{ secrets.BITBOT_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -sSL https://bithub.example.com/install-bitbot.sh | bash
+          bitbot celebrate \
+            --event "contributors_audit_pass" \
+            --ref "${GITHUB_REF}" \
+            --sha "${GITHUB_SHA}" \
+            --run "${GITHUB_RUN_ID}" \
+            --trace "$BITHUB_TRACE_FILE" || true
