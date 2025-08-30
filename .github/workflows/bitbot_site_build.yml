@@ -1,0 +1,21 @@
+name: BitBot Site Build Check
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  site_build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Production Site Status
+        run: |
+          python bithub/scripts/check_site_status.py --target production > site_status.json
+
+      - name: Trigger Site Build if Needed
+        if: ${{ hashFiles('site_status.json') != '' && contains(fromJSON(file('site_status.json')).status, 'stale') }}
+        run: |
+          python bithub/scripts/deploy_bitbot_agent.py --pattern ml.patterns.learn.bitbot.bit --output agent_id.txt
+          python bithub/scripts/run_workflow.py --agent $(cat agent_id.txt) --workflow "site:build" --args "publish:latest"
