@@ -1,0 +1,9 @@
+package bithub.repo.structure
+
+default allow = false
+
+allow {
+    required := {".bit", ".bithub"}
+    present := {f | f := input.files[_].path; startswith(f, ".bit") or startswith(f, ".bithub")}
+    count(required - present) == 0
+}
