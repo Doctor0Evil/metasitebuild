@@ -34,3 +34,15 @@ jobs:
             .bithub/ledger/compliance.log
           if-no-files-found: warn
           retention-days: 7
+
+- name: Scan for failed jobs
+  run: |
+    for script in bithub/scripts/get_failed_jobs.py \
+                  bithub/scripts/get_failed_jobs_alt1.py \
+                  bithub/scripts/get_failed_jobs_alt2.py \
+                  bithub/scripts/get_failed_jobs_stub.py; do
+      if [ -f "$script" ]; then
+        echo "Running $script..."
+        python "$script" > failed_jobs.json && break
+      fi
+    done
