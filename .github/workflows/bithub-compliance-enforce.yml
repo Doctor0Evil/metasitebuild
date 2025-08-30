@@ -1,0 +1,49 @@
+name: Bit.Hub Compliance Enforce (Sheet-Driven)
+
+on:
+  push:
+    paths:
+      - ".bit-actions/compliance.bit.aln.yml"
+      - ".bithub/policies/**"
+      - ".github/workflows/**"
+      - ".bit/loaders/**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bit Compliance From Sheet
+        uses: ./.github/actions/bit-compliance-from-sheet
+
+  patch:
+    needs: detect
+    if: failure()  # auto-patch only when detect fails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main }
+      - name: Apply sheet-driven auto-patch
+        run: .bit/loaders/bit_apply_compliance_patch.sh
+      - name: Commit and PR
+        run: |
+          git config user.name "bithub-bot"
+          git config user.email "bithub-bot@example.com"
+          BRANCH="compliance-fix/${GITHUB_RUN_ID}"
+          git checkout -b "$BRANCH"
+          git add .github/workflows
+          git commit -m "Auto-patch: sheet-driven Bit.Hub compliance"
+          git push origin HEAD
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ github.ref_name }}
+          base: main
+          title: "Auto-patch: Bit.Hub compliance (from sheet)"
+          body: "This PR was generated from .bit-actions/compliance.bit.aln.yml"
