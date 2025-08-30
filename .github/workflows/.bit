@@ -1,0 +1,73 @@
+name: Sync Bot Manifest Metadata to Scripts
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".bit/bots/*.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure scripts/bots directory exists
+        run: mkdir -p scripts/bots
+
+      - name: Sync metadata from manifests to scripts
+        shell: bash
+        run: |
+          for manifest in .bit/bots/*.yml; do
+            [ -f "$manifest" ] || continue
+            bot_name=$(basename "$manifest" .yml)
+            script="scripts/bots/$bot_name.lisp"
+
+            # Extract metadata from manifest
+            description=$(grep -E '^  description:' "$manifest" | sed 's/^[^:]*: *//')
+            triggers=$(grep -A5 '^spec:' "$manifest" | grep 'triggers:' -A5 | grep '-' | tr -d ' -')
+            permissions=$(grep -A5 '^spec:' "$manifest" | grep 'permissions:' -A5 | grep '-' | tr -d ' -')
+
+            # Build header block
+            header=";; Bot: $bot_name
+;; Description: $description
+;; Triggers: $triggers
+;; Permissions: $permissions
+;; Synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+;; License: Bit.Hub-ALN-core-internal
+"
+
+            # If script exists, replace header; else create new file
+            if [ -f "$script" ]; then
+              echo "🔄 Updating header for $script"
+              awk -v hdr="$header" 'BEGIN{print hdr} /^;; EOF/{p=1} p' "$script" > "$script.tmp" && mv "$script.tmp" "$script"
+            else
+              echo "⚠️ Creating new script for $bot_name"
+              cat > "$script" <<EOF
+$header
+(defun ${bot_name//./-}-main (input)
+  "Primary entry point for $bot_name."
+  (log-info "Starting $bot_name execution" :input input)
+  (perform-core-tasks input)
+  (finalize-bot-run)
+  :done)
+
+;; EOF
+EOF
+            fi
+          done
+
+      - name: Commit and push updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/bots
+          git commit -m "Sync bot script headers from manifests" || echo "ℹ️ No changes to commit."
+          git pull --rebase origin main
+          git push origin main
