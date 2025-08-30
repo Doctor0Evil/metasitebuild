@@ -1,0 +1,13 @@
+.bit/
+  .bitattributes
+  policy.json
+  agentic-patterns-core.create
+  content-compliance.create
+  compliance-monitor.create
+  continuous-adaptation.create
+.bithub/
+  ml_patterns.json
+  backups/
+  compliance_logs/
+.github/
+  workflows/
