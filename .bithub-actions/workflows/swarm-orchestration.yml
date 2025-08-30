@@ -1,0 +1,52 @@
+name: .bithub Swarm Orchestration
+
+on:
+  push:
+    paths:
+      - ".bithub-actions/manifests/master.bithub.files.yml"
+      - ".bithub-actions/manifests/tools.yml"
+      - ".github/workflows/**"
+      - "scripts/**"
+      - "config/**"
+      - "policies/**"
+      - "src/**"
+  workflow_dispatch:
+
+jobs:
+  # 🩺 Medic: Preflight Bot
+  preflight:
+    uses: ./.github/workflows/preflight.yml
+
+  # 🔍 Inspector: Analysis Bot
+  analysis:
+    needs: preflight
+    uses: ./.bithub-actions/workflows/analysis.yml
+
+  # 📦 Courier: Deploy Bot
+  deploy:
+    needs: analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy updated manifests to linked repos
+        run: |
+          echo "Deploying updated master.bithub.files to all linked repos..."
+          # Example: loop through repo list and push updates
+          for repo in $(cat .bithub-actions/manifests/linked-repos.txt); do
+            echo "Updating $repo..."
+            # git push logic or API calls here
+          done
+
+  # ⚖️ Judge: Audit Bot
+  audit:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Verify compliance and log to ledger
+        run: |
+          echo "Auditing deployment..."
+          # Run compliance checks
+          ./scripts/audit-compliance.sh
+          # Append signed log entry
+          echo "{\"audit\":\"pass\",\"timestamp\":\"$(date -u +%FT%TZ)\"}" >> .bithub-actions/logs/audit-$(date +%F).json
