@@ -1,0 +1,23 @@
+{
+  "name": "Bit.Hub Global Compliance Policy",
+  "version": "1.0.0",
+  "description": "Defines global compliance rules for BitBot agents and workflows.",
+  "rules": {
+    "gdpr": true,
+    "banter_filter": true,
+    "max_profanity_level": "low",
+    "audit_trail": true,
+    "log_retention_days": 90,
+    "secure_storage": [
+      "game-assets/adult/**",
+      "bithub_datalake/**",
+      "virta_env/**"
+    ],
+    "exclude_from_sync": [
+      ".bithub/backups/**",
+      ".github/cache/**",
+      "loop_state.json",
+      "corrected.aln"
+    ]
+  }
+}
