@@ -1,0 +1,114 @@
+aln:
+  id: "aln://bithub/master-policy"
+  version: "1.0.0"
+  description: "Unified Bit.Hub + ALNFantasia compliance, workflow guard, action registry, and autopatch rules"
+
+required:
+  permissions:
+    contents: read
+  compliance_job: true
+  needs_compliance: true
+  manifests:
+    - ".bit/patterns/universally_adaptable_ml.patterns.aln.bit"
+  lisp_verify: true
+  policies_dir: ".bithub/policies"
+  ledger_path: ".bithub/ledger/compliance.log"
+
+forbid:
+  run_pipes_regex: "(?i)(curl|wget).+\\|.+bash"
+  backslash_in_workflows: true
+
+actions:
+  safelist:
+    - "actions/checkout@v4"
+    - "actions/cache@v4"
+    - "actions/setup-dotnet@v3.4.2"
+    - "actions/setup-java@v5"
+    - "actions/setup-node@v4"
+    - "actions/setup-python@v5"
+    - "actions/upload-artifact@v4"
+    - "./.github/actions/bithub-compliance-gate"
+    - "./.github/actions/bit-cache-keys"
+  replace_map:
+    "actions/checkout@v2": "actions/checkout@v4"
+    "actions/checkout@v3": "actions/checkout@v4"
+    "actions/upload-artifact@v3": "actions/upload-artifact@v4"
+    "actions/setup-java@v3": "actions/setup-java@v5"
+    "actions/setup-node@v2": "actions/setup-node@v4"
+    "actions/setup-python@v2": "actions/setup-python@v5"
+    "actions/setup-dotnet@v2": "actions/setup-dotnet@v3.4.2"
+  wildcard_map:
+    - from: "thirdparty/cache@*"
+      to: "actions/cache@v4"
+  fallback_safe_action: "actions/checkout@v4"
+
+workflows:
+  rules:
+    - id: "permissions-block"
+      description: "Workflows must declare explicit permissions"
+      match: ".github/workflows/**/*.yml"
+      require:
+        yaml_path: "permissions.contents"
+        equals: "read"
+    - id: "compliance-job"
+      description: "Workflows must have a compliance job"
+      match: ".github/workflows/**/*.yml"
+      require:
+        yaml_path: "jobs.compliance"
+    - id: "needs-compliance"
+      description: "All jobs must depend on compliance"
+      match: ".github/workflows/**/*.yml"
+      require:
+        yaml_path: "jobs.*.needs"
+        contains: "compliance"
+
+policies:
+  required:
+    - ".bithub/policies/bithub.github.restrictions.rego"
+    - ".bithub/policies/bithub.lisp.policy.rego"
+    - ".bithub/policies/workflows.structure.rego"
+
+caches:
+  nuget:
+    paths: ["~/.nuget/packages"]
+    keys: ["**/packages.lock.json"]
+  maven:
+    paths: ["~/.m2/repository"]
+    keys: ["**/pom.xml"]
+  npm:
+    paths: ["~/.npm", "node_modules"]
+    keys: ["**/package-lock.json"]
+  pip:
+    paths: ["~/.cache/pip"]
+    keys: ["**/requirements.txt"]
+  hf:
+    paths: ["~/.cache/huggingface"]
+    keys: [".bit/patterns/**"]
+
+artifacts:
+  defaults:
+    retention_days: 7
+    if_no_files_found: "warn"
+
+autopatch:
+  enable: true
+  add_permissions_if_missing: true
+  add_compliance_job_if_missing: true
+  add_needs_compliance: true
+  swap_disallowed_actions: true
+  block_run_pipes: true
+
+# ALNFantasia extensions
+alnfantasia:
+  profanity_allow: "fuck,shit,bitch,asshole,cunt"
+  banter_filter: true
+  entertainment:
+    magic_lol: true
+    dice_roll: true
+    creative_enjoyments: true
+  
+# Bob the Builder integration
+bob_builder:
+  repair_mode: "professional"
+  certification: "bob_approved"
+  can_we_fix_it: "YES_WE_CAN"
