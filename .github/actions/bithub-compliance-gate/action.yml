@@ -1,0 +1,14 @@
+name: "Bit.Hub Compliance Gate"
+description: "Run Bit.Hub policies, ALN patterns check, and Lisp verifier"
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+        wget -q https://github.com/open-policy-agent/conftest/releases/download/v0.45.0/conftest_0.45.0_Linux_x86_64.tar.gz
+        tar xzf conftest_0.45.0_Linux_x86_64.tar.gz
+        sudo mv conftest /usr/local/bin/conftest
+        .bit/loaders/validate_adaptable_patterns.sh
+        .bit/loaders/lisp_verify.sh
+        conftest test --policy .bithub/policies .
