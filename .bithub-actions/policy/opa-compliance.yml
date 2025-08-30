@@ -1,0 +1,46 @@
+CI enforcement workflow
+yaml
+name: OPA Compliance Gate (.bithub)
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - ".bithub-actions/policy/**"
+      - ".bitlinks/**"
+  push:
+    paths:
+      - ".github/workflows/**"
+      - ".bithub-actions/policy/**"
+      - ".bitlinks/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install conftest
+        run: |
+          curl -sSL https://github.com/open-policy-agent/conftest/releases/download/v0.54.0/conftest_0.54.0_Linux_x86_64.tar.gz \
+          | tar -xz conftest
+          sudo mv conftest /usr/local/bin/
+
+      - name: Load policy data
+        run: |
+          test -f .bithub-actions/policy/data/security/policy.json || { echo "Missing policy data"; exit 1; }
+
+      - name: Validate workflows
+        run: |
+          set -e
+          shopt -s nullglob
+          files=(.github/workflows/*.yml .github/workflows/*.yaml)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No workflows to validate."
+            exit 0
+          fi
+          conftest test --policy .bithub-actions/policy --data .bithub-actions/policy/data "${files[@]}"
