@@ -1,0 +1,189 @@
+apiVersion: bithub/v1
+kind: OrchestrationSpec
+metadata:
+  name: ALN Programming Language
+  owner: Doctor0Evil
+  annotations:
+    bithub.io/purpose: "Games + entertainment CI/CD with self-healing orchestration"
+    bithub.io/accessibility: "hierarchical tree views; high contrast logs"
+
+identity:
+  # Token sources are checked in order; first non-empty wins.
+  tokenSources:
+    - env:BITHUB_TOKEN        # .bithub.token (preferred)
+    - env:GITHUB_TOKEN        # GitHub fallback
+    - secret:CI_PAT           # Optional PAT fallback for cross-org ops
+  scopes:
+    - orchestrate:*
+    - workflows:trigger
+    - registry:push
+    - artifacts:readwrite
+  bots:
+    # First-class .bithub-bots with purpose-scoped identities
+    - name: planner-bot
+      serviceAccount: bithub-sa-planner
+      capabilities: [ "dag.synthesize", "retry.tune", "cache.share" ]
+    - name: repair-bot
+      serviceAccount: bithub-sa-repair
+      capabilities: [ "rewrite.step", "heal.yml", "fallback.path" ]
+
+orchestration:
+  defaults:
+    retries: 3
+    backoffSeconds: 10
+    continueOnFailure: false
+    artifactPass:
+      - "**/audit/*.log"
+      - "**/images_*.json"
+  flows:
+    # Linear chain with barriers and adaptive branches
+    - name: main-ci
+      on:
+        push:
+          branches: [ "main" ]
+        pull_request:
+          branches: [ "main" ]
+      sequence:
+        - gate: policy
+          continueOnFailure: true
+        - action: bit-image
+          with:
+            imagePrefix: aln
+            pushOn:
+              event: push
+              branch: main
+        - barrier: build-complete
+        - workflows:
+            parallel:
+              - ".tests-aln"
+              - ".tests-batchfile"
+              - ".tests-lisp"
+          continueOnFailure: true
+        - action: package-assets
+          condition: "files.changed matches '**/assets/**'"
+        - action: publish-artifacts
+    # Optional nightly hardening run
+    - name: nightly-hardening
+      on:
+        schedule: "0 3 * * *"
+      sequence:
+        - action: bit-image
+          with:
+            imagePrefix: aln
+            pushOn:
+              always: true
+            provenance: true
+            sbom: true
+            sign: false
+        - workflows:
+            series:
+              - "security-scan"
+              - "license-audit"
+          continueOnFailure: false
+
+images:
+  defaults:
+    platforms: [ "linux/amd64" ]
+    testCommand: /bin/sh -lc 'echo "OK: $HOSTNAME"'
+    cache:
+      enabled: true
+      scope: default
+    provenance: true
+    sbom: true
+    sign: false
+  services:
+    - name: aln-core
+      context: "."
+      dockerfile: "Dockerfile"           # auto-discovered if omitted
+      imagePrefix: "aln"
+    - name: batch-runtime
+      context: "Batchfile"
+      dockerfile: "Dockerfile"
+      imagePrefix: "batch"
+    - name: lisp-runtime
+      context: "Lisp"
+      dockerfile: "Dockerfile"
+      imagePrefix: "lisp"
+
+clusters:
+  # Run here today; move to bithub VM.clusters by switching profile
+  defaultProfile: github-hosted
+  profiles:
+    github-hosted:
+      runnerLabels: [ "ubuntu-latest" ]
+      concurrencyGroup: "bithub-${{ ref }}"
+      cancelInProgress: false
+    vsc-amd64:
+      runnerLabels: [ "self-hosted", "linux", "x64", "bithub-vsc" ]
+      autoscale:
+        min: 2
+        max: 2000
+        cooldownSeconds: 30
+      storage:
+        cacheSizeGB: 500
+        artifactRetentionDays: 30
+    vsc-gpu:
+      runnerLabels: [ "self-hosted", "linux", "gpu", "bithub-vsc" ]
+      resources:
+        gpus: "A10:1"   # example
+        memoryGB: 64
+
+policy:
+  # Clear, documented boundaries with expressive freedom
+  profanity:
+    mode: compliant-banter
+    allowlist:
+      - "hell"
+      - "damn"
+    denylist:
+      - "slurs/*"
+    logRedaction: partial
+  security:
+    vulnThreshold: "high"    # fail on critical only
+    allowlistPackages: []
+  compliance:
+    licensesAllow:
+      - MIT
+      - Apache-2.0
+      - BSD-3-Clause
+    licensesDeny:
+      - GPL-3.0-only
+  codeowners:
+    requiredReviews: 1
+
+artifacts:
+  manifestPath: "orchestration_audit/run_${{ timestamp }}.json"
+  bundles:
+    - name: audit
+      paths:
+        - "orchestration_audit/**"
+        - "audit/**"
+      retentionDays: 30
+
+notifications:
+  channels:
+    - type: github-checks
+      level: info
+    - type: webhook
+      urlRef: secret:NOTIFY_WEBHOOK
+      level: warn
+
+support:
+  ux:
+    logs:
+      highContrast: true
+      treeView: true
+      timestamps: iso8601
+    localization:
+      defaultLocale: en-US
+      fallbackLocale: en
+  userDirectives:
+    # Human-friendly switches GitHub never offered
+    - key: "skip-heavy-tests"
+      description: "Skip long integrations on PRs from forks"
+      when: "event == 'pull_request' && isFork"
+      effect: "orchestration.disable(workflow='.tests-*')"
+    - key: "force-repair"
+      description: "Let repair-bot rewrite failing steps live"
+      when: "label == 'repair-me'"
+      effect: "bots.repair.enable=true"
