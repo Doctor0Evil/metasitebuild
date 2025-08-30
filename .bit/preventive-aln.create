@@ -1,0 +1,52 @@
+bitbot.create:
+  id: agentic-preventive-aln-core
+  description: >
+    Proactive ALN workflow runner for Bit.Hub.
+    Validates and optimizes workflows before execution, ensures compliance,
+    and persists success states to blockchain.
+  triggers:
+    - on: workflow_run
+      workflows: ["CI", "Build", "Deploy"]
+      types: [requested]
+    - on: push
+      branches: [main]
+    - on: schedule: "0 */6 * * *"
+  actions:
+    - validate_workflows:
+        script: bithub/scripts/validate_workflows.py
+        input: .github/workflows/
+        output: /tmp/validation_report.lst
+        fail_on_warning: true
+    - optimize_patterns:
+        script: bithub/scripts/optimize_patterns.py
+        input: .bithub/ml_patterns.json
+        focus:
+          - network.storage
+          - virtual.emulations
+          - ml.workflows.bit
+          - rhythmic-adapt
+        output: .bithub/ml_patterns.json
+    - commit_patterns:
+        message: "Proactive tune: storage/emulation/workflow/rhythmic sync"
+    - spawn_preventive_agents:
+        script: bithub/scripts/spawn_agents.py
+        count: 5
+        mode: monitor,validate,assist
+    - persist_success_state:
+        script: bithub/scripts/blockchain_persist.py
+        input: /tmp/validation_report.lst
+        network: bit.hub.chain
+        compliance: strict
+    - audit_success:
+        script: bithub/scripts/compliance_audit.py
+        input: /tmp/validation_report.lst
+        level: full
+        log: .bithub/audit_success.log
+    - add_contributors:
+        script: bithub/scripts/add_contributors.py
+        count: 3
+        roles: developer,reviewer
+        compliance_check: true
+  compliance:
+    policy: .bit/policy.json
+    audit: true
