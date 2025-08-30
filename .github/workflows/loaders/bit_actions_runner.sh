@@ -60,3 +60,4 @@ for ((i=0; i<COUNT; i++)); do
 done
 
 log "BIT_ACTIONS_END"
+chmod +x .bit/loaders/bit_actions_runner.sh
