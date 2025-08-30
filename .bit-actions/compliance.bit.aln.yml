@@ -1,0 +1,90 @@
+compliance:
+  id: "aln://bithub/compliance/bit-actions"
+  version: "1.0.0"
+
+  required:
+    # Structural gates every workflow must satisfy
+    permissions:
+      contents: read
+    compliance_job: true             # a job named 'compliance' must exist
+    needs_compliance: true           # all other jobs must depend on 'compliance'
+    aln_manifests:
+      - ".bit/patterns/universally_adaptable_ml.patterns.aln.bit"
+    lisp_verify: true                # .bit/loaders/lisp_verify.sh must pass
+    policies:
+      - ".bithub/policies/**.rego"   # OPA policies to run with conftest
+    ledger:
+      path: ".bithub/ledger/compliance.log"
+      required: true
+
+  forbid:
+    # Hygiene and safety
+    run_pipes_regex: "(?i)(curl|wget).+\\|.+bash"
+    backslash_in_workflows: true
+
+  actions:
+    safelist:
+      - "actions/checkout@v4"
+      - "actions/cache@v4"
+      - "actions/setup-dotnet@v3.4.2"
+      - "actions/setup-java@v5"
+      - "actions/setup-node@v4"
+      - "actions/setup-python@v5"
+      - "actions/upload-artifact@v4"
+      - "./.github/actions/bithub-compliance-gate"
+      - "./.github/actions/bit-cache-keys"
+    replace_map:
+      # Exact replacements
+      "actions/checkout@v2": "actions/checkout@v4"
+      "actions/checkout@v3": "actions/checkout@v4"
+      "actions/upload-artifact@v3": "actions/upload-artifact@v4"
+      "actions/setup-java@v1": "actions/setup-java@v5"
+      "actions/setup-java@v3": "actions/setup-java@v5"
+      "actions/setup-node@v2": "actions/setup-node@v4"
+      "actions/setup-python@v2": "actions/setup-python@v5"
+      "actions/setup-dotnet@v2": "actions/setup-dotnet@v3.4.2"
+    wildcard_map:
+      # Pattern → replacement (use @* to match any version)
+      - from: "thirdparty/cache@*"
+        to: "actions/cache@v4"
+      - from: "some/old-upload@*"
+        to: "actions/upload-artifact@v4"
+    fallback_safe_action: "actions/checkout@v4"
+
+  caches:
+    # Canonical cache definitions GitHub runners should use
+    nuget:
+      paths: ["~/.nuget/packages"]
+      keys: ["**/packages.lock.json"]
+    maven:
+      paths: ["~/.m2/repository"]
+      keys: ["**/pom.xml"]
+    npm:
+      paths: ["~/.npm", "node_modules"]
+      keys: ["**/package-lock.json"]
+    pip:
+      paths: ["~/.cache/pip"]
+      keys: ["**/requirements.txt"]
+    hf:
+      paths: ["~/.cache/huggingface"]
+      keys: [".bit/patterns/**"]
+
+  artifacts:
+    # Encourage explicit artifact publication and retention
+    defaults:
+      retention_days: 7
+      if_no_files_found: "warn"
+
+  autopatch:
+    enable: true
+    add_permissions_if_missing: true
+    add_compliance_job_if_missing: true
+    add_needs_compliance: true
+    swap_disallowed_actions: true
+    block_run_pipes: true
+
+  signals:
+    # Event hints for the overseer workflow
+    on_workflow_run: ["CI","Build","Deploy"]
+    on_push_branches: ["main", "**/failed-workflow"]
+    schedule_cron: "0 */6 * * *"
