@@ -1,0 +1,8 @@
+package bithub.lisp
+
+errors := input.json[".bithub/reports/lisp-lint.json"].errors
+
+deny[msg] {
+  count(errors) > 0
+  msg := sprintf("Lisp verifier reported %d error(s)", [count(errors)])
+}
