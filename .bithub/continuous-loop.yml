@@ -1,0 +1,31 @@
+
+name: BitHub Continuous Workflow Loop
+
+on:
+  workflow_run:
+    workflows: ["*"]  # Catches all workflows
+    types: [completed]
+  schedule:
+    - cron: "*/15 * * * *"  # Every 15 minutes
+  workflow_dispatch:
+
+jobs:
+  workflow-loop-controller:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Self
+        uses: actions/checkout@v4
+
+      - name: Record Active Workflows
+        run: |
+          gh run list --json database,headBranch,status --limit 50 > .bithub/loop-state.json
+
+      - name: Store State Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "bithub-loop-state"
+          path: .bithub/loop-state.json
+
+      - name: Loopback Notification
+        run: |
+          echo "BitHub continuous workflow loop recorded at $(date -u)"
