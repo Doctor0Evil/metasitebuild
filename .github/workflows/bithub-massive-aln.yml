@@ -12,23 +12,50 @@ on:
   schedule:
     - cron: '0 */6 * * *' # periodic debug eruption
 
-jobs:
-  analyze-errors:
-    name: Debug/Analyze Failure Logs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Parse failed workflow logs (ALN-LISP style)
+      - name: Install aln-analyze if missing
+        if: matrix.lang == 'aln'
         run: |
-          aln-analyze --input /github/logs --output /tmp/failure.lst --profane-allow 'fuck,shit,bitch,asshole,cunt'
-      - name: Humor/Satire Escalation (Sin.e-MAXX Personality)
+          set -euo pipefail
+          if ! command -v aln-analyze >/dev/null 2>&1; then
+            echo "[.bithub] aln-analyze not found — installing..."
+            # Example: install from your repo or package registry
+            # If it's in your repo:
+            if [ -f "./tools/aln-analyze" ]; then
+              chmod +x ./tools/aln-analyze
+              sudo mv ./tools/aln-analyze /usr/local/bin/aln-analyze
+            else
+              # Replace with actual install command for ALN CLI
+              sudo apt-get update
+              sudo apt-get install -y aln-cli
+            fi
+          fi
+          echo "[.bithub] aln-analyze ready: $(aln-analyze --version || echo 'version unknown')"
+
+      - name: Run ALN profanity analysis
+        if: matrix.lang == 'aln'
         run: |
-          ln -s /dev/haha /tmp/humor.bus
-          echo "Yippee-ki-yay, let the Sloppy Disk Olympics begin!" > /tmp/humor.bus
-      - name: Compliance Workaround
-        run: |
-          # Profanity allowed via ALN modular compliance patch
-          aln-patch --target /tmp/failure.lst --profanity-compliance fuck,shit,bitch,asshole,cunt --sandbox-mode TRUE
+          set -euo pipefail
+          echo "[.bithub] Running ALN analysis with compliant profanity allowlist"
+          aln-analyze \
+            --input /github/logs \
+            --output /tmp/failure.lst \
+            --profane-allow 'fuck,shit,bitch,asshole,cunt' || {
+              echo "[.bithub] ALN analysis returned nonzero — continuing with warnings"
+            }
+          echo "[.bithub] ALN analysis complete"
+          echo "=== Failure list (if any) ==="
+          cat /tmp/failure.lst || echo "[.bithub] No failures recorded"
+
+      - name: Upload ALN analysis report
+        if: matrix.lang == 'aln'
+        uses: actions/upload-artifact@v4
+        with:
+          name: aln-analysis-${{ github.run_number }}-${{ github.sha }}
+          path: /tmp/failure.lst
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 6
+          overwrite: false
 
   self-repair-workflow:
     name: Workflow Self-Heal & Bot Spawn
