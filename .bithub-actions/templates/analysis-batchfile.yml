@@ -1,0 +1,26 @@
+name: Analysis Batchfile
+on:
+  push:
+    paths:
+      - "**/*.bat"
+      - "**/*.cmd"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: batch-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  call-preflight:
+    uses: ./.bithub-actions/templates/preflight.yml
+  run-analysis:
+    needs: call-preflight
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Echo analyze
+        shell: cmd
+        run: |
+          for /r %%F in (*.bat *.cmd) do (
+            echo Analyzing %%F
+          )
