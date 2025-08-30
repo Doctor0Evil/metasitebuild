@@ -1,0 +1,5 @@
+CONTRACT: bit.hub_core_v1
+BLOCKCHAIN_SECURITY: true
+DATA_TRAFFIC_POLICY: enabled
+WORKFLOW_ENGINE: policy_driven
+PRIVACY: no_data_mining
