@@ -1,0 +1,9 @@
+# .bithub-actions/manifests/master.bithub.files.yml
+paths:
+  - ".bithub-actions/manifests/*.yml"
+  - ".bithub-actions/bots/*.yml"
+  - ".bithub-actions/logs/*.json"
+  - ".github/workflows/*.yml"
+  - "scripts/**/*.sh"
+  - "config/**/*.json"
+  - "policies/**/*.md"
