@@ -1,0 +1,30 @@
+name: BitBot Autonomous Safety and Integration
+
+on:
+  repository_dispatch:
+    types: [bitbot-safety-event, bitbot-data-query]
+  schedule:
+    - cron: "0 */4 * * *"
+  workflow_dispatch:
+
+jobs:
+  bitbot-autonomy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize BitBot API
+        run: |
+          python3 .bithub/scripts/bitbot_api_init.py
+
+      - name: Safety & Telemetry Data Store
+        run: |
+          python3 .bithub/scripts/bitbot_store_telemetry.py
+
+      - name: Audit and Report
+        run: |
+          python3 .bithub/scripts/bitbot_safety_audit.py
+
+      - name: Upload Safety Audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: "bitbot-safety-audit"
+          path: .bithub/safety-audit.json
