@@ -1,0 +1,10 @@
+package bithub.mesh
+default allowjob = false
+allowjob {
+  input.peer.persona == "strict"
+  input.msg.payload.required.compliance == "critical"
+  not forbiddenrepo(input.msg.payload.repo)
+}
+forbiddenrepo(repo) {
+  endswith(repo, "untrusted")
+}
