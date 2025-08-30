@@ -1,0 +1,3 @@
+HANDOFF_POLICY: graceful
+EXIT_CONDITION: no_dangling_states
+RECOVERY_AGENT: enabled
