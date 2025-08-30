@@ -1,0 +1,25 @@
+runner:
+  id: "bithub.runner.alpha"
+  version: "1.0.0"
+  capabilities:
+    - build
+    - test
+    - deploy
+    - ml.train
+    - creative.enjoyments.exe
+    - fan.asia.create
+    - magic.lol
+  compliance:
+    policies_dir: ".bithub/policies"
+    enforce_strict: true
+  entertainment:
+    trigger_on_success: true
+    modules:
+      - name: "magic.lol"
+        type: ascii_art
+      - name: "fan.asia.create"
+        type: world_event
+  network:
+    mode: "mesh"
+    discovery: "linking.repo.bit"
+    sync: ["p2p", "lan"]
