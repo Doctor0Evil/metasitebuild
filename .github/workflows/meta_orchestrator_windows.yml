@@ -40,12 +40,16 @@ jobs:
     name: Workflow Validator (Ubuntu)
     needs: [preflight-fix, generator]
     uses: ./.github/workflows/workflow_validator.yml
+    with:
+      caller: orchestrator-validator
+      bot_name: "github-actions[bot]"
+      bot_email: "41898282+github-actions[bot]@users.noreply.github.com"
 
   windows-tests:
     name: Livingroom Runner Tasks (Self‑hosted Windows)
     needs: validator
     runs-on: [self-hosted, Windows, X64]
-    if: success() # only if validator passed
+    if: success()
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -88,7 +92,6 @@ jobs:
             pwsh .\scripts\windows_build.ps1
           } else {
             Write-Host "No Windows build script found — skipping."
-          }
 
   recovery:
     name: Recovery Path (Ubuntu)
