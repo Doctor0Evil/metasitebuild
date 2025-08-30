@@ -1,0 +1,130 @@
+name: Register All Bit.Hub Bots (Compliant, Self‑Healing, Script‑Scaffolding)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  register-all:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (include .git and .bit)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          clean: false
+
+      - name: Ensure .bit/bots and scripts/bots directories exist
+        run: |
+          mkdir -p .bit/bots
+          mkdir -p scripts/bots
+          echo "✅ Directories ready."
+
+      - name: Auto-create default bots and scripts if missing
+        shell: bash
+        run: |
+          declare -A bots
+          bots["git.bit"]="GitOps-style repo orchestration bot"
+          bots["compliance.bit"]="Compliance enforcement and audit bot"
+          bots["orchestrator.bit"]="Meta-orchestration and workflow generator bot"
+
+          for bot in "${!bots[@]}"; do
+            manifest=".bit/bots/$bot.yml"
+            script="scripts/bots/$bot.lisp"
+
+            # Create manifest if missing
+            if [ ! -f "$manifest" ]; then
+              echo "⚠️ Bot manifest $manifest not found — creating..."
+              cat > "$manifest" <<EOF
+apiVersion: bitbot/v1
+kind: Bot
+metadata:
+  name: $bot
+  description: ${bots[$bot]}
+spec:
+  triggers:
+    - push
+    - pull_request
+  permissions:
+    contents: write
+    pull-requests: write
+  actions:
+    - type: sync
+      target: manifests
+    - type: validate
+      target: workflows
+EOF
+              echo "✅ Created $manifest"
+            else
+              echo "ℹ️ Bot manifest $manifest already exists — skipping creation."
+            fi
+
+            # Create starter script if missing
+            if [ ! -f "$script" ]; then
+              echo "⚠️ Bot script $script not found — creating..."
+              cat > "$script" <<EOF
+;; ${bots[$bot]} — Starter Logic
+;; Generated: \$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+;; License: Bit.Hub-ALN-core-internal
+
+(defun ${bot//./-}-main (input)
+  "Primary entry point for $bot."
+  (log-info "Starting $bot execution" :input input)
+  (perform-core-tasks input)
+  (finalize-bot-run)
+  :done)
+
+;; EOF
+EOF
+              echo "✅ Created $script"
+            else
+              echo "ℹ️ Bot script $script already exists — skipping creation."
+            fi
+          done
+
+      - name: Setup Java JDK (if any bot requires Java)
+        run: |
+          if grep -qi "requires:.*java" .bit/bots/*.yml; then
+            echo "✅ Java requirement found — setting up JDK."
+            echo "needs_java=true" >> $GITHUB_ENV
+          else
+            echo "ℹ️ No Java requirement found."
+            echo "needs_java=false" >> $GITHUB_ENV
+          fi
+      - if: env.needs_java == 'true'
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: List all bot manifests and scripts
+        run: |
+          echo "🔍 Bot manifests:"
+          find .bit/bots -type f -name "*.yml"
+          echo "🔍 Bot scripts:"
+          find scripts/bots -type f -name "*.lisp"
+
+      - name: Register each bot manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for manifest in $(find .bit/bots -type f -name "*.yml"); do
+            bot_name=$(basename "$manifest" .yml)
+            echo "🚀 Registering bot: $bot_name"
+            gh workflow run workflow_register_bot.yml \
+              -f bot_manifest="$manifest" \
+              -f bot_name="$bot_name"
+          done
+
+      - name: Commit and push any new manifests or scripts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .bit/bots scripts/bots
+          git commit -m "Auto-create missing bot manifests and scripts" || echo "ℹ️ No new files to commit."
+          git pull --rebase origin main
+          git push origin main
