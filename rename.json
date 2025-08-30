@@ -1,0 +1,8 @@
+{
+  "iss": "bithub",
+  "aud": ["github", "bithub"],
+  "sub": "Doctor0Evil/ALN_Programming_Language",
+  "cap": ["orchestrate:*","workflows:trigger","registry:push","artifacts:rw"],
+  "pol": { "profanity":"compliant-banter","vuln":"high" },
+  "exp": 1750000000
+}
