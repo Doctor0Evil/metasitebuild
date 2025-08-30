@@ -159,3 +159,57 @@ support:
       description: "Let repair-bot rewrite failing steps live"
       when: "label == 'repair-me'"
       effect: "bots.repair.enable=true"
+apiVersion: bithub/v1
+kind: OrchestrationSpec
+metadata:
+  name: ALN Programming Language
+  owner: Doctor0Evil
+
+orchestration:
+  flows:
+    - name: main
+      sequence:
+        - gate: policy
+        - action: bit-image
+          with:
+            pushOn:
+              event: push
+              branch: main
+            provenance: true
+            sbom: true
+            sign: false
+        - workflows:
+            parallel:
+              - ".tests-aln"
+              - ".tests-batchfile"
+              - ".tests-lisp"
+
+images:
+  defaults:
+    platforms: [ "linux/amd64" ]
+    testCommand: /bin/sh -lc 'echo "OK"'
+    cache:
+      enabled: true
+      scope: default
+    provenance: true
+    sbom: true
+    sign: false
+  services:
+    - name: aln-core
+      context: "."
+      dockerfile: "Dockerfile"
+      imagePrefix: "aln"
+      platforms: [ "linux/amd64" ]
+      testCommand: /bin/sh -lc '.bithub/scripts/lang-test-aln.sh'
+    - name: batch-runtime
+      context: "Batchfile"
+      dockerfile: "Dockerfile"
+      imagePrefix: "batch"
+      platforms: [ "linux/amd64" ]
+      testCommand: /bin/sh -lc 'echo "Batch runtime smoke via Linux container"'
+    - name: lisp-runtime
+      context: "Lisp"
+      dockerfile: "Dockerfile"
+      imagePrefix: "lisp"
+      platforms: [ "linux/amd64" ]
+      testCommand: /bin/sh -lc '.bithub/scripts/lang-test-lisp.sh'
