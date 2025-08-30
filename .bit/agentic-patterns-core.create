@@ -1,0 +1,23 @@
+bitbot.create:
+  id: agentic-patterns-core
+  description: >
+    Core autonomous.ml.patterns tuning agent for BitHub workflows.
+    Optimizes for network.storage, virtual.emulations, ml.workflows.bit,
+    and rhythmic pattern sync.
+  triggers:
+    - on: workflow_start
+    - on: workflow_midpoint
+    - on: workflow_end
+  actions:
+    - optimize_patterns:
+        focus:
+          - network.storage
+          - virtual.emulations
+          - ml.workflows.bit
+          - rhythmic-adapt
+        output: .bithub/ml_patterns.json
+    - commit_patterns:
+        message: "Agentic tune: storage/emulation/workflow/rhythmic sync"
+  compliance:
+    policy: .bit/policy.json
+    audit: true
