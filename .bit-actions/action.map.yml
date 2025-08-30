@@ -1,0 +1,18 @@
+map:
+  # Upgrade old pins
+  "actions/checkout@v2": "actions/checkout@v4"
+  "actions/checkout@v3": "actions/checkout@v4"
+
+  # Generic upload-artifact upgrades
+  "actions/upload-artifact@v3": "actions/upload-artifact@v4"
+
+  # Prefer setup actions over ad-hoc installs
+  "actions/setup-java@v3": "actions/setup-java@v5"
+  "actions/setup-java@v1": "actions/setup-java@v5"
+  "actions/setup-node@v2": "actions/setup-node@v4"
+  "actions/setup-python@v2": "actions/setup-python@v5"
+  "actions/setup-dotnet@v2": "actions/setup-dotnet@v3.4.2"
+
+  # Replace unapproved third-party caches with core cache
+  "cachesave/action@*": "actions/cache@v4"
+  "pat-some/cache@*": "actions/cache@v4"
