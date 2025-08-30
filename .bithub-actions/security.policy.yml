@@ -1,0 +1,23 @@
+rules:
+  required_permissions:
+    contents: read
+  elevated_permissions:
+    contents: write
+    pull-requests: write
+  forbidden_permissions:
+    - id-token
+  required_triggers:
+    - push
+    - workflow_dispatch
+  forbidden_triggers:
+    - schedule
+  enforce_runner:
+    - ubuntu-latest
+    - windows-latest
+    - macos-latest
+  enforce_checkout_version: "actions/checkout@v3"
+  enforce_action_versions: true
+  allowlist_actions:
+    - actions/checkout@v3
+    - actions/upload-artifact@v4.6.2
+    - actions/setup-dotnet@v3.4.2
