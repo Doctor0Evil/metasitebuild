@@ -1,0 +1,40 @@
+name: Preflight Bot
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preflight-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROFANITY_ALLOW: "fuck,shit,bitch,asshole,cunt"
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install jq and yq
+        run: sudo apt-get update && sudo apt-get install -y jq yq
+      - name: Install tools from handlers
+        run: |
+          set -e
+          mkdir -p .bithub-actions/logs
+          if [ -f ".bitlinks/handlers.yml" ]; then
+            for key in $(yq -r '.handlers | keys | .[]' .bitlinks/handlers.yml); do
+              cmd=$(yq -r ".handlers[\"$key\"].install.linux // empty" .bitlinks/handlers.yml)
+              [ -n "$cmd" ] && bash -lc "$cmd"
+            done
+          fi
+          echo "{\"installed_at\":\"$(date -u +%FT%TZ)\"}" >> .bithub-actions/logs/install-$(date +%F).json
+      - name: Upload install log
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: preflight-install-log
+          path: .bithub-actions/logs/install-*.json
+          if-no-files-found: warn
+          retention-days: 30
