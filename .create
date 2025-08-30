@@ -1,0 +1,100 @@
+name: Preflight Namespace & Workflow Auto‑Fix
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  preflight-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 🔒 Bit.Hub .bit Architecture Guard
+      - name: Enforce immutable .bit architecture (ALN compliance)
+        shell: pwsh
+        run: |
+          Write-Host "🔍 Validating .bit architecture modal..."
+          
+          # Ensure .bit directory exists
+          if (-not (Test-Path ".bit")) {
+              Write-Error "❌ .bit directory missing — required for Bit.Hub compliance."
+              exit 1
+          }
+
+          # Ensure all files in .bit have .bit extension
+          $invalidFiles = Get-ChildItem -Path ".bit" -Recurse -File | Where-Object { $_.Extension -ne ".bit" }
+          if ($invalidFiles) {
+              Write-Error "❌ Found files in .bit without .bit extension:"
+              $invalidFiles | ForEach-Object { Write-Host " - $($_.FullName)" }
+              exit 1
+          }
+
+          # Ensure .bit manifests are not modified outside policy
+          if (git diff --name-only origin/main...HEAD | Where-Object { $_ -like ".bit/*" }) {
+              Write-Host "📜 Changes detected in .bit — verifying policy..."
+              # Example: enforce read-only except via approved bot commits
+              $lastCommitAuthor = git log -1 --pretty=format:'%an'
+              if ($lastCommitAuthor -notmatch "github-actions
+
+\[bot\]
+
+|BitBot") {
+                  Write-Error "❌ Unauthorized modification to .bit manifests."
+                  exit 1
+              }
+          }
+
+          Write-Host "✅ .bit architecture validated."
+
+      # 🛠 Auto‑fix namespace & workflows
+      - name: Preflight namespace & workflow auto‑fix
+        shell: pwsh
+        run: |
+          $hasUnstaged = (git status --porcelain | Select-String '^[ M]\s').Count -gt 0
+          $hasStaged   = (git diff --cached --name-only).Count -gt 0
+          
+          if (-not $hasStaged -and $hasUnstaged) {
+              Write-Host "📌 Unstaged changes found — auto‑adding to index..."
+              git add -A
+          }
+          
+          if (git diff --cached --quiet) {
+              Write-Host "✅ No staged changes to commit."
+              exit 0
+          }
+
+          Write-Host "📦 Committing staged changes..."
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "ci(preflight): auto‑fix namespaces & sync workflows [skip ci]" || exit 0
+          
+          Write-Host "⬇️ Fetching latest main..."
+          git fetch origin main
+          
+          Write-Host "📤 Rebasing and pushing..."
+          git pull --rebase origin main
+          git push origin main
+
+      # 💤 Stale issue cleanup
+      - name: Close stale issues and PRs
+        uses: actions/stale@v9.1.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 60
+          days-before-close: 7
+          stale-issue-message: "This issue has been automatically marked as stale due to inactivity."
+          stale-pr-message: "This pull request has been automatically marked as stale due to inactivity."
+          close-issue-message: "Closing this issue due to prolonged inactivity."
+          close-pr-message: "Closing this pull request due to prolonged inactivity."
+
+      # 📊 Post‑fix report
+      - name: Report post‑fix status
+        run: |
+          echo "Post‑fix HEAD: $(git rev-parse HEAD)"
+          echo "Branch: $(git branch --show-current)"
