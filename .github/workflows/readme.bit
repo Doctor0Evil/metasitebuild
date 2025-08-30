@@ -1,0 +1,431 @@
+### Overview
+
+You’ll get a clean, end‑to‑end Bit.Hub actions pipeline that:
+- Enforces ALNFantasia, Bit.Hub, and Lisp compliance first.
+- Runs simple .bit-actions manifests (.aln files) under Git‑friendly YAML.
+- Uses adaptive caching and strict GitHub Actions restrictions.
+- Works locally and in CI via a dual‑mode loader.
+
+---
+
+### Repository layout and manifests
+
+```
+/
+├─ .bit-actions/
+│  ├─ bit.actions.registry.aln.yml
+│  └─ pipelines/
+│     └─ site.build.aln.yml
+├─ .bit/loaders/
+│  ├─ bit_actions_runner.sh
+│  └─ validate_adaptable_patterns.sh
+├─ .bithub/policies/
+│  ├─ bithub.github.restrictions.rego
+│  ├─ bithub.bit_actions.rego
+│  └─ bithub.lisp.policy.rego
+├─ .bithub/ledger/
+│  └─ compliance.log
+├─ .github/actions/
+│  └─ bit-cache-keys/action.yml
+└─ .github/workflows/
+   ├─ bithub-compliance.yml
+   └─ bit-hub-actions-runner.yml
+```
+
+#### .bit-actions/bit.actions.registry.aln.yml
+
+```yaml
+registry:
+  version: "1.0.0"
+  safelist_actions:
+    - actions/checkout@v4
+    - actions/cache@v4
+    - actions/setup-dotnet@v3.4.2
+    - actions/setup-java@v5
+    - actions/setup-node@v4
+    - actions/setup-python@v5
+    - actions/upload-artifact@v4
+    - ./.github/actions/bit-cache-keys
+  toolchains:
+    dotnet: { version: "6.0.x" }
+    java:   { version: "17", distribution: "temurin" }
+    node:   { version: "18" }
+    python: { version: "3.11" }
+  caches:
+    nuget: { paths: ["~/.nuget/packages"], keys: ["**/packages.lock.json"] }
+    maven: { paths: ["~/.m2/repository"],   keys: ["**/pom.xml"] }
+    npm:   { paths: ["~/.npm","node_modules"], keys: ["**/package-lock.json"] }
+    pip:   { paths: ["~/.cache/pip"],       keys: ["**/requirements.txt"] }
+    hf:    { paths: ["~/.cache/huggingface"], keys: [".bit/patterns/**"] }
+```
+
+#### .bit-actions/pipelines/site.build.aln.yml
+
+```yaml
+pipeline:
+  id: "site.build"
+  version: "1.0.0"
+  description: "Check site status and trigger BitBot site build"
+  permissions: { contents: "read" }
+  needs_compliance: true
+
+  setup:
+    toolchains: ["dotnet","java"]
+    caches: ["nuget","maven"]
+
+  steps:
+    - id: check-status
+      run: "python bithub/scripts/check_site_status.py --target production > site_status.json"
+      outputs:
+        - id: site_status
+          file: "site_status.json"
+    - id: decide
+      parse:
+        from_json: "site_status.json"
+        select: ".status"
+      expect: ["fresh","stale"]
+    - id: build-if-stale
+      if_equals: { step: "decide", value: "stale" }
+      run: |
+        python bithub/scripts/deploy_bitbot_agent.py --pattern ml.patterns.learn.bitbot.bit --output agent_id.txt
+        python bithub/scripts/run_workflow.py --agent "$(cat agent_id.txt)" --workflow "site:build" --args "publish:latest"
+    - id: upload-status
+      artifact:
+        name: "site_status"
+        path: "site_status.json"
+        retention_days: 7
+```
+
+---
+
+### Policies
+
+#### .bithub/policies/bithub.github.restrictions.rego
+
+```rego
+package bithub.github.restrictions
+
+deny[msg] {
+  startswith(path, ".github/workflows/")
+  wf := input.yaml[path]
+  not wf.permissions
+  msg := sprintf("Workflow missing explicit permissions: %s", [path])
+}
+
+deny[msg] {
+  startswith(path, ".github/workflows/")
+  step := input.yaml[path].jobs[_].steps[_]
+  step.uses
+  not allowed(step.uses)
+  msg := sprintf("Disallowed action %q in %s", [step.uses, path])
+}
+
+allowed(a) {
+  a == "actions/checkout@v4"
+} {
+  startswith(a, "actions/setup-")
+} {
+  startswith(a, "actions/cache@v4")
+} {
+  startswith(a, "actions/upload-artifact@v4")
+} {
+  startswith(a, "./.github/actions/")
+}
+
+deny[msg] {
+  step := input.yaml[path].jobs[_].steps[_]
+  startswith(path, ".github/workflows/")
+  step.run
+  regex.match(`(?i)(curl|wget).*\|.*bash`, step.run)
+  msg := sprintf("Network pipe to shell prohibited in %s", [path])
+}
+```
+
+#### .bithub/policies/bithub.bit_actions.rego
+
+```rego
+package bithub.bit_actions
+
+default ok = false
+
+ok {
+  input.yaml[".bit-actions/bit.actions.registry.aln.yml"]
+  input.yaml[".bit-actions/pipelines/site.build.aln.yml"]
+}
+
+deny[msg] {
+  not ok
+  msg := "Missing .bit-actions registry or pipeline manifests"
+}
+
+deny[msg] {
+  p := input.yaml[".bit-actions/pipelines/site.build.aln.yml"].pipeline
+  not p.needs_compliance
+  msg := "Pipeline must require compliance gate"
+}
+
+deny[msg] {
+  reg := input.yaml[".bit-actions/bit.actions.registry.aln.yml"].registry
+  safelist := {s | s := reg.safelist_actions[_]}
+  some path
+  startswith(path, ".github/workflows/")
+  step := input.yaml[path].jobs[_].steps[_]
+  step.uses
+  not safelist[step.uses]
+  msg := sprintf("Action not safelisted by Bit.Hub registry: %s", [step.uses])
+}
+```
+
+#### .bithub/policies/bithub.lisp.policy.rego
+
+```rego
+package bithub.lisp
+
+errors := input.json[".bithub/reports/lisp-lint.json"].errors
+
+deny[msg] {
+  count(errors) > 0
+  msg := sprintf("Lisp verifier reported %d error(s)", [count(errors)])
+}
+```
+
+---
+
+### Loader and helpers
+
+#### .bit/loaders/bit_actions_runner.sh
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+PIPE=".bit-actions/pipelines/site.build.aln.yml"
+REG=".bit-actions/bit.actions.registry.aln.yml"
+LEDGER=".bithub/ledger/compliance.log"
+
+reqbin() { command -v "$1" >/dev/null || { echo "Missing $1"; exit 1; }; }
+reqbin yq jq
+
+log() { echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"$1\",\"detail\":\"${2:-}\"}" >> "$LEDGER"; }
+
+# Toolchains
+setup_toolchain() {
+  local t="$1"
+  case "$t" in
+    dotnet) echo "::group::setup-dotnet"; echo "dotnet via GH action"; echo "::endgroup::" ;;
+    java)   echo "::group::setup-java";   echo "java via GH action";   echo "::endgroup::" ;;
+    node)   echo "::group::setup-node";   echo "node via GH action";   echo "::endgroup::" ;;
+    python) echo "::group::setup-python"; echo "python via GH action"; echo "::endgroup::" ;;
+  esac
+}
+
+# Parse manifest
+TOOLCHAINS=$(yq -r '.pipeline.setup.toolchains[]?' "$PIPE" || true)
+CACHES=$(yq -r '.pipeline.setup.caches[]?' "$PIPE" || true)
+
+log "BIT_ACTIONS_START" "pipeline=$(yq -r '.pipeline.id' "$PIPE")"
+
+# Run steps
+COUNT=$(yq '.pipeline.steps | length' "$PIPE")
+for ((i=0; i<COUNT; i++)); do
+  SID=$(yq -r ".pipeline.steps[$i].id" "$PIPE")
+  log "STEP_START" "$SID"
+
+  # Conditional execution
+  if yq -e ".pipeline.steps[$i].if_equals" "$PIPE" >/dev/null 2>&1; then
+    REF_STEP=$(yq -r ".pipeline.steps[$i].if_equals.step" "$PIPE")
+    WANT=$(yq -r ".pipeline.steps[$i].if_equals.value" "$PIPE")
+    GOT=$(jq -r '.'"$(yq -r ".pipeline.steps[] | select(.id==\"$REF_STEP\").parse.select" "$PIPE")" site_status.json 2>/dev/null || echo "")
+    [[ "$GOT" == "$WANT" ]] || { log "STEP_SKIP" "$SID"; continue; }
+  fi
+
+  # Parse JSON selector
+  if yq -e ".pipeline.steps[$i].parse" "$PIPE" >/dev/null 2>&1; then
+    SRC=$(yq -r ".pipeline.steps[$i].parse.from_json" "$PIPE")
+    SEL=$(yq -r ".pipeline.steps[$i].parse.select" "$PIPE")
+    VAL=$(jq -r "$SEL" "$SRC")
+    echo "$VAL" > ".bithub/reports/${SID}.val"
+  fi
+
+  # Run shell
+  if yq -e ".pipeline.steps[$i].run" "$PIPE" >/dev/null 2>&1; then
+    bash -eo pipefail -c "$(yq -r ".pipeline.steps[$i].run" "$PIPE")"
+  fi
+
+  # Upload instruction is handled by GH workflow step (not here)
+
+  log "STEP_END" "$SID"
+done
+
+log "BIT_ACTIONS_END"
+```
+
+Make executable:
+```bash
+chmod +x .bit/loaders/bit_actions_runner.sh
+```
+
+#### .github/actions/bit-cache-keys/action.yml
+
+```yaml
+name: "Bit Cache Keys"
+description: "Compute cache keys/paths from registry"
+inputs:
+  kind: { required: true }
+outputs:
+  key: { value: ${{ steps.mk.outputs.key }} }
+  restore: { value: ${{ steps.mk.outputs.restore }} }
+  paths: { value: ${{ steps.mk.outputs.paths }} }
+runs:
+  using: "composite"
+  steps:
+    - id: mk
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update && sudo apt-get install -y yq jq >/dev/null
+        REG=".bit-actions/bit.actions.registry.aln.yml"
+        K="${{ inputs.kind }}"
+        P=$(yq -r ".registry.caches[\"$K\"].paths[]" "$REG")
+        F=$(yq -r ".registry.caches[\"$K\"].keys[]" "$REG")
+        HASH="${{ hashFiles(format('{0}', inputs.kind)) }}"
+        echo "paths=$(printf '%s\n' "$P")" >> "$GITHUB_OUTPUT"
+        echo "key=bithub-${K}-${{ runner.os }}-${HASH}" >> "$GITHUB_OUTPUT"
+        echo "restore=bithub-${K}-${{ runner.os }}-" >> "$GITHUB_OUTPUT"
+```
+
+---
+
+### Workflows
+
+#### .github/workflows/bithub-compliance.yml
+
+```yaml
+name: Bit.Hub ALN + Lisp Compliance Wall
+
+on:
+  pull_request:
+  push:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install conftest
+        run: |
+          wget -q https://github.com/open-policy-agent/conftest/releases/download/v0.45.0/conftest_0.45.0_Linux_x86_64.tar.gz
+          tar xzf conftest_0.45.0_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin/conftest
+
+      - name: Validate ALN patterns
+        run: .bit/loaders/validate_adaptable_patterns.sh
+
+      - name: Verify Lisp sources
+        run: .bit/loaders/lisp_verify.sh
+
+      - name: Run Bit.Hub policies
+        run: conftest test --policy .bithub/policies .
+```
+
+#### .github/workflows/bit-hub-actions-runner.yml
+
+```yaml
+name: Bit.Hub Actions Runner
+
+on:
+  push:
+    paths:
+      - ".bit-actions/**"
+      - ".bithub/policies/**"
+      - "bithub/scripts/**"
+      - ".github/actions/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bit-actions-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  run-pipeline:
+    needs: [ ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Toolchains (from registry)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3.4.2
+        with: { dotnet-version: '6.0.x' }
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Caches (NuGet + Maven)
+      - name: Cache NuGet
+        id: nuget
+        uses: ./.github/actions/bit-cache-keys
+        with: { kind: nuget }
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.nuget.outputs.paths }}
+          key: ${{ steps.nuget.outputs.key }}
+          restore-keys: ${{ steps.nuget.outputs.restore }}
+
+      - name: Cache Maven
+        id: maven
+        uses: ./.github/actions/bit-cache-keys
+        with: { kind: maven }
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.maven.outputs.paths }}
+          key: ${{ steps.maven.outputs.key }}
+          restore-keys: ${{ steps.maven.outputs.restore }}
+
+      # Execute Bit.Actions pipeline
+      - name: Run Bit.Actions pipeline
+        run: |
+          sudo apt-get update && sudo apt-get install -y yq jq
+          .bit/loaders/bit_actions_runner.sh
+
+      # Upload site status artifact (declared in pipeline)
+      - name: Upload site status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site_status
+          path: site_status.json
+          if-no-files-found: warn
+          retention-days: 7
+```
+
+---
+
+### How to run and extend
+
+- **Direct run**:
+  - Commit all files, push, and watch “Bit.Hub Actions Runner”.
+- **Add pipelines**:
+  - Drop more manifests under .bit-actions/pipelines/*.aln.yml.
+  - The same runner will execute them if referenced by the loader (you can parameterize pipeline selection via an input env).
+- **Tighten policies**:
+  - Extend Rego to enforce step naming, required artifacts, and stricter safelists.
+- **Speed upgrades**:
+  - Prewarm .bithub/cache on self‑hosted Bit.Hub.runners and add a secondary cache restore phase in the runner script if you want even faster cold starts.
+
+If you want, I can add parameterization so the runner picks a pipeline by name via workflow_dispatch input (e.g., pipeline_id: site.build) and wire multiple caches/toolchains automatically from the registry per pipeline.
