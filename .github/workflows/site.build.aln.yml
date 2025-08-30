@@ -1,0 +1,32 @@
+pipeline:
+  id: "site.build"
+  version: "1.0.0"
+  description: "Check site status and trigger BitBot site build"
+  permissions: { contents: "read" }
+  needs_compliance: true
+
+  setup:
+    toolchains: ["dotnet","java"]
+    caches: ["nuget","maven"]
+
+  steps:
+    - id: check-status
+      run: "python bithub/scripts/check_site_status.py --target production > site_status.json"
+      outputs:
+        - id: site_status
+          file: "site_status.json"
+    - id: decide
+      parse:
+        from_json: "site_status.json"
+        select: ".status"
+      expect: ["fresh","stale"]
+    - id: build-if-stale
+      if_equals: { step: "decide", value: "stale" }
+      run: |
+        python bithub/scripts/deploy_bitbot_agent.py --pattern ml.patterns.learn.bitbot.bit --output agent_id.txt
+        python bithub/scripts/run_workflow.py --agent "$(cat agent_id.txt)" --workflow "site:build" --args "publish:latest"
+    - id: upload-status
+      artifact:
+        name: "site_status"
+        path: "site_status.json"
+        retention_days: 7
