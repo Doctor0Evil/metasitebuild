@@ -1,0 +1,44 @@
+name: Preflight Bot
+
+on:
+  push:
+    paths:
+      - ".bithub-actions/manifests/master.bithub.files.yml"
+      - ".bithub-actions/manifests/tools.yml"
+      - ".github/workflows/**"
+      - "scripts/**"
+      - "config/**"
+      - "policies/**"
+  workflow_call:
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install yq
+        run: sudo apt-get update && sudo apt-get install -y yq
+
+      - name: Parse tool manifest & install missing tools
+        run: |
+          mkdir -p .bithub-actions/logs
+          for tool in $(yq '.tools[].name' .bithub-actions/manifests/tools.yml); do
+            if ! command -v "$tool" &>/dev/null; then
+              echo "Installing $tool..."
+              install_cmd=$(yq ".tools[] | select(.name==\"$tool\") | .install.linux" .bithub-actions/manifests/tools.yml)
+              eval "$install_cmd"
+              echo "{\"tool\":\"$tool\",\"installed_at\":\"$(date -u +%FT%TZ)\"}" >> .bithub-actions/logs/install-$(date +%F).json
+            fi
+          done
+
+      - name: Upload install log artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: preflight-install-log
+          path: .bithub-actions/logs/*.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
+          overwrite: true
+          include-hidden-files: true
