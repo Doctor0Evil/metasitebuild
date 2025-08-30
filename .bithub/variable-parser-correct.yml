@@ -1,0 +1,28 @@
+name: BitHub Variable Parser Correction
+
+on:
+  push:
+    paths:
+      - "**/*.yml"
+      - "**/*.yaml"
+  workflow_dispatch:
+
+jobs:
+  parser-correction:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find and Correct Variables
+        run: |
+          pip install ruamel.yaml
+          python3 .bithub/scripts/variable_parser_correction.py
+
+      - name: Commit and Push
+        run: |
+          git config user.name "bitbot"
+          git config user.email "bitbot@bithub.org"
+          git add .
+          git commit -m "BitHub Variable Parser Correction"
+          git push || echo "No changes to commit"
