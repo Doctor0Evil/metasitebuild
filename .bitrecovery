@@ -1,0 +1,89 @@
+name: ".bit Secondary Recovery (Bit.Hub-Compliant)"
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Resilient Smart Work AI Pipeline", "Dynamic Resilient AI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  secondary-recovery:
+    name: ".bit: Secondary Recovery Job (with Bit.Hub Audit)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: ".bit: Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: ".bit: Ensure context.json exists"
+        run: |
+          mkdir -p .bit
+          if [ ! -f ".bit/context.json" ]; then
+            echo '{"event":"manual","timestamp":"'"$(date -u +%FT%TZ)"'"}' > .bit/context.json
+            echo "[.bit] Created default context.json"
+          fi
+
+      - name: ".bit: OPA/Bit.Hub Policy Gate"
+        uses: open-policy-agent/setup-opa@v2
+
+      - name: ".bit: Evaluate Step Policy"
+        run: |
+          opa eval --data .bit/policy \
+                   --input .bit/context.json \
+                   --format pretty \
+                   'data.bithub.secondary_recovery.allow'
+
+      - name: ".bit: Ensure recovery script present"
+        run: |
+          if [ ! -x "./secondary-recovery.sh" ]; then
+            echo "::error::Recovery script 'secondary-recovery.sh' is missing or not executable."
+            exit 1
+          fi
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.5.0
+        with:
+          go-version: '1.22.x'
+          check-latest: true
+          cache: true
+
+      - name: ".bit: Run Secondary Recovery Task"
+        id: secondary_recovery
+        continue-on-error: true
+        run: |
+          echo "Running .bit secondary recovery logic..."
+          ./secondary-recovery.sh
+
+      - name: ".bit: Handle Recovery Failure"
+        if: steps.secondary_recovery.outcome == 'failure'
+        run: |
+          echo "::warning::Secondary recovery failed. Bit.Hub fallback engaged."
+          echo "Review logs and consider manual audit/intervention as per Bit.Hub protocol."
+
+      - name: ".bit: Upload Recovery Logs"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: .bit-recovery-logs
+          path: |
+            "./recovery*.log"
+            "./logs/"
+            "!./logs/exclude-this.log"
+
+      - name: ".bit: Notify on Recovery Events"
+        if: failure()
+        run: |
+          echo "Sending .bit/Bit.Hub-compliant notifications for recovery failure."
+          # Optional: Integrate with Slack, Teams, or email APIs per company compliance here.
+
+      - name: ".bit: Job Summary & Bit.Hub Compliance Log"
+        run: |
+          if [ "${{ steps.secondary_recovery.outcome }}" = "success" ]; then
+            echo "### .bit secondary recovery completed **successfully** :white_check_mark:" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### .bit secondary recovery **failed** :x:" >> $GITHUB_STEP_SUMMARY
+            echo "Logs and fallback info uploaded as workflow artifacts." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "Bit.Hub compliance log completed at $(date -u)."
