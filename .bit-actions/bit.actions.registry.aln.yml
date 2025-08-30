@@ -1,0 +1,11 @@
+registry:
+  version: "1.0.0"
+  safelist_actions:
+    - actions/checkout@v4
+    - actions/cache@v4
+    - actions/setup-dotnet@v3.4.2
+    - actions/setup-java@v5
+    - actions/setup-node@v4
+    - actions/setup-python@v5
+    - actions/upload-artifact@v4
+    - ./.github/actions/bithub-compliance-gate
