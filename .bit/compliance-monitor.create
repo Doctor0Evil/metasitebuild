@@ -1,0 +1,19 @@
+bitbot.create:
+  id: agentic-compliance-monitor
+  description: >
+    Monitors all active workflows for compliance with ml_patterns.json and
+    remediates non-compliant bots.
+  triggers:
+    - on: workflow_complete
+  actions:
+    - check_compliance:
+        script: bithub/scripts/check_compliance.py
+        patterns: .bithub/ml_patterns.json
+    - remediate_bots:
+        script: bithub/scripts/remediate_bots.py
+        input: .github/bots/
+        patterns: .bithub/ml_patterns.json
+        adaptive: true
+        rename_on_fail: true
+  audit:
+    log_to: .bithub/compliance_logs/
