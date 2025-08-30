@@ -1,0 +1,21 @@
+bit_hub_commands:
+  - command: "git push"
+    allowed_roles: ["release_manager", "admin"]
+  - command: "git merge"
+    conditions:
+      branch_protection: true
+      reviewer_required: true
+  - command: "git stash"
+    allowed_roles: ["developer", "admin"]
+compliance_policies:
+  enforce_audit: true
+  schedule_scan: daily
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run OPA policy check
+        run: |
+          opa eval --data ./policy --input .bit --format pretty 'data.bitworkflow.allow_git.allow'
