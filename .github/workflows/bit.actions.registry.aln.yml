@@ -1,0 +1,22 @@
+registry:
+  version: "1.0.0"
+  safelist_actions:
+    - actions/checkout@v4
+    - actions/cache@v4
+    - actions/setup-dotnet@v3.4.2
+    - actions/setup-java@v5
+    - actions/setup-node@v4
+    - actions/setup-python@v5
+    - actions/upload-artifact@v4
+    - ./.github/actions/bit-cache-keys
+  toolchains:
+    dotnet: { version: "6.0.x" }
+    java:   { version: "17", distribution: "temurin" }
+    node:   { version: "18" }
+    python: { version: "3.11" }
+  caches:
+    nuget: { paths: ["~/.nuget/packages"], keys: ["**/packages.lock.json"] }
+    maven: { paths: ["~/.m2/repository"],   keys: ["**/pom.xml"] }
+    npm:   { paths: ["~/.npm","node_modules"], keys: ["**/package-lock.json"] }
+    pip:   { paths: ["~/.cache/pip"],       keys: ["**/requirements.txt"] }
+    hf:    { paths: ["~/.cache/huggingface"], keys: [".bit/patterns/**"] }
