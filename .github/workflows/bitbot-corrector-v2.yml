@@ -1,0 +1,128 @@
+name: Bit.Hub Runner Compliance Corrector v2
+
+on:
+  push:
+    paths:
+      - ".github/workflows/**"
+      - ".bit/**"
+      - ".bithub/**"
+  workflow_dispatch:
+    inputs:
+      repair_mode:
+        description: Apply auto-fixes (true) or only report (false)
+        type: boolean
+        default: true
+      target_ref:
+        description: Base branch for the PR
+        type: string
+        default: "main"
+  workflow_call:
+    inputs:
+      repair_mode:
+        required: false
+        type: boolean
+        default: true
+      target_ref:
+        required: false
+        type: string
+        default: "main"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bitbot-corrector-v2-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  BIT_HUB_REPO_URL: "https://github.com/Doctor0Evil/Bit.Hub.git"
+  BIT_HUB_RUNNER_LABELS: "self-hosted,bit.hub,linux"
+  GITHUB_DEFAULT_RUNNER: "ubuntu-latest"
+  DEFAULT_TIMEOUT_MIN: "30"
+  REPORT_DIR: ".bithub/reports"
+  POLICY_DIR: ".bithub/policy"
+  SCHEMA_DIR: ".bit/schemas"
+  CORRECTOR_BRANCH_PREFIX: "bot/workflow-corrections-v2"
+  OPA_VERSION: "0.64.1"
+  YQ_VERSION: "v4.44.3"
+
+jobs:
+  preflight:
+    runs-on: ${{ env.GITHUB_DEFAULT_RUNNER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Attempt canonical sync (non-blocking)
+        run: |
+          set +e
+          if git ls-remote "$BIT_HUB_REPO_URL" &>/dev/null; then
+            echo "Canonical repo reachable — syncing..."
+            git clone --depth=1 "$BIT_HUB_REPO_URL" /tmp/bithub
+            rsync -av --ignore-existing /tmp/bithub/.bithub/policy/ .bithub/policy/
+            rsync -av --ignore-existing /tmp/bithub/.bit/schemas/ .bit/schemas/
+          else
+            echo "::warning::Canonical repo $BIT_HUB_REPO_URL not reachable — using local copies."
+          fi
+          set -e
+
+      - name: Ensure directories
+        run: mkdir -p "${REPORT_DIR}" "${POLICY_DIR}" "${SCHEMA_DIR}"
+
+      - name: Install yq and OPA
+        run: |
+          BIN="$HOME/.local/bin"; mkdir -p "$BIN"
+          curl -fsSL -o "$BIN/yq" "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+          curl -fsSL -o "$BIN/opa" "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static"
+          chmod +x "$BIN/yq" "$BIN/opa"
+          echo "$BIN" >> $GITHUB_PATH
+
+  analyze_and_fix:
+    needs: preflight
+    runs-on: ${{ env.GITHUB_DEFAULT_RUNNER }}
+    outputs:
+      changes: ${{ steps.diff.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Normalize and fix workflows
+        run: |
+          shopt -s nullglob
+          for y in .github/workflows/*.y*ml; do
+            yq -i 'if has("name") then . else .name = "Auto-Normalized Workflow" end' "$y"
+            yq -i '.permissions = (.permissions // {"contents":"read"})' "$y"
+            yq -i '.concurrency = (.concurrency // {"group": "wf-${{ github.ref }}", "cancel-in-progress": false})' "$y"
+            yq -i '.jobs |= with_entries(.value."timeout-minutes" = (.value."timeout-minutes" // env(DEFAULT_TIMEOUT_MIN) | tonumber))' "$y"
+            yq -i '.jobs |= with_entries(.value."runs-on" = (.value."runs-on" // (env(BIT_HUB_RUNNER_LABELS) | split(","))))' "$y"
+            yq -i '.jobs |= with_entries(.value.runs_on_adaptive = true)' "$y"
+            yq -i '.. | select(tag == "!!str") |= sub("actions/checkout@v[12]"; "actions/checkout@v4")' "$y"
+          done
+
+      - name: Stage changes
+        id: diff
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+
+  propose_changes:
+    needs: analyze_and_fix
+    if: needs.analyze_and_fix.outputs.changes == 'true'
+    runs-on: ${{ env.GITHUB_DEFAULT_RUNNER }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: git add -A
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ env.CORRECTOR_BRANCH_PREFIX }}/${{ github.run_id }}
+          base: ${{ inputs.target_ref || 'main' }}
+          title: "Bit.Hub Compliance v2: Auto-corrections"
+          commit-message: "chore(bit.hub): normalize workflows, inject permissions/concurrency, enforce timeouts, adaptive runs-on, upgrade checkout"
+          body: |
+            Automated corrections to align workflows with Bit.Hub runner and policy practices.
+            Canonical repo: $BIT_HUB_REPO_URL
+          labels: compliance, automation
+          delete-branch: true
