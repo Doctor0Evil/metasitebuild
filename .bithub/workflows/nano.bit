@@ -1,0 +1,21 @@
+package bithub.github.workflows
+
+deny[msg] {
+    startswith(file_path, ".github/workflows/")
+    not endswith(file_path, ".yml")
+    msg := sprintf("❌ Non‑YAML file in workflows: %s", [file_path])
+}
+
+deny[msg] {
+    startswith(file_path, ".github/workflows/")
+    endswith(file_path, ".yml")
+    not valid_workflow(file_path)
+    msg := sprintf("❌ Invalid workflow syntax in %s", [file_path])
+}
+
+valid_workflow(path) {
+    wf := input.yaml[path]
+    wf.name
+    wf.on
+    wf.jobs
+}
