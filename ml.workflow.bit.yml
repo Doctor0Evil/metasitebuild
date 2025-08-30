@@ -1,0 +1,17 @@
+jobs:
+  ml-policy-enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: open-policy-agent/setup-opa@v2
+      - name: Evaluate ML policy
+        run: |
+          opa eval --data ./policy \
+            --input ./context/ml.json \
+            --format pretty "data.mlworkflow.allow"
+      - name: Train ML Model
+        run: |
+          python train.py --config ml-config.yml
+      - name: Update Policy from Model Output
+        run: |
+          python gen_rego.py --metrics ./metrics/latest.json --output ./policy/ml_dynamic.rego
