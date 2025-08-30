@@ -1,0 +1,44 @@
+{
+  "allowlist_actions": [
+    "actions/checkout@v3",
+    "actions/upload-artifact@v4.6.2",
+    "actions/setup-dotnet@v3.4.2"
+  ],
+  "allowlist_domains": [
+    "raw.githubusercontent.com",
+    "github.com",
+    "objects.githubusercontent.com"
+  ],
+  "allowed_runners": [
+    "ubuntu-latest",
+    "windows-latest",
+    "macos-latest"
+  ],
+  "required_triggers": [
+    "push",
+    "workflow_dispatch"
+  ],
+  "forbidden_triggers": [
+    "schedule"
+  ],
+  "required_permissions": {
+    "contents": "read"
+  },
+  "forbidden_permissions": [
+    "id-token"
+  ],
+  "artifacts": {
+    "min_retention_days": 1,
+    "max_retention_days": 90,
+    "require_name": true,
+    "require_path": true
+  },
+  "matrix": {
+    "max_include": 200,
+    "max_parallel": 50
+  },
+  "concurrency": {
+    "require_top_level": true,
+    "require_cancel_in_progress": true
+  }
+}
