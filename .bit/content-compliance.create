@@ -1,0 +1,21 @@
+bitbot.create:
+  id: agentic-content-compliance
+  description: >
+    Agent for scanning, filtering, and securely storing adult/extreme content
+    with GDPR and banter filter compliance.
+  triggers:
+    - on: commit_message_contains:
+        - adult
+        - ml_patterns
+  actions:
+    - run_filter:
+        script: bithub/scripts/content_filter.py
+        input: game-assets/adult
+        policy: .bit/policy.json
+    - store_secure:
+        script: bithub/scripts/store_secure.py
+        input: game-assets/adult
+        target: bithub_datalake/adult
+  compliance:
+    gdpr: true
+    banter_filter: true
