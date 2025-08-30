@@ -1,53 +1,47 @@
+# BitHub Massive ALN Workflow (Sin.e-MAXX Mode)
 name: BitHub Massive ALN Workflow (Sin.e-MAXX Mode)
-
 on:
   workflow_run:
     workflows: ["CI", "Build", "Deploy"]
-    types:
-      - completed
+    types: [completed]
   push:
-    branches:
-      - main
-      - "**/failed-workflow"
+    branches: [main, '**/failed-workflow']
   schedule:
     - cron: '0 */6 * * *' # periodic debug eruption
 
-      - name: Install aln-analyze if missing
-        if: matrix.lang == 'aln'
+jobs:
+  analyze-errors:
+    name: Debug/Analyze Failure Logs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ALN CLI (portable)
         run: |
-          set -euo pipefail
-          if ! command -v aln-analyze >/dev/null 2>&1; then
-            echo "[.bithub] aln-analyze not found — installing..."
-            # Example: install from your repo or package registry
-            # If it's in your repo:
+          if ! command -v aln-analyze >/dev/null; then
             if [ -f "./tools/aln-analyze" ]; then
               chmod +x ./tools/aln-analyze
               sudo mv ./tools/aln-analyze /usr/local/bin/aln-analyze
             else
-              # Replace with actual install command for ALN CLI
               sudo apt-get update
-              sudo apt-get install -y aln-cli
+              sudo apt-get install -y aln-cli || echo "[.bithub] Fallback install failed"
             fi
           fi
-          echo "[.bithub] aln-analyze ready: $(aln-analyze --version || echo 'version unknown')"
-
-      - name: Run ALN profanity analysis
-        if: matrix.lang == 'aln'
+          echo "[.bithub] ALN-analyze ready: $(aln-analyze --version || echo 'unknown')"
+      - name: Run ALN analysis
         run: |
-          set -euo pipefail
-          echo "[.bithub] Running ALN analysis with compliant profanity allowlist"
-          aln-analyze \
-            --input /github/logs \
-            --output /tmp/failure.lst \
-            --profane-allow 'fuck,shit,bitch,asshole,cunt' || {
-              echo "[.bithub] ALN analysis returned nonzero — continuing with warnings"
-            }
-          echo "[.bithub] ALN analysis complete"
-          echo "=== Failure list (if any) ==="
+          aln-analyze --input /github/logs --output /tmp/failure.lst \
+            --profane-allow 'fuck,shit,bitch,asshole,cunt' \
+            || echo "[.bithub] ALN analysis warnings"
           cat /tmp/failure.lst || echo "[.bithub] No failures recorded"
-
-      - name: Upload ALN analysis report
-        if: matrix.lang == 'aln'
+      - name: Generate Humor Bus
+        run: |
+          echo "Yippee-ki-yay, let the Sloppy Disk Olympics begin!" > /tmp/humor.bus
+      - name: Apply Compliance Patch
+        run: |
+          aln-patch --target /tmp/failure.lst \
+            --profanity-compliance "fuck,shit,bitch,asshole,cunt" \
+            --sandbox-mode TRUE
+      - name: Upload ALN report
         uses: actions/upload-artifact@v4
         with:
           name: aln-analysis-${{ github.run_number }}-${{ github.sha }}
@@ -62,24 +56,26 @@ on:
     needs: analyze-errors
     runs-on: ubuntu-latest
     steps:
-      - name: Launch fixer VM bots (auto-scale bit.hub VMs)
+      - uses: actions/checkout@v4
+      - name: Launch fixer bots
         run: |
           aln-fixer-bot --scale dynamic --target /tmp/failure.lst --log /tmp/fixer-bot.log
-      - name: Erupt workflow fixer (recursive bot launch)
+      - name: Erupt workflow fixer
         run: |
-          for bot in $(cat /tmp/fixer-bot.log); do
-            aln-erupt --bot $bot --repair-mode lava --debug MAX
-          done
+          while read -r bot; do
+            aln-erupt --bot "$bot" --repair-mode lava --debug MAX
+          done < /tmp/fixer-bot.log
 
   blockchain-persist:
     name: Persist & Tokenize via Blockchain
     needs: self-repair-workflow
     runs-on: ubuntu-latest
     steps:
-      - name: Tokenize log/patch to blockchain
+      - uses: actions/checkout@v4
+      - name: Tokenize to blockchain
         run: |
           aln-blockchain --tokenize /tmp/fixer-bot.log --network bit.hub.chain --compliance MAX
-      - name: Audit & Escalate Profane Compliance
+      - name: Audit Profane Compliance
         run: |
           aln-compliance-audit --input /tmp/humor.bus --profanity-level unrestricted.bat --log /tmp/audit.log
 
@@ -88,9 +84,10 @@ on:
     needs: blockchain-persist
     runs-on: ubuntu-latest
     steps:
-      - name: Add more bots (auto-summon from bit.hub)
+      - uses: actions/checkout@v4
+      - name: Summon bots (Sin.e-MAXX mode)
         run: |
           aln-bot-summon --count 20 --personality Sin.e-MAXX --mode developer,debug,janitor
-      - name: Announce success (adult satire mode)
+      - name: Announce success (satirical)
         run: |
           echo "Fucking.legendary! Erupting with massive bot army. Clinton & Tyson backup routines locked and loaded."
