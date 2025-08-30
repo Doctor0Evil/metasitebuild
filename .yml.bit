@@ -1,0 +1,44 @@
+# .bit/preflight.aln
+modal: .bit.architecture.guard
+version: 1.0
+description: >
+  ALN compliance modal to enforce immutable .bit architecture
+  and fail orchestration if non‑compliant.
+
+triggers:
+  - on: workflow.start
+    branches: [ main ]
+
+guards:
+  - id: check-bit-dir
+    type: exists
+    path: ".bit"
+    fail_message: "❌ .bit directory missing — required for ALN compliance."
+
+  - id: enforce-bit-extension
+    type: file_extension
+    path: ".bit"
+    allowed: [ ".bit" ]
+    fail_message: "❌ Non‑.bit file detected in .bit architecture modal."
+
+  - id: enforce-authorized-modifications
+    type: git_diff
+    scope: ".bit/*"
+    allowed_authors:
+      - "BitBot"
+      - "github-actions[bot]"
+    fail_message: "❌ Unauthorized modification to .bit manifests."
+
+  - id: schema-validation
+    type: schema
+    path: ".bit/**/*.bit"
+    schema_ref: ".bit/schema/bit-architecture.json"
+    fail_message: "❌ .bit manifest schema validation failed."
+
+actions:
+  on_fail:
+    - log: "🔒 ALN guard triggered — blocking orchestration."
+    - stop_pipeline: true
+
+  on_pass:
+    - log: "✅ .bit architecture validated under ALN compliance."
