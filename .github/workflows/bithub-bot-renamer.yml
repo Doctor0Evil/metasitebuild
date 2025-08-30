@@ -1,0 +1,56 @@
+# .github/workflows/bithub-bot-renamer.yml
+name: Bithub Bot Compliance Renamer
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/**'
+
+jobs:
+  rename-bots:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Find and Patch Workflow Bots
+        run: |
+          set -e
+          TARGET_BOT_NAME=".bithub-bot"
+          TARGET_BOT_EMAIL="bithub-bot@users.noreply.github.com"
+          # Find all workflow files that reference github-actions[bot]
+          find .github/workflows -type f -name '*.yml' | while read -r f; do
+            echo "↪️  Scanning $f"
+            sed -i "s/github-actions\[bot\]/$TARGET_BOT_NAME/g" "$f"
+            sed -i "s/41898282+$TARGET_BOT_NAME/$TARGET_BOT_NAME/g" "$f"
+            sed -i "s/github-actions-bot@users.noreply.github.com/$TARGET_BOT_EMAIL/g" "$f"
+          done
+
+      - name: Configure Git for Bithub-Bot
+        run: |
+          git config user.name ".bithub-bot"
+          git config user.email "bithub-bot@users.noreply.github.com"
+
+      - name: Commit Compliance Changes
+        run: |
+          git add .github/workflows/
+          if git diff --cached --quiet; then
+            echo "No bot changes required. All workflows already compliant."
+          else
+            git commit -m "[.bithub-bot] Updated workflows for BitHub bot compliance"
+            git push || echo "Manual review required for protected branches."
+          fi
+
+      - name: Summary Receipt (CircleK Format)
+        run: |
+          echo '=========================================='
+          echo '| BitHub Bot Compliance Update Receipt    |'
+          echo '| Timestamp: ' $(date -u)
+          echo '| All .github bots now .bithub-bots      |'
+          echo '| Git config: .bithub-bot                |'
+          echo '=========================================='
