@@ -1,0 +1,20 @@
+mesh:
+  version: "1.0.0"
+  discovery:
+    mdns: true
+    p2p: true
+    seeds:
+      - "wss://seed1.bithub.mesh"
+      - "wss://seed2.bithub.mesh"
+  tls:
+    required: true
+    mode: "self-signed-ok" # valid: self-signed-ok | strict-ca
+  auth:
+    jwt_issuer: "aln://bithub/auth"
+    accept_personas:
+      - "strict"
+      - "hybrid"
+      - "creative"
+  rate_limits:
+    per_peer_rps: 10
+    burst: 50
