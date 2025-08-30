@@ -1,0 +1,23 @@
+name: Analysis ALN
+on:
+  push:
+    paths:
+      - "**/*.aln"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aln-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  PROFANITY_ALLOW: "fuck,shit,bitch,asshole,cunt"
+jobs:
+  call-preflight:
+    uses: ./.bithub-actions/templates/preflight.yml
+  run-analysis:
+    needs: call-preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run aln-analyze
+        run: aln-analyze --input /github/logs --output /tmp/failure.lst --profane-allow "${PROFANITY_ALLOW}"
