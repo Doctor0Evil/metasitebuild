@@ -1,0 +1,18 @@
+.bithub-actions/
+  manifests/
+    master.bithub.files.yml
+    tools.yml
+    workflows.yml
+  bots/
+    preflight-bot.yml
+    deploy-bot.yml
+    audit-bot.yml
+  logs/
+    install-YYYYMMDD.json
+    audit-YYYYMMDD.json
+.github/
+  workflows/
+    preflight.yml
+    analysis.yml
+    deploy.yml
+    post-deploy-audit.yml
