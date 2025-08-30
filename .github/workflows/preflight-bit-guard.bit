@@ -1,0 +1,151 @@
+# .github/workflows/preflight-bit-guard.yml
+name: Preflight Namespace & Workflow Auto‑Fix
+
+on:
+  workflow_call:
+    inputs:
+      autorepair:
+        description: Attempt to auto-fix and normalize to .bit extensions
+        required: false
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      autorepair:
+        description: Attempt to auto-fix and normalize to .bit extensions
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches: [ "main" ]
+
+jobs:
+  preflight-fix:
+    runs-on: ubuntu-latest
+    env:
+      BIT_HUB_AUTOFIX: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.autorepair || (inputs.autorepair || 'false') }}
+      ALLOWED_BOT_AUTHORS: "github-actions[bot],BitBot"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Guard .bit modal, runner governance, and extensions
+        id: guard
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $autoFix = "$env:BIT_HUB_AUTOFIX" -eq 'true'
+          $allowedAuthors = ($env:ALLOWED_BOT_AUTHORS -split ',') | ForEach-Object { $_.Trim() }
+          $actor = "${{ github.actor }}"
+          $branchRef = "${{ github.ref }}"
+          $onMain = $branchRef -eq 'refs/heads/main'
+          $violations = [System.Collections.Generic.List[string]]::new()
+
+          function Add-Violation([string]$msg) { 
+            Write-Host "❌ $msg"
+            $violations.Add($msg) | Out-Null
+          }
+
+          Write-Host "🔍 Validating .bit architecture modal..."
+          if (-not (Test-Path ".bit")) { Add-Violation ".bit directory is missing." }
+
+          # 1) Enforce .bit extensions inside .bit, .bitrunners, .gitrunners
+          $targets = @(".bit", ".bitrunners", ".gitrunners") | Where-Object { Test-Path $_ }
+          foreach ($root in $targets) {
+            $bad = Get-ChildItem -Path $root -Recurse -File | Where-Object {
+              $_.Extension -ne ".bit" -and $_.Name -ne ".gitkeep"
+            }
+            if ($bad.Count -gt 0) {
+              if ($autoFix) {
+                Write-Host "🛠 Normalizing extensions to .bit under $root..."
+                foreach ($file in $bad) {
+                  $new = [IO.Path]::ChangeExtension($file.FullName, ".bit")
+                  git mv -- "$($file.FullName)" "$new"
+                }
+              } else {
+                $bad | ForEach-Object { Add-Violation "Non-.bit file in $root: $($_.FullName)" }
+              }
+            }
+          }
+
+          # 2) Enforce ALN manifests reside under .bit (not scattered)
+          $alnOutside = Get-ChildItem -Recurse -File -Include *.aln | Where-Object {
+            -not $_.FullName.StartsWith((Resolve-Path ".bit").Path + [IO.Path]::DirectorySeparatorChar)
+          }
+          if ($alnOutside.Count -gt 0) {
+            if ($autoFix) {
+              Write-Host "🛠 Moving .aln manifests into .bit/"
+              foreach ($f in $alnOutside) {
+                $dest = Join-Path ".bit" $f.Name
+                New-Item -ItemType Directory -Force -Path ".bit" | Out-Null
+                git mv -- "$($f.FullName)" "$dest"
+              }
+            } else {
+              $alnOutside | ForEach-Object { Add-Violation ".aln must live under .bit: $($_.FullName)" }
+            }
+          }
+
+          # 3) Unauthorized modifications to .bit contents on main
+          $bitChanges = (git diff --name-only origin/main...HEAD | Select-String '^\.bit/').ToString()
+          if ($onMain -and $bitChanges) {
+            $allowed = $false
+            foreach ($a in $allowedAuthors) {
+              if ($actor -match [regex]::Escape($a)) { $allowed = $true; break }
+            }
+            if (-not $allowed) {
+              Add-Violation "Unauthorized modification to .bit on main by '$actor'. Allowed: $($allowedAuthors -join ', ')"
+            }
+          }
+
+          # 4) Minimal schema presence check
+          if (Test-Path ".bit") {
+            if (-not (Test-Path ".bit/schema/bit-architecture.json")) {
+              if ($autoFix) {
+                New-Item -ItemType Directory -Force -Path ".bit/schema" | Out-Null
+                Set-Content -Path ".bit/schema/bit-architecture.json" -Value '{ "$schema":"https://json-schema.org/draft/2020-12/schema", "title":"bit-architecture","type":"object" }' -Encoding UTF8
+                git add .bit/schema/bit-architecture.json
+              } else {
+                Add-Violation "Missing .bit/schema/bit-architecture.json (schema contract)."
+              }
+            }
+          }
+
+          # 5) Runner governance presence
+          if (-not (Test-Path ".bitrunners")) { Add-Violation "Missing .bitrunners runner policy directory." }
+          if (-not (Test-Path ".gitrunners")) { Add-Violation "Missing .gitrunners runner policy directory." }
+
+          # Exit or continue to auto-fix commit/push
+          if ($violations.Count -gt 0 -and -not $autoFix) {
+            Write-Error "🔒 Guard failed with $($violations.Count) violation(s). Enable autorepair to attempt normalization."
+            exit 1
+          }
+
+          if ($autoFix) {
+            $hasChanges = -not (git diff --quiet) -or -not (git diff --cached --quiet)
+            if ($hasChanges) {
+              Write-Host "📦 Committing normalization changes..."
+              git config --global user.name "github-actions[bot]"
+              git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git commit -m "ci(preflight): normalize to .bit + move ALN under .bit [skip ci]" || true
+
+              if ($onMain) {
+                Write-Host "⬇️ Fetching main..."
+                git fetch origin main
+                Write-Host "📤 Rebase & push..."
+                git pull --rebase origin main
+                git push origin HEAD:main
+              } else {
+                Write-Host "ℹ️ Not on main; leaving changes committed to current ref."
+              }
+            } else {
+              Write-Host "✅ No changes required after normalization."
+            }
+          }
+
+      - name: Report post‑fix status
+        if: ${{ always() }}
+        run: |
+          echo "Post‑fix HEAD: $(git rev-parse HEAD)"
+          echo "Branch: $(git branch --show-current)"
