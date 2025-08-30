@@ -30,8 +30,7 @@ jobs:
       - name: Run ALN analysis
         run: |
           aln-analyze --input /github/logs --output /tmp/failure.lst \
-            --profane-allow 'fuck,shit,bitch,asshole,cunt' \
-            || echo "[.bithub] ALN analysis warnings"
+            --profane-allow 'fuck,shit,bitch,asshole,cunt' || echo "[.bithub] ALN analysis warnings"
           cat /tmp/failure.lst || echo "[.bithub] No failures recorded"
       - name: Generate Humor Bus
         run: |
