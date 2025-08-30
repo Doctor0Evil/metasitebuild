@@ -1,0 +1,20 @@
+.bit.create:
+  name: "Doctor0Evil's Lair"
+  description: >
+    A BitHub-enhanced creative hub integrating animation, entertainment, design tools, and ML-triggered workflows.
+    Built for ALN and Lisp ecosystems, with BitBot utilities for humor, intelligence programming, and continuous evolution.
+  modules:
+    - animation_workflows
+    - entertainment_tools
+    - design_utilities
+    - ml_triggered_evolution
+    - humor_reasoning
+    - intelligence_programming
+    - aln_lisp_foundation
+  integrations:
+    - BitBot
+    - BitHub.BlockStore
+    - ML Algorithms (adaptive, recursive)
+  compliance:
+    - expressive_banter: permitted within documented safety boundaries
+    - audit_trail: enabled for all workflow triggers and outputs
