@@ -71,3 +71,4 @@ for wf in $(find .github/workflows -type f -name "*.yml" -o -name "*.yaml"); do
 done
 
 echo "Auto-patch complete."
+chmod +x .bit/loaders/bit_apply_compliance_patch.sh
