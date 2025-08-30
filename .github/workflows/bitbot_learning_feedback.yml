@@ -1,0 +1,49 @@
+name: BitBot Learning Feedback Loop
+
+on:
+  workflow_run:
+    workflows:
+      - BitBot Recover Failed Workflows
+      - BitBot Queue Pending Workflows
+      - BitBot Site Build Check
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  learn_from_runs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Aggregate Run Results
+        run: |
+          python bithub/scripts/aggregate_run_results.py > run_results.json
+
+      - name: Update ML Patterns
+        run: |
+          python bithub/scripts/update_ml_patterns.py --input run_results.json --pattern-store .bithub/ml_patterns.json
+
+      - name: Store Updated Patterns
+        run: |
+          git config user.name "bitbot"
+          git config user.email "bitbot@users.noreply.github.com"
+          git add .bithub/ml_patterns.json
+          git commit -m "Update ML patterns from latest runs" || echo "No changes"
+          git push
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.9.1
+        with:
+          # Set always-auth in npmrc.
+          always-auth: false
+          # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
+          node-version: 18.x
+          # Optional registry to set up for auth.
+          registry-url: https://registry.npmjs.org
+          # Optional scope for authenticating against scoped registries.
+          scope: ""
+          # Used to specify a package manager for caching in the default directory.
+          cache: npm
+          # Used to specify the path to a dependency file.
+          cache-dependency-path: package-lock.json
