@@ -1,0 +1,62 @@
+name: "Bit Compliance From Sheet"
+description: "Enforce Bit.Hub compliance using .bit-actions/compliance.bit.aln.yml"
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update && sudo apt-get install -y yq jq >/dev/null
+        wget -q https://github.com/open-policy-agent/conftest/releases/download/v0.45.0/conftest_0.45.0_Linux_x86_64.tar.gz
+        tar xzf conftest_0.45.0_Linux_x86_64.tar.gz
+        sudo mv conftest /usr/local/bin/conftest
+
+        SHEET=".bit-actions/compliance.bit.aln.yml"
+        [[ -f "$SHEET" ]] || { echo "Missing $SHEET"; exit 1; }
+
+        # 1) Structural checks
+        REQUIRED_PERM=$(yq -r '.compliance.required.permissions | keys | .[0]' "$SHEET")
+        for wf in $(find .github/workflows -type f -name "*.yml" -o -name "*.yaml"); do
+          # permissions
+          if ! yq -e '.permissions' "$wf" >/dev/null 2>&1; then
+            echo "::error file=$wf::Missing permissions block"; exit 1;
+          fi
+          # compliance job
+          if ! yq -e '.jobs.compliance' "$wf" >/dev/null 2>&1; then
+            echo "::error file=$wf::Missing compliance job"; exit 1;
+          fi
+          # needs: compliance for all jobs
+          for j in $(yq -r '.jobs | keys[]' "$wf"); do
+            [[ "$j" == "compliance" ]] && continue
+            NEEDS=$(yq -r ".jobs[\"$j\"].needs // \"\"" "$wf")
+            if [[ "$NEEDS" != *"compliance"* ]]; then
+              echo "::error file=$wf::Job '$j' lacks needs: compliance"; exit 1;
+            fi
+          done
+          # forbidden pipes
+          RX=$(yq -r '.compliance.forbid.run_pipes_regex' "$SHEET")
+          if grep -Eq "$RX" "$wf"; then
+            echo "::error file=$wf::Forbidden curl|bash or wget|bash pipeline found"; exit 1;
+          fi
+          # backslash path hygiene
+          if grep -q ".github\\workflows" "$wf"; then
+            echo "::error file=$wf::Backslash path detected"; exit 1;
+          fi
+        done
+
+        # 2) Policy checks via conftest if policies exist
+        if compgen -G ".bithub/policies/*.rego" > /dev/null; then
+          conftest test --policy .bithub/policies .
+        fi
+
+        # 3) Required manifests present
+        for m in $(yq -r '.compliance.required.aln_manifests[]' "$SHEET"); do
+          [[ -f "$m" ]] || { echo "::error::Missing required manifest $m"; exit 1; }
+        done
+
+        # 4) Lisp verify toggle (expect a prior job/step to have run the script if needed)
+        if [[ "$(yq -r '.compliance.required.lisp_verify' "$SHEET")" == "true" ]]; then
+          [[ -f ".bithub/reports/lisp-lint.json" ]] || echo "::warning::lisp-lint.json not found; ensure .bit/loaders/lisp_verify.sh runs in compliance job"
+        fi
+
+        echo "Bit.Hub compliance sheet validated."
