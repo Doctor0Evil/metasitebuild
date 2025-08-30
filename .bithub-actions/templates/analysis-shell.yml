@@ -1,0 +1,25 @@
+name: Analysis Shell
+on:
+  push:
+    paths:
+      - "**/*.sh"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: shell-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  call-preflight:
+    uses: ./.bithub-actions/templates/preflight.yml
+  run-analysis:
+    needs: call-preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run shellcheck
+        run: |
+          for f in $(git ls-files "**/*.sh"); do
+            echo "Checking $f"
+            shellcheck "$f" || true
+          done
