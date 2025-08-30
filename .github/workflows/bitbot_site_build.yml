@@ -1,4 +1,5 @@
 name: BitBot Site Build Check
+
 on:
   schedule:
     - cron: "0 * * * *"
@@ -8,14 +9,62 @@ jobs:
   site_build:
     runs-on: ubuntu-latest
     steps:
+      # Stage 1: Checkout
       - uses: actions/checkout@v4
 
+      # Stage 2: Setup Runtimes
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3.4.2
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v5.0.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Stage 3: Cache Dependencies
+      - name: Cache NuGet packages
+        uses: actions/cache@v4.2.4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      # Stage 4: Compliance Gate (Santa Clause Rego)
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa && sudo mv opa /usr/local/bin/opa
+
+      - name: Run Santa Clause Policy
+        run: |
+          echo '{"repo":"aln://repo/ALNFantasia"}' > input.json
+          opa eval --format pretty --data .bithub/policies/santa.clause.rego --input input.json "data.bithub.santa.allow_build"
+        continue-on-error: false
+
+      # Stage 5: Site Status Check
       - name: Check Production Site Status
+        id: status
         run: |
           python bithub/scripts/check_site_status.py --target production > site_status.json
+          echo "status=$(jq -r '.status' site_status.json)" >> "$GITHUB_OUTPUT"
 
+      # Stage 6: Conditional Build Trigger
       - name: Trigger Site Build if Needed
-        if: ${{ hashFiles('site_status.json') != '' && contains(fromJSON(file('site_status.json')).status, 'stale') }}
+        if: ${{ steps.status.outputs.status == 'stale' }}
         run: |
           python bithub/scripts/deploy_bitbot_agent.py --pattern ml.patterns.learn.bitbot.bit --output agent_id.txt
-          python bithub/scripts/run_workflow.py --agent $(cat agent_id.txt) --workflow "site:build" --args "publish:latest"
+          python bithub/scripts/run_workflow.py --agent "$(cat agent_id.txt)" --workflow "site:build" --args "publish:latest"
+
+      # Stage 7: Artifact Upload
+      - name: Upload Site Status Artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: site_status
+          path: site_status.json
+          if-no-files-found: warn
+          retention-days: 7
