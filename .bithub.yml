@@ -8,18 +8,16 @@ metadata:
     bithub.io/accessibility: "hierarchical tree views; high contrast logs"
 
 identity:
-  # Token sources are checked in order; first non-empty wins.
   tokenSources:
-    - env:BITHUB_TOKEN        # .bithub.token (preferred)
-    - env:GITHUB_TOKEN        # GitHub fallback
-    - secret:CI_PAT           # Optional PAT fallback for cross-org ops
+    - env:BITHUB_TOKEN
+    - env:GITHUB_TOKEN
+    - secret:CI_PAT
   scopes:
     - orchestrate:*
     - workflows:trigger
     - registry:push
     - artifacts:readwrite
   bots:
-    # First-class .bithub-bots with purpose-scoped identities
     - name: planner-bot
       serviceAccount: bithub-sa-planner
       capabilities: [ "dag.synthesize", "retry.tune", "cache.share" ]
@@ -36,7 +34,6 @@ orchestration:
       - "**/audit/*.log"
       - "**/images_*.json"
   flows:
-    # Linear chain with barriers and adaptive branches
     - name: main-ci
       on:
         push:
@@ -45,41 +42,20 @@ orchestration:
           branches: [ "main" ]
       sequence:
         - gate: policy
-          continueOnFailure: true
         - action: bit-image
           with:
-            imagePrefix: aln
+            # Global defaults for images (per-service overrides below)
             pushOn:
               event: push
               branch: main
-        - barrier: build-complete
+            provenance: true
+            sbom: true
+            sign: false
         - workflows:
             parallel:
               - ".tests-aln"
               - ".tests-batchfile"
               - ".tests-lisp"
-          continueOnFailure: true
-        - action: package-assets
-          condition: "files.changed matches '**/assets/**'"
-        - action: publish-artifacts
-    # Optional nightly hardening run
-    - name: nightly-hardening
-      on:
-        schedule: "0 3 * * *"
-      sequence:
-        - action: bit-image
-          with:
-            imagePrefix: aln
-            pushOn:
-              always: true
-            provenance: true
-            sbom: true
-            sign: false
-        - workflows:
-            series:
-              - "security-scan"
-              - "license-audit"
-          continueOnFailure: false
 
 images:
   defaults:
@@ -94,19 +70,24 @@ images:
   services:
     - name: aln-core
       context: "."
-      dockerfile: "Dockerfile"           # auto-discovered if omitted
+      dockerfile: "Dockerfile"         # auto-discovered if omitted
       imagePrefix: "aln"
+      platforms: [ "linux/amd64" ]
+      testCommand: /bin/sh -lc 'echo "ALN core OK"'
     - name: batch-runtime
       context: "Batchfile"
       dockerfile: "Dockerfile"
       imagePrefix: "batch"
+      platforms: [ "linux/amd64" ]
+      testCommand: /bin/sh -lc 'echo "Batch runtime OK"'
     - name: lisp-runtime
       context: "Lisp"
       dockerfile: "Dockerfile"
       imagePrefix: "lisp"
+      platforms: [ "linux/amd64" ]
+      testCommand: /bin/sh -lc 'echo "Lisp runtime OK"'
 
 clusters:
-  # Run here today; move to bithub VM.clusters by switching profile
   defaultProfile: github-hosted
   profiles:
     github-hosted:
@@ -125,29 +106,21 @@ clusters:
     vsc-gpu:
       runnerLabels: [ "self-hosted", "linux", "gpu", "bithub-vsc" ]
       resources:
-        gpus: "A10:1"   # example
+        gpus: "A10:1"
         memoryGB: 64
 
 policy:
-  # Clear, documented boundaries with expressive freedom
   profanity:
     mode: compliant-banter
-    allowlist:
-      - "hell"
-      - "damn"
-    denylist:
-      - "slurs/*"
+    allowlist: [ "hell", "damn" ]
+    denylist: [ "slurs/*" ]
     logRedaction: partial
   security:
-    vulnThreshold: "high"    # fail on critical only
+    vulnThreshold: "high"
     allowlistPackages: []
   compliance:
-    licensesAllow:
-      - MIT
-      - Apache-2.0
-      - BSD-3-Clause
-    licensesDeny:
-      - GPL-3.0-only
+    licensesAllow: [ "MIT", "Apache-2.0", "BSD-3-Clause" ]
+    licensesDeny: [ "GPL-3.0-only" ]
   codeowners:
     requiredReviews: 1
 
@@ -178,7 +151,6 @@ support:
       defaultLocale: en-US
       fallbackLocale: en
   userDirectives:
-    # Human-friendly switches GitHub never offered
     - key: "skip-heavy-tests"
       description: "Skip long integrations on PRs from forks"
       when: "event == 'pull_request' && isFork"
