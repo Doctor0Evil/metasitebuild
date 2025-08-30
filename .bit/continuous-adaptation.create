@@ -1,0 +1,22 @@
+bitbot.create:
+  id: agentic-continuous-adaptation
+  description: >
+    Maintains recursive workflow loops, syncs patterns rhythmically,
+    and cleans up edge cases via SlopBucketLow routines.
+  triggers:
+    - on: schedule: "*/10 * * * *"
+    - on: workflow_complete
+  actions:
+    - loop_master:
+        script: bithub/scripts/loop_master.py
+        mode: recursive
+        compliance: strict
+    - sync_patterns:
+        script: bithub/scripts/sync_patterns.py
+        input: .bithub/ml_patterns.json
+        mode: rhythmic-adapt
+        output: .bithub/ml_patterns.json
+    - slopbucketlow_cleanup:
+        script: bithub/scripts/slopbucketlow.py
+        mode: aggressive
+        audit: true
