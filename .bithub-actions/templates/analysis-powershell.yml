@@ -1,0 +1,26 @@
+name: Analysis PowerShell
+on:
+  push:
+    paths:
+      - "**/*.ps1"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ps-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  call-preflight:
+    uses: ./.bithub-actions/templates/preflight.yml
+  run-analysis:
+    needs: call-preflight
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check PowerShell
+        shell: pwsh
+        run: '$PSVersionTable.PSVersion'
+      - name: Placeholder analysis
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object { Write-Host "Analyzing $($_.FullName)" }
