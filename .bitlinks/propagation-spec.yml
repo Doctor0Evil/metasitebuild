@@ -1,0 +1,25 @@
+@BITLINKS_PROPAGATION {
+  apply_repos: [
+    "Virta-Sys",
+    "ALN_Programming_Language",
+    "Bit.Hub",
+    "SlopBucketStudios",
+    "PixelGameDevShell",
+    "VaultGov",
+    "bit.bit.gov"
+  ],
+  propagate_actions: [
+    ".bit init-repo", ".bit workflow migrate", ".bit enforce", ".bit evolve", ".bit sync",
+    ".bit banter.allow", ".bit telemetry", ".bit dice.roll", ".bit snapshot system"
+  ],
+  compliance: {
+    opa_policy: "core/rego/policy/opa_global.rego",
+    rego_policy: "core/rego/policy/bithub_enforcement.rego",
+    profanity_allow: ".bithub-actions/profanity-allow.yml",
+    ALNFantasia: true, BitVault: true, BitGov: true
+  },
+  triggered_update: {
+    lock: "bar_level",
+    rationale: "No bar may be raised further. ALN-compliance maximum; freezing at current ceiling."
+  }
+}
