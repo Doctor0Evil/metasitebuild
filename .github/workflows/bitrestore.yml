@@ -1,0 +1,178 @@
+name: BitRestore (.bit/.bithub rehydration)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Where to restore from"
+        type: choice
+        required: true
+        options: [ns, s3, ipfs]
+        default: ns
+      restore_manifests:
+        description: "Restore .bit manifests"
+        type: boolean
+        default: true
+      restore_ledgers:
+        description: "Restore .bithub/ledger"
+        type: boolean
+        default: true
+      restore_caches:
+        description: "Prewarm language caches"
+        type: boolean
+        default: true
+      force:
+        description: "Overwrite existing files"
+        type: boolean
+        default: false
+      s3_bucket:
+        description: "S3 bucket (if source=s3)"
+        required: false
+      s3_prefix:
+        description: "S3 prefix/folder (if source=s3)"
+        required: false
+      aws_region:
+        description: "AWS region (if source=s3)"
+        required: false
+      ipfs_gateway:
+        description: "IPFS HTTP gateway (if source=ipfs)"
+        required: false
+        default: "https://ipfs.io"
+      ipfs_cid:
+        description: "IPFS CID (tar.gz payload) if source=ipfs"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bit.Hub Compliance Gate
+        uses: ./.github/actions/bithub-compliance-gate
+
+  restore:
+    needs: compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq yq unzip tar gzip
+          if [[ "${{ inputs.source }}" == "s3" ]]; then
+            sudo apt-get install -y awscli
+          fi
+
+      - name: Begin restore log
+        run: |
+          mkdir -p .bithub/ledger .bithub/restore
+          echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"BITRESTORE_START\",\"source\":\"${{ inputs.source }}\"}" >> .bithub/ledger/restore.log
+
+      - name: Fetch backup payloads (ns: local files)
+        if: ${{ inputs.source == 'ns' }}
+        run: |
+          echo "Using local .bithub/backup and .bithub/cache if available."
+          ls -lah .bithub/backup || true
+          ls -lah .bithub/cache || true
+
+      - name: Fetch backup payloads (s3)
+        if: ${{ inputs.source == 's3' }}
+        env:
+          AWS_REGION: ${{ inputs.aws_region }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          [[ -n "${{ inputs.s3_bucket }}" ]] || { echo "Missing s3_bucket"; exit 1; }
+          PREF="${{ inputs.s3_prefix }}"
+          aws s3 sync "s3://${{ inputs.s3_bucket }}/${PREF}" .bithub/restore --no-progress
+          ls -lah .bithub/restore || true
+
+      - name: Fetch backup payloads (ipfs)
+        if: ${{ inputs.source == 'ipfs' }}
+        run: |
+          [[ -n "${{ inputs.ipfs_cid }}" ]] || { echo "Missing ipfs_cid"; exit 1; }
+          mkdir -p .bithub/restore
+          URL="${{ inputs.ipfs_gateway }}/${{ inputs.ipfs_cid }}"
+          echo "Downloading $URL ..."
+          wget -O .bithub/restore/payload.tar.gz "$URL"
+          ls -lah .bithub/restore
+
+      - name: Restore .bit manifests
+        if: ${{ inputs.restore_manifests }}
+        run: |
+          set -euo pipefail
+          mkdir -p .bit
+          FORCE="${{ inputs.force }}"
+          # Prefer explicit tarballs then payload bundle
+          SRC=""
+          for C in .bithub/backup/bit.tar.gz .bithub/restore/bit.tar.gz .bithub/restore/payload.tar.gz; do
+            [[ -f "$C" ]] && { SRC="$C"; break; }
+          done
+          if [[ -n "$SRC" ]]; then
+            if [[ "$FORCE" == "true" ]]; then
+              tar -xzf "$SRC" -C .
+            else
+              tar -xzf "$SRC" -C . --keep-old-files
+            fi
+            echo "Restored .bit from $SRC"
+          else
+            echo "No .bit backup archive found; skipping."
+          fi
+
+      - name: Restore ledgers
+        if: ${{ inputs.restore_ledgers }}
+        run: |
+          set -euo pipefail
+          mkdir -p .bithub/ledger
+          SRC=""
+          for C in .bithub/backup/ledger.tar.gz .bithub/restore/ledger.tar.gz .bithub/restore/payload.tar.gz; do
+            [[ -f "$C" ]] && { SRC="$C"; break; }
+          done
+          if [[ -n "$SRC" ]]; then
+            tar -xzf "$SRC" -C .
+            echo "Restored ledgers from $SRC"
+          else
+            echo "No ledger archive found; skipping."
+          fi
+
+      - name: Prewarm language caches
+        if: ${{ inputs.restore_caches }}
+        run: |
+          set -euo pipefail
+          # Use local cache tarballs if present, or those fetched into .bithub/restore
+          for SRC in ".bithub/cache/node.tgz" ".bithub/cache/python.tgz" ".bithub/cache/dotnet.tgz" ".bithub/cache/java.tgz" \
+                     ".bithub/restore/node.tgz" ".bithub/restore/python.tgz" ".bithub/restore/dotnet.tgz" ".bithub/restore/java.tgz"; do
+            [[ -f "$SRC" ]] || continue
+            case "$SRC" in
+              *node.tgz)   mkdir -p ~/.npm node_modules && tar -xzf "$SRC" -C . ;;
+              *python.tgz) mkdir -p ~/.cache/pip        && tar -xzf "$SRC" -C . ;;
+              *dotnet.tgz) mkdir -p ~/.nuget/packages   && tar -xzf "$SRC" -C . ;;
+              *java.tgz)   mkdir -p ~/.m2/repository    && tar -xzf "$SRC" -C . ;;
+            esac
+            echo "Prewarmed from $SRC"
+          done
+
+      - name: Validate restore (light checks)
+        run: |
+          test -d .bit && echo "OK: .bit exists"
+          test -d .bithub/ledger && echo "OK: .bithub/ledger exists"
+          ls -lah .bit || true
+          ls -lah .bithub/ledger || true
+
+      - name: End restore log
+        if: always()
+        run: |
+          echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"BITRESTORE_END\",\"status\":\"${{ job.status }}\"}" >> .bithub/ledger/restore.log
+
+      - name: Upload restore log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bitrestore-log-${{ github.run_number }}
+          path: .bithub/ledger/restore.log
+          if-no-files-found: warn
+          retention-days: 7
