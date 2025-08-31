@@ -1,0 +1,42 @@
+name: Bit.Hub Universal Core Enforcement
+version: 1.0.0
+scope: core
+owner: Doctor0Evil/Bit.Hub
+description: Root enforcement profile; sets thresholds, bindings, and global defaults.
+power:
+  default: standard
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+bindings:
+  canonical_repo: https://github.com/Doctor0Evil/Bit.Hub.git
+  report_dir: .bithub/reports
+  policy_dir: .bithub/policy
+  schemas_dir: .bit/schemas
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+    - path: .bithub/policy/container.rego
+      package: bithub.container
+    - path: .bithub/policy/runner.rego
+      package: bithub.runner
+    - path: .bithub/policy/availability.rego
+      package: bithub.availability
+    - path: .bithub/policy/content.rego
+      package: bithub.content
+  parameters:
+    required_labels:
+      - bit.hub
+    default_job_timeout_minutes: 30
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - open_pr_with_fixes
+  self_heal: true
+notes:
+  - This file is imported by orchestrators to determine enforcement behavior across the repo.
