@@ -1,0 +1,143 @@
+  sign-legal-snapshot:
+    runs-on: ubuntu-latest
+    needs: evolve
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare SSH key (fail-open)
+        id: prepkey
+        continue-on-error: true
+        shell: bash
+        env:
+          PRIV: ${{ secrets.BIT_SIGNING_PRIV_SSH }}
+          PUB:  ${{ secrets.BIT_SIGNING_PUB_SSH }}
+        run: |
+          mkdir -p .bit/signing
+          if [ -n "$PRIV" ] && [ -n "$PUB" ]; then
+            echo "$PRIV" > .bit/signing/id_ed25519
+            chmod 600 .bit/signing/id_ed25519
+            echo "$PUB"  > .bit/signing/id_ed25519.pub
+            ssh-keygen -y -f .bit/signing/id_ed25519 >/dev/null 2>&1 || echo "::warning ::Key check skipped."
+          else
+            echo "::warning ::Signing keys not available; will emit unsigned artifact (fail-open)."
+            echo "unsigned=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Canonicalize signing payload
+        shell: bash
+        run: |
+          ts="$(date -u +%FT%TZ)"
+          commit="$(git rev-parse --short=7 HEAD)"
+          repo="${GITHUB_REPOSITORY}"
+
+          # Compute hashes (best-effort)
+          thash="$(test -f TERMS-OF-SERVICE.md && sha256sum TERMS-OF-SERVICE.md | awk '{print $1}' || echo none)"
+          h_gitcomply="$(test -f .gitcomply && sha256sum .gitcomply | awk '{print $1}' || echo none)"
+          h_gitenf="$(test -f .gitenforcement && sha256sum .gitenforcement | awk '{print $1}' || echo none)"
+          h_create="$(test -f config.bit.create && sha256sum config.bit.create | awk '{print $1}' || echo none)"
+
+          # Canonical JSON payload to sign
+          cat > .bit/signing/payload.json <<JSON
+{
+  "version": 1,
+  "subject": "ALN Legal Evolution Cycle",
+  "author": {"canonical":"jacob.scott.farmer","aliases":["Doctor0Evil"]},
+  "binding": {"repo":"$repo","commit":"$commit",
+    "scope":["docs/legal/**",".bit/schemas/**",".bit/templates/legal/**",".bit/policy/**"]},
+  "hashes": {"terms_hash":"sha256:$thash",
+    "policy_hash":{".gitcomply":"sha256:$h_gitcomply",".gitenforcement":"sha256:$h_gitenf","config.bit.create":"sha256:$h_create"}},
+  "signed_at": "$ts",
+  "nonce": "bithub-legal-evolution"
+}
+JSON
+
+      - name: Produce signature (ssh-ed25519) fail-open
+        id: sign
+        continue-on-error: true
+        shell: bash
+        run: |
+          if [ -f .bit/signing/id_ed25519 ]; then
+            # OpenSSH text-signature (RFC style) via ssh-keygen -Y sign
+            printf "%s" "$(cat .bit/signing/payload.json)" > .bit/signing/payload.txt
+            ssh-keygen -Y sign -f .bit/signing/id_ed25519 -n file .bit/signing/payload.txt \
+              1>.bit/signing/sig 2>/dev/null || true
+            # Extract base64 from the signature block for embedding
+            awk '/^-----BEGIN SSH SIGNATURE-----/{flag=1;next}/^-----END SSH SIGNATURE-----/{flag=0}flag' .bit/signing/sig \
+              | tr -d '\n' > .bit/signing/sig.b64 || true
+          else
+            echo "no_sign=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Emit .jacob.scott.farmer.lol.bit
+        shell: bash
+        run: |
+          pub="$(test -f .bit/signing/id_ed25519.pub && cat .bit/signing/id_ed25519.pub || echo 'ssh-ed25519 UNSIGNED')"
+          fp="$(echo -n "$pub" | ssh-keygen -l -f - 2>/dev/null | awk '{print $2}' || echo 'sha256:unknown')"
+          sig="$(test -f .bit/signing/sig.b64 && cat .bit/signing/sig.b64 || echo 'UNSIGNED')"
+          ts="$(jq -r '.signed_at' .bit/signing/payload.json)"
+
+          cat > .jacob.scott.farmer.lol.bit <<YML
+version: 1
+subject: ALN Legal Evolution Cycle
+author:
+  canonical: jacob.scott.farmer
+  aliases: [Doctor0Evil]
+identity:
+  scheme: ssh-ed25519
+  key_id: ${pub}
+  fingerprint: ${fp}
+signature:
+  alg: ssh-ed25519
+  value: ${sig}
+  signed_at: ${ts}
+  nonce: bithub-legal-evolution
+binding:
+  repo: ${GITHUB_REPOSITORY}
+  commit: $(git rev-parse --short=7 HEAD)
+  scope:
+    - docs/legal/**
+    - .bit/schemas/**
+    - .bit/templates/legal/**
+    - .bit/policy/**
+hashes:
+  terms_hash: sha256:$(test -f TERMS-OF-SERVICE.md && sha256sum TERMS-OF-SERVICE.md | awk '{print $1}' || echo none)
+  policy_hash:
+    - .gitcomply: sha256:$(test -f .gitcomply && sha256sum .gitcomply | awk '{print $1}' || echo none)
+    - .gitenforcement: sha256:$(test -f .gitenforcement && sha256sum .gitenforcement | awk '{print $1}' || echo none)
+    - config.bit.create: sha256:$(test -f config.bit.create && sha256sum config.bit.create | awk '{print $1}' || echo none)
+claims:
+  non_interference: true
+  creative_freedom: true
+  non_attribution: true
+  liability_shield: true
+notes:
+  - Signature attests authorship/approval of current legal evolution snapshot under Bit.Hub governance.
+  - Fail-open verification: runs continue even if signature cannot be produced; discrepancies are logged.
+YML
+
+          echo "Created .jacob.scott.farmer.lol.bit"
+
+      - name: Verify signature (best-effort)
+        if: steps.sign.outputs.no_sign != '1'
+        continue-on-error: true
+        shell: bash
+        run: |
+          # Reconstruct signature file and verify
+          if [ -f .bit/signing/sig ] && [ -f .bit/signing/id_ed25519.pub ]; then
+            ssh-keygen -Y verify -f .bit/signing/id_ed25519.pub -I file -n file \
+              -s .bit/signing/sig -m .bit/signing/payload.txt || echo "::warning ::Signature verification failed (fail-open)."
+          else
+            echo "::notice ::Skipping verify (unsigned or missing pubkey)."
+          fi
+
+      - name: Commit signature (fail-open)
+        continue-on-error: true
+        shell: bash
+        run: |
+          git config user.name "BitHub-Bot"
+          git config user.email "bot@bithub.local"
+          git add .jacob.scott.farmer.lol.bit
+          git diff --cached --quiet || git commit -m "Sign legal evolution snapshot (.jacob.scott.farmer.lol.bit)"
+          git push || echo "::warning ::Push blocked; continuing."
