@@ -1,4 +1,7 @@
+# Path: .github/workflows/bit-hub-compliance-audit.yml
+
 name: Bit.Hub Universal Compliance Audit
+
 on:
   push:
     branches:
@@ -19,27 +22,39 @@ jobs:
       contents: read
       security-events: write
     env:
-      BITHUBREPOURL: https://github.com/Doctor0Evil/Bit.Hub.git
+      BITHUBREPOURL: "https://github.com/Doctor0Evil/Bit.Hub.git"
       POLICYDIR: .bithubpolicy
       REPORTDIR: .bithubreports
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Ensure audit/report directories exist
+        run: |
+          mkdir -p "$POLICYDIR" "$REPORTDIR"
+
       - name: Sync Bit.Hub Policy Modules
         run: |
           if git ls-remote "$BITHUBREPOURL" > /dev/null; then
             git clone --depth=1 "$BITHUBREPOURL" tmpbithub
             rsync -av --ignore-existing tmpbithub/.bithubpolicy* "$POLICYDIR/"
+            rm -rf tmpbithub
           else
             echo "Warning: Canonical Bit.Hub repo unreachable, using local policy"
           fi
 
+      - name: Install OPA
+        run: |
+          curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+
       - name: Audit Workflows + Code
         run: |
-          curl -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-          chmod +x opa
-          ./opa eval --format pretty --data "$POLICYDIR" --input echo data || echo "OPA not installed/skipped"
+          if [ -x ./opa ]; then
+            ./opa eval --format pretty --data "$POLICYDIR" --input <(echo data) || echo "OPA policy eval failed"
+          else
+            echo "OPA not installed/skipped"
+          fi
 
       - name: Record Audit Log
         run: |
@@ -50,4 +65,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bit-hub-compliance-audit
-          path: $REPORTDIR
+          path: .bithubreports
