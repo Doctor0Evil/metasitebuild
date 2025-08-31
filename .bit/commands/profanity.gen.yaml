@@ -1,0 +1,14 @@
+# .bit/commands/profanity.gen.yaml
+name: profanity-generator
+description: Generate banter per policy/persona/context
+inputs:
+  context:
+    required: true
+    enum: [production-explicit, staging, ci, local-dev]
+  n:
+    required: false
+    default: "20"
+handlers:
+  - run: tools/handlers/profanity_runtime.sh "${{ inputs.context }}" "${{ inputs.n }}"
+    env:
+      BIT_POLICY_FILE: .bit/policy/banter.policy.json
