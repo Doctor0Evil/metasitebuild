@@ -1,0 +1,28 @@
+Annotations
+1 error
+Debug/Analyze Failure Logs
+failed 2 hours ago in 4s
+Search logs
+1s
+1s
+0s
+Run aln-analyze --input /github/logs --output /tmp/failure.lst --profane-allow 'fuck,shit,bitch,asshole,cunt'
+  aln-analyze --input /github/logs --output /tmp/failure.lst --profane-allow 'fuck,shit,bitch,asshole,cunt'
+  shell: /usr/bin/bash -e {0}
+/home/runner/work/_temp/9a1c53db-4d54-4eb8-8973-a2a7f4b24ad9.sh: line 1: aln-analyze: command not found
+Error: Process completed with exit code 127.
+0s
+0s
+0s
+Post job cleanup.
+/usr/bin/git version
+git version 2.51.0
+Temporarily overriding HOME='/home/runner/work/_temp/1235204f-5a67-4f8b-ab36-da193ae307db' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+/usr/bin/git config --global --add safe.directory /home/runner/work/Bit.Hub/Bit.Hub
+/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
