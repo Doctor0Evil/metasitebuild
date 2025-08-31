@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "notes": [
+    "Profane-but-compliant terms allowed in fictional/adult-humor contexts when properly tagged."
+  ],
+  "policy": {
+    "require_metadata_tags": ["fictional", "age-gated:18+"],
+    "allowed_contexts": ["narrative", "npc_dialogue", "debug_performance"]
+  },
+  "examples": [
+    { "term": "example_profane_term", "context": "npc_dialogue", "must_tag": true }
+  ]
+}
