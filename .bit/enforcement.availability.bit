@@ -1,0 +1,31 @@
+name: Bit.Hub Availability & Continuity Enforcement
+version: 1.0.0
+scope: availability
+owner: Doctor0Evil/Bit.Hub
+description: Ensures mirrors, orchestrators, and registries are configured; prevents single points of failure.
+power:
+  default: standard
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+inputs:
+  include:
+    - ".bit/continuity.json"
+policies:
+  modules:
+    - path: .bithub/policy/availability.rego
+      package: bithub.availability
+  parameters:
+    min_mirrors: 2
+    min_registries: 2
+    max_concurrent_ci_default: 6
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+  self_heal: false
+notes:
+  - Used by the Failover Sentinel and Queue Governor to route around congestion/outages.
