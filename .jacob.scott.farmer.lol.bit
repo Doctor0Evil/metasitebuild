@@ -1,0 +1,37 @@
+version: 1
+subject: ALN Legal Evolution Cycle
+author:
+  canonical: jacob.scott.farmer
+  aliases: [Doctor0Evil]
+identity:
+  scheme: ssh-ed25519
+  key_id: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXAMPLEPUBLICKEYOFJACOBSCOTTFARMER
+  fingerprint: sha256:EXAMPLEFINGERPRINTHERE
+signature:
+  alg: ssh-ed25519
+  value: >-
+    BASE64_SIGNATURE_PLACEHOLDER
+  signed_at: 2025-08-31T00:00:00Z
+  nonce: bithub-legal-evolution
+binding:
+  repo: Doctor0Evil/Bit.Hub
+  commit: f734d13
+  scope:
+    - docs/legal/**
+    - .bit/schemas/**
+    - .bit/templates/legal/**
+    - .bit/policy/**
+hashes:
+  terms_hash: sha256:TERMSFILEHASH
+  policy_hash:
+    - .gitcomply: sha256:GITCOMPLYHASH
+    - .gitenforcement: sha256:GITENFORCEHASH
+    - config.bit.create: sha256:CONFIGCREATEHASH
+claims:
+  non_interference: true
+  creative_freedom: true
+  non_attribution: true
+  liability_shield: true
+notes:
+  - Signature attests authorship/approval of current legal evolution snapshot under Bit.Hub governance.
+  - Fail-open verification: runs continue even if signature cannot be produced; discrepancies are logged.
