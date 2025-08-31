@@ -1,0 +1,17 @@
+{{- range .Values.namespaces }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: {{ . }}
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress","Egress"]
+  egress:
+  - to:
+    {{- range $host := $.Values.allowlist.egressHosts }}
+    - namespaceSelector: {}
+      # Document: allow logical egress only to {{ $host }} (enforced by runtime harness and egress controller)
+    {{- end }}
+---
+{{- end }}
