@@ -1,0 +1,13 @@
+package bithub.mesh
+
+default allow = false
+
+allow {
+  input.msg.type == "JOBOFFER"
+  input.peer.nli == "YOUR-UNIQUE-NLI-ID"
+  input.msg.payload.allowed == true
+}
+deny[msg] {
+  not allow
+  msg := "Denied: Only Bit.Hub NLI authorized actors may operate."
+}
