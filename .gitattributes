@@ -1,0 +1,76 @@
+version: 1.0.0
+name: Bit.Hub Universal Git Enforcement
+description: >
+  Baseline enforcement rules for all GitHub runners executing in this repository.
+  Ensures artifact handling, caching, and compliance are consistent and non-blocking.
+
+power:
+  default: standard
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+
+runner:
+  required_labels:
+    - bit.hub
+  forbidden_labels:
+    - untrusted
+  min_os: ubuntu-20.04
+  adaptive_runs_on:
+    - self-hosted
+    - bit.hub
+    - linux
+
+artifact_policy:
+  # How runners handle artifacts to avoid stalls
+  upload:
+    retry_attempts: 3
+    retry_delay_seconds: 10
+    fail_on_error: false
+  download:
+    retry_attempts: 3
+    retry_delay_seconds: 10
+    fail_on_error: false
+  retention_days_default: 7
+  cleanup_on_start: true   # Clear stale artifacts before job start
+  skip_if_missing: true    # Never stall if artifact not found
+
+cache_policy:
+  restore_keys_fallback: true
+  fail_on_cache_miss: false
+  cleanup_on_start: true
+
+workflow_defaults:
+  permissions:
+    contents: read
+  concurrency:
+    group: wf-${{ github.ref }}
+    cancel-in-progress: false
+  timeout-minutes: 30
+  checkout_version: actions/checkout@v4
+
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+    - path: .bithub/policy/container.rego
+      package: bithub.container
+    - path: .bithub/policy/runner.rego
+      package: bithub.runner
+    - path: .bithub/policy/artifact.rego
+      package: bithub.artifact
+
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - block_merge
+  self_heal: true
+
+notes:
+  - This file is read by SmartRunner/Laughter.exe at job start.
+  - Artifact and cache stalls are auto‑resolved according to artifact_policy/cache_policy.
+  - In strict/paranoid, denials from linked policies can block merges or deploys.
