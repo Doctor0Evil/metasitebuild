@@ -1,0 +1,8 @@
+# Pins the expected hashes and enforcement mode
+script_sha256=REPLACE_WITH_SHA256_OF_tools/ethics-guard.sh
+spec_sha256=REPLACE_WITH_SHA256_OF_.bit/environment.ethics.yml
+enforcement=strict
+allow_fail_open=0
+
+sha256sum tools/ethics-guard.sh | awk '{print $1}'
+sha256sum .bit/environment.ethics.yml | awk '{print $1}'
