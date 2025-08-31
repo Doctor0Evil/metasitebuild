@@ -1,0 +1,11 @@
+// .bit/policy/banter.policy.json
+{
+  "flag": "max.allowed.banter",
+  "default_mode": "masked",
+  "contexts": {
+    "production-explicit": "explicit",
+    "staging": "masked",
+    "ci": "masked",
+    "local-dev": "mild"
+  }
+}
