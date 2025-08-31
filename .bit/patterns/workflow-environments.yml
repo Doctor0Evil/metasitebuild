@@ -1,0 +1,72 @@
+version: 1
+environments:
+  build:
+    match:
+      - name: "build"
+      - file: "build"
+      - uses: "actions/setup-(node|python|go)@"
+    require:
+      permissions:
+        contents: read
+      concurrency:
+        group: "wf-${{ github.ref }}"
+        cancel-in-progress: false
+      timeout-minutes: 30
+      runs-on:
+        - self-hosted
+        - bit.hub
+        - linux
+  test:
+    match:
+      - name: "test"
+      - file: "test"
+      - run: "(pytest|npm test|go test)"
+    require:
+      permissions:
+        contents: read
+      timeout-minutes: 30
+      runs-on:
+        - self-hosted
+        - bit.hub
+        - linux
+  container:
+    match:
+      - file: "Dockerfile"
+      - uses: "docker/build-push-action@"
+    require:
+      permissions:
+        contents: read
+        packages: write
+      labels:
+        - org.opencontainers.image.source
+        - org.opencontainers.image.description
+        - org.opencontainers.image.licenses
+  release:
+    match:
+      - uses: "softprops/action-gh-release@"
+      - file: "lmfao.bit"
+    require:
+      permissions:
+        contents: write
+      timeout-minutes: 15
+  docs:
+    match:
+      - file: "docs/|README|jekyll|gh-pages
+    require:
+      permissions:
+        contents: read
+      timeout-minutes: 15
+rules:
+  global:
+    forbid_actions:
+      - "actions/checkout@v1"
+      - "actions/checkout@v2"
+    warn_floating_tags: true
+    enforce_timeout_minutes: 30
+    enforce_concurrency: true
+    adaptive_runs_on:
+      - self-hosted
+      - bit.hub
+      - linux
+lexicon:
+  humor_hot_words: "\\b(lol|omfg|wtf|lmao|lmfao|meltdown|chaos)\\b"
