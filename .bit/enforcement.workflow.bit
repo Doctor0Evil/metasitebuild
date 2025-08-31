@@ -1,0 +1,41 @@
+name: Bit.Hub Workflow Enforcement
+version: 2.0.0
+scope: workflow
+owner: Doctor0Evil/Bit.Hub
+description: Normalizes workflows and enforces least privilege, pinning, timeouts, and adaptive runners.
+power:
+  default: strict
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+inputs:
+  include:
+    - ".github/workflows/*.yml"
+    - ".github/workflows/*.yaml"
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+  parameters:
+    minimal_permissions:
+      contents: read
+    require_timeout_minutes: 30
+    adaptive_runs_on:
+      - self-hosted
+      - bit.hub
+      - linux
+    forbid_actions:
+      - actions/checkout@v1
+      - actions/checkout@v2
+    warn_floating_tags: true
+actions:
+  on_warning:
+    - annotate
+    - open_pr_with_fixes
+  on_denial:
+    - write_report
+    - open_pr_with_fixes
+  self_heal: true
+notes:
+  - Injects permissions, concurrency, timeouts, and upgrades actions/checkout to v4 via auto-fixers.
