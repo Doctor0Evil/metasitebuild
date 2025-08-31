@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: central-data-bank
+  namespace: bithub-system
+data:
+  hr_core.json: |
+{{ .Values.centralDataBank.hrCore | indent 4 }}
+  personality_matrix.json: |
+{{ .Values.centralDataBank.personalityMatrix | indent 4 }}
+  thresholds.json: |
+{{ .Values.centralDataBank.thresholds | indent 4 }}
