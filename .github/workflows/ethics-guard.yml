@@ -2,6 +2,8 @@ name: Ethics Guard Compliance
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -10,44 +12,50 @@ jobs:
     permissions:
       contents: read
       actions: read
-      id-token: write   # for OIDC to Bit.Hub if needed
+      id-token: write
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Go environment
-        uses: actions/setup-go@v5.5.0
+      - name: First interaction
+        uses: actions/first-interaction@v1.3.0
         with:
-          # The Go version to download. Set a specific version, e.g. '1.22.x'
-          go-version: '1.22.x'
-          check-latest: true
-          cache: true
+          # Token for the repository (GitHub sets this automatically)
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: Provide custom messages for issues and PRs
+          # issue-message: "Welcome and thank you for your first issue!"
+          # pr-message: "Thank you for your first PR!"
 
-      - name: Validate Environment Compliance (ALN Mode)
+      - name: Verify lock integrity matches working files
         run: |
-          python bithub/scripts/check_env_compliance.py \
-            --spec .bit/environment.ethics.yml \
-            --aln-mode strict \
-            --export .bit/ethics_report.aln
+          set -euo pipefail
+          WANT_SCRIPT=$(awk -F= '/^script_sha256=/{print $2}' .bit/ethics-guard.lock)
+          WANT_SPEC=$(awk -F= '/^spec_sha256=/{print $2}' .bit/ethics-guard.lock)
+          GOT_SCRIPT=$(sha256sum tools/ethics-guard.sh | awk '{print $1}')
+          GOT_SPEC=$(sha256sum .bit/environment.ethics.yml | awk '{print $1}')
+          echo "script want=$WANT_SCRIPT got=$GOT_SCRIPT"
+          echo "spec   want=$WANT_SPEC  got=$GOT_SPEC"
+          [[ "$WANT_SCRIPT" == "$GOT_SCRIPT" ]] || { echo "Script hash mismatch"; exit 2; }
+          [[ "$WANT_SPEC" == "$GOT_SPEC" ]] || { echo "Spec hash mismatch"; exit 2; }
 
-      - name: Output Compliance Report (JSON + ALN)
+      - name: Run Ethics Guard (ALN Strict)
+        env:
+          BIT_HUB_NODE_ID: ${{ runner.name }}
+          ALN_COMPLIANCE_MODE: "1"
+          ALN_FAILSAFE: "0"
+          # Optional: Export BIT_HUB_SIGNING_KEY in secrets/mount for signing artifacts
+          # BIT_HUB_SIGNING_KEY: /secure/keys/bithub-ci.pem
         run: |
-          python bithub/scripts/export_compliance_report.py \
-            --output compliance_report.json
-          cp .bit/ethics_report.aln compliance_report.aln
+          ./tools/ethics-guard.sh .bit/environment.ethics.yml strict compliance_report.json compliance_report.aln
 
-      - name: Upload Reports for Audit
+      - name: Upload compliance artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: compliance-reports
+          name: ethics-compliance-${{ github.run_id }}
           path: |
             compliance_report.json
+            compliance_report.json.sha3
             compliance_report.aln
-
-      - name: Notify on Compliance Breach
-        if: failure()
-        run: |
-          python bithub/scripts/notify_security.py \
-            --incident "${{ github.workflow }}" \
-            --node-id "${{ runner.name }}" \
-            --aln-report compliance_report.aln
+            artifacts/
