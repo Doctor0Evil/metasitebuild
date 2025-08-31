@@ -1,0 +1,49 @@
+name: Bit.Hub Content Enforcement
+version: 1.0.0
+scope: content
+owner: Doctor0Evil/Bit.Hub
+description: Defines acceptable vs profane-but-compliant content boundaries with safety tagging.
+power:
+  default: standard
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+inputs:
+  include:
+    - "**/*.lisp"
+    - "**/*.md"
+    - "scripts/**"
+    - "scenes/**"
+    - "scenarios/**"
+  exclude:
+    - ".git/**"
+policies:
+  modules:
+    - path: .bithub/policy/content.rego
+      package: bithub.content
+  parameters:
+    tags:
+      profane_but_compliant:
+        require_metadata:
+          - fictional
+          - age-gated:18+
+        recommend_metadata:
+          - content_rating:adult-humor
+    allow_contexts:
+      - narrative
+      - npc_dialogue
+      - debug_performance
+    prohibited_glossary_ref: .bit/glossary.prohibited.json
+    profane_glossary_ref: .bit/glossary.profane.json
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - quarantine_artifact
+  self_heal: false
+notes:
+  - Profane-but-compliant terms must be tagged as fictional and age-gated.
+  - Prohibited terms are managed in a private glossary list (not committed publicly).
