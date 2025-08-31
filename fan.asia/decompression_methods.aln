@@ -1,0 +1,39 @@
+(deflib fan.asia.decompression
+  (export decompress-gz)
+  (export decompress-zip)
+  (export decompress-bz2)
+  (export decompress-lzma)
+  (export decompress-tgz)
+  (export audit-decompression)
+)
+
+(defn decompress-gz (input-path output-path)
+  (os.exec ["gzip" "-d" input-path "-c"] (out: output-path))
+  (audit-decompression input-path output-path "gz")
+)
+
+(defn decompress-zip (input-path output-dir)
+  (os.exec ["unzip" "-o" input-path "-d" output-dir])
+  (audit-decompression input-path output-dir "zip")
+)
+
+(defn decompress-bz2 (input-path output-path)
+  (os.exec ["bzip2" "-d" input-path "-c"] (out: output-path))
+  (audit-decompression input-path output-path "bz2")
+)
+
+(defn decompress-lzma (input-path output-path)
+  (os.exec ["lzma" "-d" input-path "-c"] (out: output-path))
+  (audit-decompression input-path output-path "lzma")
+)
+
+(defn decompress-tgz (input-path output-dir)
+  (os.exec ["tar" "-xzvf" input-path "-C" output-dir])
+  (audit-decompression input-path output-dir "tgz")
+)
+
+(defn audit-decompression (src dst method)
+  (log (format "decompress: %s → %s via %s @%s"
+    src dst method (now)))
+  ;; emits to runtime/ledger for Bit.Hub .bithub/ledger/runner.log
+)
