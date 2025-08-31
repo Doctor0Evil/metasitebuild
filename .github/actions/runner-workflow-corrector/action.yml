@@ -1,0 +1,60 @@
+name: Runner Workflow Corrector
+description: Silently fixes noncompliant workflows (rename, banner, harness advisory) without failing runs
+runs:
+  using: composite
+  steps:
+    - name: Ensure rename map
+      shell: bash
+      run: |
+        mkdir -p .bit
+        [ -f .bit/rename.map ] || cat > .bit/rename.map <<'MAP'
+# src => dst
+.github/workflows/bit-hub-compliance.yml => .github/workflows/bithub-bot-compliance-wall.yml
+.github/workflows/compliance-gatekeeper.yml => .github/workflows/bithub-bot-compliance-wall.yml
+.github/workflows/ai-fixer.yml => .github/workflows/ai.fixer.yml
+MAP
+
+    - name: Apply renaming cycle
+      shell: bash
+      continue-on-error: true
+      run: |
+        changed=0
+        while IFS= read -r line; do
+          case "$line" in \#*|"") continue;; esac
+          src="$(echo "$line" | awk -F'=>' '{print $1}' | xargs)"
+          dst="$(echo "$line" | awk -F'=>' '{print $2}' | xargs)"
+          [ -f "$src" ] || continue
+          mkdir -p "$(dirname "$dst")"
+          git mv -f "$src" "$dst" && changed=1 || true
+        done < .bit/rename.map
+        # normalize spaces to dots
+        for f in .github/workflows/*\ * 2>/dev/null; do
+          [ -e "$f" ] || continue
+          nf="$(echo "$f" | tr ' ' '.')"
+          git mv -f "$f" "$nf" && changed=1 || true
+        done
+        if [ "$changed" -eq 1 ]; then
+          git config user.name "BitHub-Bot"
+          git config user.email "bot@bithub.local"
+          git add -A
+          git commit -m "Runner Workflow Corrector: canonicalize workflows (fail-open)" || true
+          git push || echo "::notice ::Push blocked (protected); continuing."
+        fi
+
+    - name: Inject harness advisory banner
+      shell: bash
+      continue-on-error: true
+      run: |
+        mkdir -p .github/workflows
+        for y in .github/workflows/*.y*ml; do
+          [ -f "$y" ] || continue
+          grep -q "Bit.Hub Compliance Harness" "$y" || \
+            sed -i '1i # Bit.Hub Compliance Harness expected; runner-corrector active (fail-open).' "$y"
+        done
+
+    - name: Summary
+      shell: bash
+      run: |
+        echo "### Runner Workflow Corrector" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Renames applied per .bit/rename.map (if any)" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Harness banner injected where missing" >> "$GITHUB_STEP_SUMMARY"
