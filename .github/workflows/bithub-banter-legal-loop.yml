@@ -1,0 +1,108 @@
+name: Bit.Hub Banter + Legal Loop
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "meta.bit.bang"
+      - ".bithub/legal/**"
+      - "bithub/scripts/**"
+
+permissions:
+  contents: read
+
+jobs:
+  scan-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - name: Install tools
+        run: |
+          pip install --disable-pip-version-check --quiet pyyaml
+          sudo apt-get update && sudo apt-get install -y jq yq
+
+      - name: Content scan
+        run: |
+          python bithub/scripts/scan_content.py \
+            --policy ".bithub/legal/restricted-profanity.yml" \
+            --sources ".bit-actions" ".github" "bithub" \
+            --out ".bithub/reports/content-scan.json"
+
+      - name: Legal presence report
+        run: |
+          python - << 'PY'
+          import os, json, yaml
+          meta = yaml.safe_load(open("meta.bit.bang"))
+          paths = [d["path"] for d in meta["legalDocs"]["documents"]] + meta["legalDocs"]["attestations"]["files"]
+          out = {"exists": {p: os.path.exists(p) for p in paths}}
+          os.makedirs(".bithub/reports", exist_ok=True)
+          json.dump(out, open(".bithub/reports/legal-docs.json","w"))
+          PY
+
+      - name: Run Bit.Hub policies
+        run: conftest test --policy .bithub/policies .
+
+      - name: Ledger
+        run: |
+          echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"LEGAL_LOOP\",\"detail\":\"scan+policy\"}" >> .bithub/ledger/compliance.log
+
+      - name: Broadcast
+        if: ${{ success() }}
+        run: echo "Compliance pass — broadcasting via mag bus"
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.5.0
+        with:
+          # Pin to a stable Go release; use semver range if you want auto‑minor updates
+          go-version: '1.22.x'
+
+          # Alternatively, pull version from go.mod for single‑source‑of‑truth
+          go-version-file: './go.mod'
+
+          # Always check for the latest patch in the specified range
+          check-latest: true
+
+          # Use default token unless you’re on GHES and need to avoid rate limits
+          token: ${{ github.token }}
+
+          # Enable caching of module downloads
+          cache: true
+
+          # Explicitly point to go.sum for cache key generation
+          cache-dependency-path: '**/go.sum'
+
+          # Force architecture if cross‑compiling; otherwise omit
+          architecture: x64
+
+      - name: Verify Go installation
+        run: |
+          go version
+          go env
+
+      - name: Download Go module dependencies
+        run: go mod download
+
+      - name: Run Go vet (static analysis)
+        run: go vet ./...
+
+      - name: Run Go tests with race detector
+        run: go test -race -v ./...
+
+      - name: Build Go binaries
+        run: go build -o bin/app ./...
+
+      - name: Upload Go build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-binaries
+          path: bin/
+          retention-days: 7
+          lol
+          
