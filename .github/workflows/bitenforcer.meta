@@ -1,0 +1,18 @@
+jobs:
+  preflight-hyperparams:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate hyper.parameters.json
+        run: |
+          META=".meta/hyper.parameters.json"
+          if [ ! -f "$META" ]; then
+            echo "::warning::No hyper.parameters.json found; scaffolding."
+            mkdir -p .meta
+            cat > "$META" <<'JSON'
+          { "version": "1.0", "scope": "Bit.Hub", "appliesTo": [] }
+JSON
+          fi
+          jq empty "$META" || { echo "::error::Invalid JSON in $META"; exit 1; }
+      - name: Show current hyper‑parameters
+        run: jq . .meta/hyper.parameters.json
