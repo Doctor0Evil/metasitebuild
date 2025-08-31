@@ -1,0 +1,52 @@
+name: Bit.Hub Environment Recognizer
+description: Detects workflow-environment patterns and outputs fixes; never fails.
+inputs:
+  patterns_file:
+    default: ".bit/patterns/workflow-environments.yml"
+outputs:
+  report_path:
+    value: ${{ steps.scan.outputs.report }}
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      id: scan
+      run: |
+        set -euo pipefail
+        PF="${{ inputs.patterns_file }}"
+        REPORT=".bithub/reports/environment-scan.ndjson"
+        mkdir -p .bithub/reports
+
+        has() { grep -Eiq "$1" <<<"$2"; }
+
+        scan_file() {
+          local f="$1"
+          local wf_json
+          wf_json="$(yq -o=json '.' "$f")"
+          local uses
+          uses="$(yq '.. | select(tag == "!!str") | select(test("@"))' "$f" | tr '\n' ' ' || true)"
+
+          # Infer environment
+          env="unknown"
+          name="$(yq -r '.name // ""' "$f" || true)"
+          body="$(cat "$f")"
+          if has 'build' "$name$body"; then env="build"; fi
+          if has 'test' "$name$body"; then env="test"; fi
+          if has 'docker|Dockerfile|build-push-action@' "$body"; then env="container"; fi
+          if has 'gh-release|softprops/action-gh-release@|lmfao.bit' "$body"; then env="release"; fi
+          if has 'jekyll|gh-pages|docs|README' "$body"; then env="docs"; fi
+
+          jq -nc \
+            --arg path "$f" \
+            --arg env "$env" \
+            --arg uses "$uses" \
+            --argjson wf "$wf_json" \
+            '{path:$path, env:$env, uses:($uses|split(" ")|map(select(length>0))), workflow:$wf}' \
+            >> "$REPORT"
+        }
+
+        mapfile -t files < <(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort || true)
+        for f in "${files[@]}"; do scan_file "$f"; done
+
+        echo "report=$REPORT" >> "$GITHUB_OUTPUT"
+        echo "::notice title=Bit.Hub::Environment scan report at $REPORT"
