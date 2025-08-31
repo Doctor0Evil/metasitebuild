@@ -1,0 +1,56 @@
+{{- if eq .Values.mode.webhook "enabled" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: bithub-policy-webhook
+  namespace: bithub-system
+spec:
+  selector: { app: bithub-policy-webhook }
+  ports:
+    - port: 443
+      targetPort: 8443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bithub-policy-webhook
+  namespace: bithub-system
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: bithub-policy-webhook } }
+  template:
+    metadata: { labels: { app: bithub-policy-webhook } }
+    spec:
+      containers:
+        - name: webhook
+          image: {{ .Values.image.policyHarness }}
+          args: ["--serve-webhook"]
+          ports: [{ containerPort: 8443 }]
+          env:
+            - name: CDB_CONFIGMAP
+              value: central-data-bank
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: bithub-policy-injector
+webhooks:
+  - name: injector.bithub.local
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: bithub-policy-webhook
+        namespace: bithub-system
+        path: /mutate
+      caBundle: ""  # inject via helm post-render or cert-manager
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+    namespaceSelector: {}
+{{- end }}
