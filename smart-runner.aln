@@ -1,0 +1,22 @@
+Bit.HubALN SmartPipeline Runner for Cross-Repo, GitHub-Compatible, Self-Healing Operation
+let SMARTMODE envSMARTMODE, paranoid
+let BITHUBREPO envBITHUBREPOURL, https://github.com/Doctor0Evil/Bit.Hub.git
+let SUMMARYPATH envGITHUBSTEPSUMMARY, .bithubreports/smartsummary.md
+
+task init
+  log.notice Smart-Runner Bit.Hub NLI/NLOnly mode enabled, SMARTMODE $SMARTMODE
+  fs.mkdir .bithubreports
+  fs.mkdir .bithubcollect
+  fs.mkdir .bitbot
+  install.tools # install yq, jq, opa
+  sync.canonical # always pull .bithubpolicy from BITHUBREPO
+  enforce.gitignore
+  normalize.workflows
+  artifact.cache.cleanup
+  policy.eval
+  index.guard
+  dotnet.build
+  commit.and.pr
+  summary
+
+flow init - install.tools - sync.canonical - enforce.gitignore - normalize.workflows - artifact.cache.cleanup - policy.eval - index.guard - dotnet.build - commit.and.pr - summary run flow
