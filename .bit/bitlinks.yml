@@ -1,0 +1,11 @@
+version: 1
+links:
+  oracle.context:
+    target: docs/lore/oracle.md
+    description: Oracle knowledge base
+  rules.compliance:
+    target: .gitenforcement
+    description: Enforcement manifest
+  humor.core:
+    target: .bit/Central_Data_Bank/hr_core.json
+    description: Humor-Reasoning core
