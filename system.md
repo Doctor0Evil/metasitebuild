@@ -1,12 +1,18 @@
-Got it — you want a set of `.yml` GitHub Actions workflows that “back” the recovery/upgrade logic you’ve sketched in ALN/Lisp‑style pseudocode, so BitBot can:
+# /etc/systemd/system/ethics-guard.service
+[Unit]
+Description=Bit.Hub Ethics Guard
+After=network-online.target
 
-- Detect failed jobs and replace their runners with upgraded BitBot agents.
-- Retry with preserved inputs and mark legacy jobs as superseded.
-- Pick up pending/hanging workflows and run them on BitBot.
-- Trigger a site build if production is stale.
-- Keep the learning loop alive by feeding results back into the ML patterns store.
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/runner-repo
+ExecStart=/srv/runner-repo/tools/ethics-guard.sh .bit/environment.ethics.yml
+User=runner
+Group=runner
 
-Here’s a **modular suite** of YAML workflows that map directly to those steps.
+[Install]
+WantedBy=multi-user.target
+
 
 ---
 
