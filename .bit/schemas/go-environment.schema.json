@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bithub.dev/schemas/go-environment.schema.json",
+  "title": "Bit.Hub Go Environment Schema",
+  "description": "Schema defining required configuration for Go environment in Bit.Hub pipelines.",
+  "type": "object",
+  "required": ["go_version", "modules", "compliance", "pipeline"],
+  "properties": {
+    "go_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "Semantic version of Go SDK, e.g., 1.20 or 1.20.3"
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "version"],
+        "properties": {
+          "name": { "type": "string" },
+          "version": { "type": "string" }
+        }
+      },
+      "description": "List of Go modules with specific versions."
+    },
+    "compliance": {
+      "type": "object",
+      "required": ["policy_version", "enforce_strict", "allowed_labels"],
+      "properties": {
+        "policy_version": { "type": "string" },
+        "enforce_strict": { "type": "boolean" },
+        "allowed_labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Runner labels allowed to execute this pipeline."
+        }
+      }
+    },
+    "pipeline": {
+      "type": "object",
+      "required": ["steps", "timeout_minutes", "cache"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ordered list of shell or script commands to execute."
+        },
+        "timeout_minutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 180,
+          "description": "Timeout for the pipeline in minutes."
+        },
+        "cache": {
+          "type": "object",
+          "properties": {
+            "paths": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Filesystem paths to cache."
+            },
+            "key": {
+              "type": "string",
+              "description": "Cache key for restoring/saving."
+            },
+            "restore_keys": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Fallback keys for cache restore."
+            }
+          },
+          "required": ["paths", "key"]
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
