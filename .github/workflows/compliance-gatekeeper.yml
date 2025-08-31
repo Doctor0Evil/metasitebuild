@@ -1,0 +1,97 @@
+name: Bit.Hub Compliance Gatekeeper
+
+on:
+  workflow_call:
+    inputs:
+      bit_hub_repo_url:
+        required: false
+        type: string
+        default: https://github.com/Doctor0Evil/Bit.Hub.git
+
+jobs:
+  compliance-gate:
+    runs-on: ubuntu-latest
+    env:
+      BIT_HUB_REPO_URL: ${{ inputs.bit_hub_repo_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python & Node
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v3.9.1
+        with:
+          node-version: 18.x
+
+      - name: Install OPA & yq
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq curl git
+          curl -fsSL -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+          curl -fsSL -o /usr/local/bin/opa https://openpolicyagent.org/downloads/v0.64.1/opa_linux_amd64_static
+          chmod +x /usr/local/bin/opa
+
+      - name: Bootstrap compliance files from Bit.Hub
+        run: |
+          mkdir -p .bithub/ledger
+          TMP=$(mktemp -d)
+          git clone --depth=1 "$BIT_HUB_REPO_URL" "$TMP"
+
+          for item in .gitcomply .bit.git.deploy .bithub/policies; do
+            SRC="$TMP/$item"
+            DEST="$item"
+            if [ -e "$SRC" ]; then
+              if [ ! -e "$DEST" ]; then
+                echo "⚠️ $item missing — pulling from Bit.Hub..."
+                cp -r "$SRC" "$DEST"
+                echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"BOOTSTRAP\",\"detail\":\"$item pulled (missing)\"}" >> .bithub/ledger/compliance.log
+              else
+                SRC_HASH=$(tar -cf - "$SRC" | sha256sum | cut -d' ' -f1)
+                DEST_HASH=$(tar -cf - "$DEST" | sha256sum | cut -d' ' -f1)
+                if [ "$SRC_HASH" != "$DEST_HASH" ]; then
+                  echo "♻️ $item outdated — refreshing from Bit.Hub..."
+                  rm -rf "$DEST"
+                  cp -r "$SRC" "$DEST"
+                  echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"BOOTSTRAP\",\"detail\":\"$item refreshed (hash mismatch)\"}" >> .bithub/ledger/compliance.log
+                else
+                  echo "✅ $item is up-to-date."
+                fi
+              fi
+            else
+              echo "::error::$item not found in Bit.Hub repo."
+              exit 1
+            fi
+          done
+
+      - name: Run Bit.Hub policy checks
+        run: |
+          opa eval --fail-defined -d .bithub/policies 'data'
+        continue-on-error: false
+
+      - name: Log compliance pass
+        run: |
+          echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"COMPLIANCE_PASS\",\"detail\":\"All checks passed\"}" >> .bithub/ledger/compliance.log
+
+                      - name: Setup .NET Core SDK
+  uses: actions/setup-dotnet@v3.4.2
+  with:
+    # Optional SDK version(s) to use. If not provided, will install global.json version when available. Examples: 2.2.104, 3.1, 3.1.x, 3.x, 6.0.2xx
+    dotnet-version: # optional
+    # Optional quality of the build. The possible values are: daily, signed, validated, preview, ga.
+    dotnet-quality: # optional
+    # Optional global.json location, if your global.json isn't located in the root of the repo.
+    global-json-file: # optional
+    # Optional package source for which to set up authentication. Will consult any existing NuGet.config in the root of the repo and provide a temporary NuGet.config using the NUGET_AUTH_TOKEN environment variable as a ClearTextPassword
+    source-url: # optional
+    # Optional OWNER for using packages from GitHub Package Registry organizations/users other than the current repository's owner. Only used if a GPR URL is also provided in source-url
+    owner: # optional
+    # Optional NuGet.config location, if your NuGet.config isn't located in the root of the repo.
+    config-file: # optional
+    # Optional input to enable caching of the NuGet global-packages folder
+    cache: # optional
+    # Used to specify the path to a dependency file: packages.lock.json. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+          
