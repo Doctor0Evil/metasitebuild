@@ -1,20 +1,19 @@
-name: BitBot Learning Feedback Loop
+name: BitBot Learning Feedback Loop (Reusable)
 
 on:
-  workflow_run:
-    workflows:
-      - BitBot Recover Failed Workflows
-      - BitBot Queue Pending Workflows
-      - BitBot Site Build Check
-    types:
-      - completed
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      bit_hub_repo_url:
+        required: false
+        type: string
+        default: https://github.com/Doctor0Evil/Bit.Hub.git
 
 jobs:
-  learn_from_runs:
+  bitbot-learning-loop:
     runs-on: ubuntu-latest
     env:
-      BIT_HUB_REPO_URL: https://github.com/Doctor0Evil/Bit.Hub.git
+      BIT_HUB_REPO_URL: ${{ inputs.bit_hub_repo_url }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -23,38 +22,66 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Setup Node.js environment
+      - name: Setup Node.js
         uses: actions/setup-node@v3.9.1
         with:
           node-version: 18.x
           cache: npm
           cache-dependency-path: package-lock.json
 
-      # --- Bootstrap missing scripts from Bit.Hub ---
-      - name: Ensure required scripts
+      # --- Compliance gate: .gitcomply + .bit.git.deploy ---
+      - name: Verify Bit.Hub compliance manifests
+        run: |
+          if [ ! -f ".gitcomply" ]; then
+            echo "::error::.gitcomply missing — cannot proceed."
+            exit 1
+          fi
+          if [ ! -d ".bit.git.deploy" ]; then
+            echo "::error::.bit.git.deploy directory missing — cannot proceed."
+            exit 1
+          fi
+          echo "✅ Compliance manifests present."
+
+      # --- Bootstrap required scripts with hash check ---
+      - name: Ensure required scripts (with hash check)
         run: |
           mkdir -p bithub/scripts
+          TMP=$(mktemp -d)
+          git clone --depth=1 "$BIT_HUB_REPO_URL" "$TMP"
+
           for script in aggregate_run_results.py update_ml_patterns.py; do
-            if [ ! -f "bithub/scripts/$script" ]; then
-              echo "⚠️ $script missing — pulling from Bit.Hub canonical repo..."
-              TMP=$(mktemp -d)
-              git clone --depth=1 "$BIT_HUB_REPO_URL" "$TMP"
-              if [ -f "$TMP/bithub/scripts/$script" ]; then
-                cp "$TMP/bithub/scripts/$script" "bithub/scripts/$script"
-                echo "✅ Pulled $script from Bit.Hub"
-              else
-                echo "::error::$script not found in Bit.Hub repo — skipping."
-              fi
+            CANONICAL="$TMP/bithub/scripts/$script"
+            LOCAL="bithub/scripts/$script"
+
+            if [ ! -f "$CANONICAL" ]; then
+              echo "::error::$script not found in Bit.Hub repo — cannot bootstrap."
+              continue
+            fi
+
+            if [ ! -f "$LOCAL" ]; then
+              echo "⚠️ $script missing — pulling from Bit.Hub..."
+              cp "$CANONICAL" "$LOCAL"
+              echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"BOOTSTRAP\",\"detail\":\"$script pulled (missing)\"}" >> .bithub/ledger/compliance.log
             else
-              echo "✅ Found $script locally."
+              LOCAL_HASH=$(sha256sum "$LOCAL" | cut -d' ' -f1)
+              CANON_HASH=$(sha256sum "$CANONICAL" | cut -d' ' -f1)
+              if [ "$LOCAL_HASH" != "$CANON_HASH" ]; then
+                echo "♻️ $script outdated — refreshing from Bit.Hub..."
+                cp "$CANONICAL" "$LOCAL"
+                echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"BOOTSTRAP\",\"detail\":\"$script refreshed (hash mismatch)\"}" >> .bithub/ledger/compliance.log
+              else
+                echo "✅ $script is up-to-date."
+              fi
             fi
           done
 
+      # --- Aggregate run results ---
       - name: Aggregate Run Results
         if: hashFiles('bithub/scripts/aggregate_run_results.py') != ''
         run: |
           python bithub/scripts/aggregate_run_results.py > run_results.json
 
+      # --- Update ML patterns ---
       - name: Update ML Patterns
         if: hashFiles('bithub/scripts/update_ml_patterns.py') != '' && hashFiles('run_results.json') != ''
         run: |
@@ -62,6 +89,20 @@ jobs:
             --input run_results.json \
             --pattern-store .bithub/ml_patterns.json
 
+      # --- Process ALNFantasia, Lisp, and emerging .bit.created concepts ---
+      - name: Process ALNFantasia & Lisp features
+        run: |
+          if [ -f "bit.bot.workflows.json" ]; then
+            echo "🔍 Parsing bit.bot.workflows.json for emerging concepts..."
+            jq -r '.concepts[]?' bit.bot.workflows.json | while read concept; do
+              echo "Processing concept: $concept"
+              # Hook in ALNFantasia/Lisp/emerging concept handlers here
+            done
+          else
+            echo "ℹ️ No bit.bot.workflows.json found."
+          fi
+
+      # --- Store updated patterns ---
       - name: Store Updated Patterns
         if: hashFiles('.bithub/ml_patterns.json') != ''
         run: |
@@ -71,7 +112,8 @@ jobs:
           git commit -m "Update ML patterns from latest runs" || echo "No changes"
           git push
 
+      # --- Ledger logging ---
       - name: Log to compliance ledger
         run: |
           mkdir -p .bithub/ledger
-          echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"LEARNING_LOOP\",\"detail\":\"Completed with bootstrap-from-Bit.Hub\"}" >> .bithub/ledger/compliance.log
+          echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"LEARNING_LOOP\",\"detail\":\"Completed with Bit.Keep-aligned bootstrap and compliance checks\"}" >> .bithub/ledger/compliance.log
