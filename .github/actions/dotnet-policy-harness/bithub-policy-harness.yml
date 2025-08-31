@@ -28,3 +28,20 @@ runs:
       shell: bash
       continue-on-error: true
       run: dotnet run --project src/BitHub.PolicyHarness -- post
+# snippet inside your workload Pod spec after mutation
+containers:
+  - name: app
+    image: ghcr.io/yourorg/yourapp:latest
+  - name: bithub-policy-harness
+    image: {{ .Values.image.policyHarness }}
+    args: ["--pre", "--post"]
+    env:
+      - name: HR_CORE_JSON
+        valueFrom: { configMapKeyRef: { name: central-data-bank, key: hr_core.json } }
+      - name: PERSONALITY_MATRIX_JSON
+        valueFrom: { configMapKeyRef: { name: central-data-bank, key: personality_matrix.json } }
+      - name: THRESHOLDS_JSON
+        valueFrom: { configMapKeyRef: { name: central-data-bank, key: thresholds.json } }
+    resources:
+      requests: { cpu: "50m", memory: "64Mi" }
+      limits:   { cpu: "200m", memory: "256Mi" }
