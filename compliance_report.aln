@@ -1,0 +1,15 @@
+; compliance_report.aln
+@REPORT {
+  suite: "EthicsGuard",
+  status: "pass",
+  spec: "environment.ethics.yml",
+  timestamp: "2025-08-31T19:57:53Z",
+  host: "runner-ubuntu-24",
+  commit: "abc123def456...",
+  node_id: "github-runner-42",
+  evidence: {
+    json: "compliance_report.json",
+    sha3: "compliance_report.json.sha3",
+    sig:  "compliance_report.json.sig"
+  }
+}
