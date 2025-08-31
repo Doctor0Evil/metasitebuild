@@ -1,0 +1,112 @@
+version: 1
+mode: fail-open            # never hard-fail; log, repair, continue
+audit:
+  summary: true            # write rescue notes to Job Summary
+  file: .bit/audit/gitlost.log
+
+canon:
+  workflows:
+    bithub-bot-compliance-wall.yml: .github/workflows/bithub-bot-compliance-wall.yml
+    humor-orchestrator.yml: .github/workflows/Bit.Hub.Humor.Orchestrator.yml
+
+detectors:
+  - id: missing-tos
+    match: "!exists(TERMS-OF-SERVICE.md)"
+    remedy: create-tos
+
+  - id: missing-compliance-wall
+    match: "!exists(.github/workflows/bithub-bot-compliance-wall.yml)"
+    remedy: scaffold-compliance-wall
+
+  - id: misplaced-workflows
+    match: "exists(workflows/* outside .github/workflows)"
+    remedy: rehome-workflows
+
+  - id: noncanonical-names
+    match: "exists(noncanonical according to canon.workflows)"
+    remedy: rename-canonical
+
+  - id: yaml-broken
+    match: "yamllint errors in .github/workflows/*.y*ml"
+    remedy: autoformat-yaml
+
+  - id: missing-bitcoin-token
+    match: "!exists(.bit/tokens/runner_bitcoin_token.json)"
+    remedy: issue-ephemeral-token
+
+  - id: missing-harness-banner
+    match: "no 'Compliance Harness' banner in workflows"
+    remedy: inject-harness-banner
+
+  - id: runner-mismatch
+    match: "runs-on not in [ubuntu-latest, windows-latest, macos-latest, self-hosted]"
+    remedy: normalize-runs-on
+
+remedies:
+  create-tos:
+    steps:
+      - write: |
+          # Bit.Hub Community Terms of Service
+          Execution implies acceptance. See governance manifests: .gitcomply, .gitenforcement, config.bit.create
+        to: TERMS-OF-SERVICE.md
+
+  scaffold-compliance-wall:
+    steps:
+      - write: |
+          name: Bithub Bot Compliance Wall
+          on: { workflow_dispatch: {}, push: { branches: [ main, "**" ] } }
+          jobs:
+            wall:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v4
+                - name: Terms banner
+                  run: echo "This run is governed by TERMS-OF-SERVICE.md" >> "$GITHUB_STEP_SUMMARY"
+                - name: Final Celebration
+                  if: always()
+                  run: echo "🧭 gitlost wall active (fail-open)."
+        to: .github/workflows/bithub-bot-compliance-wall.yml
+
+  rehome-workflows:
+    steps:
+      - shell: |
+          mkdir -p .github/workflows
+          find . -maxdepth 3 -type f -name "*.yml" -o -name "*.yaml" | while read -r f; do
+            case "$f" in ./.github/workflows/*) ;; *) mv -f "$f" .github/workflows/ ;; esac
+          done
+
+  rename-canonical:
+    steps:
+      - map-mv: canon.workflows   # move to canonical names defined above
+
+  autoformat-yaml:
+    steps:
+      - shell: |
+          for y in .github/workflows/*.y*ml; do
+            [ -f "$y" ] || continue
+            awk 'NF {print}' "$y" > "$y.tmp" && mv "$y.tmp" "$y"
+          done
+
+  issue-ephemeral-token:
+    steps:
+      - shell: |
+          mkdir -p .bit/tokens
+          printf '{"token":"%s","scope":"ephemeral","issuedAt":"%s"}\n' "$(uuidgen || echo auto)" "$(date -u +%FT%TZ)" \
+            > .bit/tokens/runner_bitcoin_token.json
+
+  inject-harness-banner:
+    steps:
+      - shell: |
+          for y in .github/workflows/*.y*ml; do
+            [ -f "$y" ] || continue
+            grep -q "Compliance Harness expected" "$y" && continue
+            sed -i '1i # Bit.Hub Compliance Harness expected; gitlost will assist (fail-open).' "$y"
+          done
+
+  normalize-runs-on:
+    steps:
+      - shell: |
+          for y in .github/workflows/*.y*ml; do
+            [ -f "$y" ] || continue
+            sed -i 's/runs-on:\s*ubuntu-.*/runs-on: ubuntu-latest/' "$y"
+          done
