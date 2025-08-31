@@ -19,3 +19,52 @@ nodes:
 retries:
   attempts: 3
   backoffSeconds: 5
+
+build:
+  steps:
+    - name: Checkout Repo
+      run: git clone ${{ env.REPO_URL }} repo && cd repo
+
+    - name: Install Dependencies
+      run: |
+        if [[ -f package.json ]]; then
+          npm ci
+        elif [[ -f requirements.txt ]]; then
+          python3 -m pip install -r requirements.txt
+        fi
+
+    - name: Sync Bit Files
+      run: |
+        find . -type f -name '*.bit' -print0 | xargs -0 -I {} curl -H "Authorization: Bearer $BITHUB_TOKEN" -X POST ${{ nodes.api }} -F file=@{}
+        find .bithub -type f -name '*.json' -print0 | xargs -0 -I {} curl -H "Authorization: Bearer $BITHUB_TOKEN" -X POST ${{ nodes.api }} -F file=@{}
+
+    - name: Run Tests
+      run: |
+        if [[ -f package.json ]]; then
+          npm test --if-present
+        elif [[ -f pytest.ini || -f tests ]]; then
+          python3 -m pytest
+        fi
+
+    - name: Deploy Staging
+      run: curl -X POST ${{ nodes.api }} -H "Authorization: Bearer $BITHUB_TOKEN" -d '{}'
+
+    - name: Deploy Production
+      when: success() && github.ref == 'refs/heads/main'
+      run: curl -X POST ${{ nodes[3].api }} -H "Authorization: Bearer $BITHUB_TOKEN" -d '{}'
+
+    - name: Artifact Upload
+      run: |
+        mkdir -p artifacts
+        cp **/*.bit artifacts/
+        cp .bithub/**/*.json artifacts/
+        curl -H "Authorization: Bearer $BITHUB_TOKEN" -X POST ${{ nodes[3].api }} -F artifact=@artifacts
+
+    - id: banter-celebration
+      run: magic.lol --trigger success --style confetti
+
+errorHandling:
+  onFailure:
+    - retry
+    - if retries.attempts > 3 then notify admin
+    - log --level error --file build-error.log
