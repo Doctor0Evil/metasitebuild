@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-08-31T03:10:00Z",
+  "terms": [
+    {
+      "term": "banter_context",
+      "definition": "A contextual tag indicating the maturity level and allowed deployment zones for banter assets.",
+      "allowed_values": ["adult", "mature", "test_sandbox"]
+    },
+    {
+      "term": "asset_bundle",
+      "definition": "A packaged set of related content (banter lines, art, dev tools) stored in the cache until distribution."
+    },
+    {
+      "term": "caching_event",
+      "definition": "A scheduled or triggered process that aggregates all approved assets into a single distributable payload."
+    },
+    {
+      "term": "compliance_block",
+      "definition": "A policy enforcement gate that halts or reroutes non-compliant workflows before execution."
+    }
+  ]
+}
