@@ -1,0 +1,28 @@
+name: Bit.Hub Runner Enforcement
+version: 1.0.0
+scope: runner
+owner: Doctor0Evil/Bit.Hub
+description: Baselines runners; recommends labels and discourages privileged Docker modes.
+power:
+  default: standard
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+policies:
+  modules:
+    - path: .bithub/policy/runner.rego
+      package: bithub.runner
+  parameters:
+    required_labels:
+      - bit.hub
+    docker_privileged_disallowed: true
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+  self_heal: false
+notes:
+  - Hosted runners won’t expose privilege; policy still advises against it in self-hosted clusters.
