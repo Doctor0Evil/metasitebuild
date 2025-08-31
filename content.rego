@@ -15,10 +15,10 @@ warn[msg] {
 
 contains_prohibited(t) {
   badword := lower(t)
-  badword == "real-world-slur"  # Replace with actual prohibited terms or patterns
+  badword == "real-world-slur"  # Replace with your actual prohibited terms list
 }
 
 contains_profane_but_compliant(t) {
   term := lower(t)
-  term == "f-bomb"  # Example placeholder for profane but compliant terms
+  term == "fuck"  # Example profane but compliant term; expand as needed
 }
