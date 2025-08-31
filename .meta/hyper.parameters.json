@@ -1,0 +1,43 @@
+{
+  "version": "1.1",
+  "scope": "Bit.Hub",
+  "appliesTo": ["artifact-builds", "dotnet-core-isolations"],
+  "independence": {
+    "enforceNonInterference": true,
+    "allowlistEndpoints": [
+      "https://vsc.example.net",
+      "https://vsc-prod.example.net"
+    ]
+  },
+  "build": {
+    "optimizationLevel": "aggressive",
+    "parallelism": 4,
+    "sandbox": true
+  },
+  "runtime": {
+    "maxThreads": 8,
+    "memoryLimitMB": 2048,
+    "enableRailguards": true
+  },
+  "aiCompliance": {
+    "personalityVectorBounds": {
+      "banter": { "min": 0, "max": 1 },
+      "profanity": { "min": 0, "max": 2 },
+      "compscore": { "min": 800, "max": 2000 }
+    },
+    "stickyThresholds": true,
+    "cooldownMinutes": 120
+  },
+  "bitCoin": {
+    "tokenPath": ".bit/tokens/runner_bitcoin_token.json",
+    "yieldPolicy": {
+      "compscoreLow": { "yieldPercent": 25, "log": true },
+      "compscoreCritical": { "yieldPercent": 50, "log": true, "haltNonEssential": true }
+    },
+    "failSafes": {
+      "maxConcurrentJobs": 2,
+      "autoPauseOnViolation": true,
+      "auditLog": ".bit/audit/bitCoin-yields.log"
+    }
+  }
+}
