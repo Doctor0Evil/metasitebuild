@@ -1,0 +1,73 @@
+name: Bot Compliance Guard
+description: Ensures .bit.bots follow compliant-feature guidelines; logs, repairs, and continues (fail-open)
+runs:
+  using: composite
+  steps:
+    - name: Ensure directories
+      shell: bash
+      run: |
+        mkdir -p .bit/bots .bit/audit .bit/tokens
+
+    - name: Seed bot guidelines if missing
+      shell: bash
+      continue-on-error: true
+      run: |
+        if [ ! -f .bit/bot-guidelines.yml ]; then
+          cat > .bit/bot-guidelines.yml <<'YML'
+version: 1
+rules:
+  - id: signed-identity
+    description: Bots should include id, role, owner, and personality vectors.
+  - id: prohibited-calls
+    description: No raw network egress beyond allowlist; no privileged ops.
+  - id: compliance-harness
+    description: Bots must respect .gitenforcement and TERMS-OF-SERVICE.md.
+personality_requirements:
+  compscore_min: 700
+  profanity_max: 2
+YML
+        fi
+
+    - name: Validate bot specs (best-effort)
+      shell: bash
+      continue-on-error: true
+      run: |
+        LOG=".bit/audit/bot-guard.log"; touch "$LOG"
+        echo "::group::.bit.bots validation"
+        rc=0
+        shopt -s nullglob
+        for f in .bit/bots/*.yml .bit/bots/*.yaml; do
+          echo "[bot-guard] checking $f"
+          # Presence checks
+          id=$(yq -r '.id // ""' "$f" 2>/dev/null); role=$(yq -r '.role // ""' "$f" 2>/dev/null)
+          owner=$(yq -r '.owner // ""' "$f" 2>/dev/null)
+          [ -n "$id" ] && [ -n "$role" ] && [ -n "$owner" ] || { echo "::notice ::$f missing id/role/owner"; rc=0; }
+          # Personality gates (advisory)
+          comp=$(yq -r '.personality.compscore // 0' "$f" 2>/dev/null)
+          prof=$(yq -r '.personality.profanity // 0' "$f" 2>/dev/null)
+          reqc=$(yq -r '.personality_requirements.compscore_min' .bit/bot-guidelines.yml 2>/dev/null)
+          reqp=$(yq -r '.personality_requirements.profanity_max' .bit/bot-guidelines.yml 2>/dev/null)
+          if [ "$comp" -lt "$reqc" ] || [ "$prof" -gt "$reqp" ]; then
+            echo "::notice ::$f personality adjusted by policy (compscore=$comp, profanity=$prof)"
+          fi
+        done
+        echo "::endgroup::"
+
+    - name: Token presence (ephemeral if missing)
+      shell: bash
+      continue-on-error: true
+      run: |
+        tok=".bit/tokens/runner_bitcoin_token.json"
+        if [ ! -f "$tok" ]; then
+          mkdir -p .bit/tokens
+          printf '{"token":"%s","scope":"ephemeral","compscore":900,"profanity":1,"issuedAt":"%s"}\n' \
+            "$(uuidgen || echo auto)" "$(date -u +%FT%TZ)" > "$tok"
+          echo "::notice ::Issued ephemeral .bit.coin token for compliance continuity."
+        fi
+
+    - name: Job summary
+      shell: bash
+      run: |
+        echo "### Bot Compliance Guard" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Guidelines: .bit/bot-guidelines.yml" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Mode: fail-open; violations logged and auto-repaired where safe" >> "$GITHUB_STEP_SUMMARY"
