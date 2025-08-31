@@ -29,3 +29,6 @@ jobs:
       - name: Loopback Notification
         run: |
           echo "BitHub continuous workflow loop recorded at $(date -u)"
+
+- id: banter-celebration
+  run: magic.lol --trigger success --style confetti
