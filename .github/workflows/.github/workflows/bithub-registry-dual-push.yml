@@ -1,0 +1,102 @@
+name: Bit.Hub Registry Dual Push (Compliance Wall)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_name:
+        type: string
+        default: "service"
+      tag:
+        type: string
+        default: "latest"
+      power_threshold:
+        type: choice
+        default: "standard"
+        options: [standard, strict, paranoid]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: bithub-dual-registry-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REPORT_DIR: ".bithub/reports"
+  POLICY_DIR: ".bithub/policy"
+  REGISTRY1: "ghcr.io/${{ github.repository_owner }}"
+  REGISTRY2: "${{ vars.PRIVATE_REGISTRY_NAMESPACE }}"
+  OPA_VERSION: "0.64.1"
+  POWER_THRESHOLD: ${{ inputs.power_threshold || vars.POWER_THRESHOLD || 'standard' }}
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          BIN="$HOME/.local/bin"; mkdir -p "$BIN"
+          curl -fsSL -o "$BIN/opa" "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static"
+          chmod +x "$BIN/opa"; echo "$BIN" >> $GITHUB_PATH
+      - name: Build image
+        run: |
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.description=Bit.Hub image" \
+            --label "org.opencontainers.image.licenses=MIT" \
+            -t "${REGISTRY1}/${{ inputs.image_name }}:${{ inputs.tag }}" .
+      - name: Inspect and evaluate policy
+        id: wall
+        run: |
+          mkdir -p "${REPORT_DIR}"
+          docker inspect "${REGISTRY1}/${{ inputs.image_name }}:${{ inputs.tag }}" > "${REPORT_DIR}/inspect.json"
+          jq -n --arg kind "container_image" \
+                --arg name "${REGISTRY1}/${{ inputs.image_name }}:${{ inputs.tag }}" \
+                --slurpfile meta "${REPORT_DIR}/inspect.json" \
+                '{kind:$kind, name:$name, metadata:$meta[0]}' > /tmp/image.json
+          opa eval -f json -I -d "${POLICY_DIR}" -i /tmp/image.json 'data.bithub.container' \
+            | jq -c '.result[].expressions[].value' > "${REPORT_DIR}/container-eval.json" || true
+          DENY=$(jq '[.deny[]] | length' "${REPORT_DIR}/container-eval.json" 2>/dev/null || echo 0)
+          WARN=$(jq '[.warn[]] | length' "${REPORT_DIR}/container-eval.json" 2>/dev/null || echo 0)
+          echo "denials=$DENY" >> "$GITHUB_OUTPUT"
+          echo "warnings=$WARN" >> "$GITHUB_OUTPUT"
+          cat "${REPORT_DIR}/container-eval.json" || true
+      - name: Login GHCR
+        if: always() && (env.POWER_THRESHOLD == 'standard' || steps.wall.outputs.denials == '0')
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push GHCR
+        if: always() && (env.POWER_THRESHOLD == 'standard' || steps.wall.outputs.denials == '0')
+        run: docker push "${REGISTRY1}/${{ inputs.image_name }}:${{ inputs.tag }}"
+      - name: Login private registry
+        if: always() && (env.POWER_THRESHOLD == 'standard' || steps.wall.outputs.denials == '0')
+        run: echo "${{ secrets.PRIVATE_REGISTRY_PASSWORD }}" | docker login "${{ vars.PRIVATE_REGISTRY_HOST }}" -u "${{ secrets.PRIVATE_REGISTRY_USERNAME }}" --password-stdin
+      - name: Tag and push private registry
+        if: always() && (env.POWER_THRESHOLD == 'standard' || steps.wall.outputs.denials == '0')
+        run: |
+          docker tag "${REGISTRY1}/${{ inputs.image_name }}:${{ inputs.tag }}" "${REGISTRY2}/${{ inputs.image_name }}:${{ inputs.tag }}"
+          docker push "${REGISTRY2}/${{ inputs.image_name }}:${{ inputs.tag }}"
+      - name: Always succeed
+        run: echo "Dual registry process completed."
+
+            - name: Download a Build Artifact
+  uses: actions/download-artifact@v5.0.0
+  with:
+    # Name of the artifact to download. If unspecified, all artifacts for the run are downloaded.
+    name: # optional
+    # IDs of the artifacts to download, comma-separated. Either inputs `artifact-ids` or `name` can be used, but not both.
+    artifact-ids: # optional
+    # Destination path. Supports basic tilde expansion. Defaults to $GITHUB_WORKSPACE
+    path: # optional
+    # A glob pattern matching the artifacts that should be downloaded. Ignored if name is specified.
+    pattern: # optional
+    # When multiple artifacts are matched, this changes the behavior of the destination directories. If true, the downloaded artifacts will be in the same directory specified by path. If false, the downloaded artifacts will be extracted into individual named directories within the specified path.
+    merge-multiple: # optional, default is false
+    # The GitHub token used to authenticate with the GitHub API. This is required when downloading artifacts from a different repository or from a different workflow run. If this is not specified, the action will attempt to download artifacts from the current repository and the current workflow run.
+    github-token: # optional
+    # The repository owner and the repository name joined together by "/". If github-token is specified, this is the repository that artifacts will be downloaded from.
+    repository: # optional, default is ${{ github.repository }}
+    # The id of the workflow run where the desired download artifact was uploaded from. If github-token is specified, this is the run that artifacts will be downloaded from.
+    run-id: # optional, default is ${{ github.run_id }}
+          
