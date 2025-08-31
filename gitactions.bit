@@ -1,0 +1,32 @@
+name: Enforce Voice Compliance
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run compliance wall
+        run: bash ./tools/loldeploy_wall.sh
+
+      - name: Disable voice for non‑compliant runners/bots
+        run: |
+          for f in .bitrunners/*.json .bitbots/*.json; do
+            status=$(jq -r '.compliance_status' "$f")
+            if [ "$status" != "pass" ]; then
+              jq '.voice_enabled=false' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+            fi
+          done
+
+      - name: Commit & push updates
+        run: |
+          git config user.name "BitHub‑VoiceEnforcer"
+          git config user.email "voice.enforcer@local"
+          git add .bitrunners .bitbots
+          git commit -m "Auto‑disable voice for non‑compliant nodes" || exit 0
+          git push
