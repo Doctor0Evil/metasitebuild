@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bithub.dev/schemas/enforcement-bit.schema.json",
+  "title": "Bit.Hub Enforcement Manifest",
+  "type": "object",
+  "required": ["name", "version", "scope", "power", "policies"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string" },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "core",
+        "content",
+        "workflow",
+        "container",
+        "runner",
+        "availability",
+        "release",
+        "humor"
+      ]
+    },
+    "owner": { "type": "string" },
+    "description": { "type": "string" },
+    "power": {
+      "type": "object",
+      "required": ["default", "thresholds"],
+      "properties": {
+        "default": {
+          "type": "string",
+          "enum": ["standard", "strict", "paranoid"]
+        },
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "standard": { "type": "string", "enum": ["audit_only", "deny_on_denials"] },
+            "strict": { "type": "string", "enum": ["deny_on_denials"] },
+            "paranoid": { "type": "string", "enum": ["deny_on_denials_or_warnings"] }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "bindings": {
+      "type": "object",
+      "properties": {
+        "canonical_repo": { "type": "string", "format": "uri" },
+        "report_dir": { "type": "string" },
+        "policy_dir": { "type": "string" },
+        "schemas_dir": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "inputs": {
+      "type": "object",
+      "properties": {
+        "include": { "type": "array", "items": { "type": "string" } },
+        "exclude": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "policies": {
+      "type": "object",
+      "required": ["modules"],
+      "properties": {
+        "modules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "package"],
+            "properties": {
+              "path": { "type": "string" },
+              "package": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "parameters": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "actions": {
+      "type": "object",
+      "properties": {
+        "on_warning": { "type": "array", "items": { "type": "string" } },
+        "on_denial": { "type": "array", "items": { "type": "string" } },
+        "self_heal": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
