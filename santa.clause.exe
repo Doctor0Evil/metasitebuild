@@ -1,0 +1,25 @@
+public class SantaDistributor
+{
+    private readonly string _root; private readonly bool _failOpen;
+    public SantaDistributor(string root, bool failOpen) => (_root, _failOpen) = (root, failOpen);
+    public void DeliverArtifacts(SummaryWriter sum)
+    {
+        var exe = Path.Combine(_root, "tools", "santa.clause.exe");
+        var outDir = Path.Combine(_root, ".bit", "out");
+        if (!Directory.Exists(outDir)) { sum.Line("- No artifacts found for Santa."); return; }
+        foreach (var file in Directory.EnumerateFiles(outDir, "*", SearchOption.AllDirectories))
+        {
+            try
+            {
+                if (File.Exists(exe))
+                {
+                    var p = System.Diagnostics.Process.Start(exe, $"--deliver \"{file}\" --targets clusters,alnfantasia --mode precision");
+                    p?.WaitForExit();
+                    sum.Line($"- Santa delivered: {Path.GetFileName(file)}");
+                }
+                else sum.Line($"- Santa stub recorded: {Path.GetFileName(file)}");
+            }
+            catch (Exception ex) { if (!_failOpen) throw; sum.Line($"- Santa error: {ex.Message}"); }
+        }
+    }
+}
