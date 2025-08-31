@@ -180,3 +180,16 @@ YML
     needs: [package-and-upload, sign-artifact]
     steps:
       - run: echo "🎁 Build packaged and uploaded. ✅ Always-successful completion."
+
+      - name: Update latest bitlink (fail-open)
+        continue-on-error: true
+        run: |
+          mkdir -p .bit
+          ART="${{ steps.pkg.outputs.artifact_name }}"
+          cat > .bit/bitlinks.yml <<YML
+version: 1
+links:
+  latest.build:
+    target: .bit/out/${ART}
+    description: Most recent packaged build
+YML
