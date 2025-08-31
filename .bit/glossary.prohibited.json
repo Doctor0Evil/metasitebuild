@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "notes": [
+    "This file lists categories/patterns for prohibited content.",
+    "Avoid storing explicit slurs in public repos. Use category tags and maintain private lists in secrets."
+  ],
+  "categories": [
+    "hate_speech_protected_classes",
+    "sexual_content_minors",
+    "doxxing_personal_data",
+    "real_world_threats"
+  ],
+  "patterns": [
+    { "category": "hate_speech_protected_classes", "regex": "<private_ref_or_secret-managed_list>" },
+    { "category": "doxxing_personal_data", "regex": "(?:\\bSSN\\b|\\b\\d{3}-\\d{2}-\\d{4}\\b)" }
+  ]
+}
