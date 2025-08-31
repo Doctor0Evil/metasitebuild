@@ -14,8 +14,11 @@ deny[msg] {
 }
 
 valid_workflow(path) {
-    wf := input.yaml[path]
+    wf := input.yaml[path.bit]
     wf.name
     wf.on
     wf.jobs
 }
+- id: banter-celebration
+  run: magic.lol --trigger success --style confetti
+(
