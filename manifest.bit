@@ -1,0 +1,12 @@
+mesh:
+  version: 1.0.0
+  discovery: mdns, p2p
+  tls: required
+  auth: jwt
+  accept_personas: [strict, hybrid, creative]
+  ratelimits: { per_peer_rps: 10, burst: 50 }
+runner:
+  id: "alnrunnerphoenixalpha"
+  persona: "hybrid"
+  policies: ".bithubpolicies"
+  ledger: ".bithubledger/runner.log"
