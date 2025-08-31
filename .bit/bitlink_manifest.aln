@@ -5,3 +5,7 @@
   (userinputs "https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/c81bbbf0-38a9-432a-a454-a4491b70293b/AI_Gen_User_Inputs.txt")
   (securitycore "https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/0e6f2977-7553-48b2-ad9a-fbc0bdda2a0d/ALN_CORE_USER_SECURITY.txt")
 )
+(defun resolve-bitlink (bitlink-id)
+  ;; Loads .bit/bitlink_manifest.aln and maps ID to actual URL/file
+  (let ((mapping (load-bitlink-mapping ".bit/bitlink_manifest.aln")))
+    (cdr (assoc bitlink-id mapping))))
