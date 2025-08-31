@@ -1,0 +1,100 @@
+name: gitlost-rescuer
+description: Detects and repairs lost runners/workflows using .gitlost (fail-open)
+runs:
+  using: composite
+  steps:
+    - name: Load .gitlost
+      shell: bash
+      continue-on-error: true
+      run: |
+        test -f .gitlost || { echo "::warning::.gitlost missing; using defaults."; touch .gitlost; }
+        echo "## gitlost active (fail-open)" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Apply remedies
+      shell: bash
+      continue-on-error: true
+      run: |
+        set +e
+        LOG=".bit/audit/gitlost.log"
+        mkdir -p "$(dirname "$LOG")" .github/workflows .bit/tokens
+        touch "$LOG"
+
+        # helpers
+        yamls() { ls .github/workflows/*.y*ml 2>/dev/null || true; }
+
+        echo "::group::gitlost detectors"
+        # missing TOS
+        [ -f TERMS-OF-SERVICE.md ] || { echo "[gitlost] create TOS"; cat > TERMS-OF-SERVICE.md <<'TOS'
+# Bit.Hub Community Terms of Service
+Execution implies acceptance. Governed by .gitcomply, .gitenforcement, config.bit.create
+TOS
+        echo "created TERMS-OF-SERVICE.md" >> "$LOG"; }
+
+        # compliance wall scaffold
+        [ -f .github/workflows/bithub-bot-compliance-wall.yml ] || {
+          cat > .github/workflows/bithub-bot-compliance-wall.yml <<'YML'
+name: Bithub Bot Compliance Wall
+on: { workflow_dispatch: {}, push: { branches: [ main, "**" ] } }
+jobs:
+  wall:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Terms banner
+        run: echo "This run is governed by TERMS-OF-SERVICE.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Final Celebration
+        if: always()
+        run: echo "🧭 gitlost wall active (fail-open)."
+YML
+          echo "scaffolded compliance wall" >> "$LOG"
+        }
+
+        # rehome stray workflows
+        find . -maxdepth 3 -type f \( -name "*.yml" -o -name "*.yaml" \) \
+          ! -path "./.github/workflows/*" | while read -r f; do
+            mkdir -p .github/workflows
+            mv -f "$f" .github/workflows/
+            echo "rehomed $f" >> "$LOG"
+          done
+
+        # canonical renames (simple examples; extend with .gitlost canon map)
+        [ -f .github/workflows/bit-hub-compliance.yml ] && \
+          { mv -f .github/workflows/bit-hub-compliance.yml .github/workflows/bithub-bot-compliance-wall.yml 2>/dev/null || true; echo "renamed bit-hub-compliance.yml" >> "$LOG"; }
+
+        # trim broken YAML blank lines
+        for y in $(yamls); do awk 'NF {print}' "$y" > "$y.tmp" && mv "$y.tmp" "$y"; done
+
+        # ensure runner token exists
+        [ -f .bit/tokens/runner_bitcoin_token.json ] || {
+          printf '{"token":"%s","scope":"ephemeral","issuedAt":"%s"}\n' "$(uuidgen || echo auto)" "$(date -u +%FT%TZ)" \
+            > .bit/tokens/runner_bitcoin_token.json
+          echo "issued ephemeral token" >> "$LOG"
+        }
+
+        # harness banner advisory
+        for y in $(yamls); do
+          grep -q "Compliance Harness expected" "$y" || sed -i '1i # Bit.Hub Compliance Harness expected; gitlost will assist (fail-open).' "$y"
+        done
+        echo "::endgroup::"
+
+    - name: Commit silent repairs (best-effort)
+      shell: bash
+      continue-on-error: true
+      env:
+        GIT_AUTHOR_NAME: BitHub-Bot
+        GIT_AUTHOR_EMAIL: bot@bithub.local
+        GIT_COMMITTER_NAME: BitHub-Bot
+        GIT_COMMITTER_EMAIL: bot@bithub.local
+      run: |
+        git add -A
+        git diff --cached --quiet && echo "nothing to commit" || {
+          git commit -m "gitlost: silent rescue and canonicalization (fail-open)"
+          git push || echo "::warning::push blocked (protected branch or token scope)."
+        }
+
+    - name: Summarize gitlost
+      shell: bash
+      continue-on-error: true
+      run: |
+        echo "### .gitlost rescue summary" >> "$GITHUB_STEP_SUMMARY"
+        test -f .bit/audit/gitlost.log && tail -n 200 .bit/audit/gitlost.log >> "$GITHUB_STEP_SUMMARY" || true
