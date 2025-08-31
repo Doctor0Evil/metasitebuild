@@ -1,17 +1,15 @@
-package alnfantasia.decompression
+package bithub.decompression
 
-deny[msg] {
-  input.decompress.method == "tar"
-  not startswith(input.decompress.output, "/tmp/")
-  msg := "tar decompression only allowed in /tmp/"
-}
-
-deny[msg] {
-  input.decompress.method == "any"
-  input.decompress.file_size_mb > 120
-  msg := sprintf("Decompression file %q (%d MB) too large for runner railguard", [input.decompress.input, input.decompress.file_size_mb])
-}
+default allow = false
 
 allow {
-  not deny[_]
+  input.action == "decompress"
+  input.method in {"zlib", "gzip", "tar"}
+  input.size_mb <= 128
+  not input.repo in blacklisted_repos
+}
+blacklisted_repos := {"evilcorp/payloads"}
+deny[msg] {
+  not allow
+  msg := sprintf("Denied decompression (repo: %v, method: %v, size: %d)", [input.repo, input.method, input.size_mb])
 }
