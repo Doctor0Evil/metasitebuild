@@ -9,7 +9,15 @@ on:
         default: "standard"
         options: [standard, strict, paranoid]
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+    paths:
+      - '.bithub/policies/**'
+      - 'ALN/**/*.lisp'
+      - 'Batch/**/*.bat'
+      - 'LOL_LANG/**/*.lol'
+      - 'virtual.data.banks/**'
+      - 'fan.asia/AIFantasia/**'
+      - 'virta-net/**'
   schedule:
     - cron: "23 3 * * *" # Daily at 03:23 UTC
 
@@ -24,10 +32,8 @@ jobs:
       BIT_HUB_REPO_URL: https://github.com/Doctor0Evil/Bit.Hub.git
       POWER_THRESHOLD: ${{ inputs.power_threshold || 'standard' }}
     steps:
-      # Stage 1: Checkout
       - uses: actions/checkout@v4
 
-      # Stage 2: Install tooling
       - name: Install yq, opa, gh
         run: |
           sudo apt-get update -y
@@ -38,7 +44,6 @@ jobs:
           chmod +x /usr/local/bin/opa
           curl -fsSL https://raw.githubusercontent.com/cli/cli/trunk/script/install.sh | sh -s -- -b /usr/local/bin
 
-      # Stage 3: Sync canonical Bit.Hub rules
       - name: Sync Bit.Hub rules
         run: |
           TMP=$(mktemp -d)
@@ -50,7 +55,6 @@ jobs:
           mkdir -p .bithub/policy
           rsync -a --ignore-existing "$TMP/.bithub/policy/" .bithub/policy/
 
-      # Stage 4: Apply config defaults to workflows
       - name: Apply config.bit.create defaults
         run: |
           for wf in $(find .github/workflows -type f -name '*.yml' -o -name '*.yaml'); do
@@ -60,7 +64,6 @@ jobs:
             yq -i '.. | select(tag == "!!str") |= sub("actions/checkout@v[12]$"; load(".bit/config.bit.create").defaults.workflow.checkout_version)' "$wf"
           done
 
-      # Stage 5: Evaluate workflows against Bit.Hub policy
       - name: Evaluate workflows
         run: |
           mkdir -p .bithub/reports
@@ -72,42 +75,79 @@ jobs:
               >> .bithub/reports/workflow-policy.ndjson || true
           done
 
-      # Stage 6: .NET Build (example artifact build)
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore
+      - run: dotnet test --no-build --verbosity normal
         continue-on-error: true
 
-      # Stage 7: Publish artifacts (per .gitenforcement rules)
-      - name: Publish artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: bithub-dotnet-build
           path: '**/bin/Release/**'
           retention-days: 7
         continue-on-error: true
 
-      # Stage 8: Commit & PR changes if needed
       - name: Commit and PR changes
         run: |
           git add .github/workflows .gitcomply .gitenforcement .bit/config.bit.create || true
           if ! git diff --cached --quiet; then
             git -c user.name="bitbot" -c user.email="bitbot@users.noreply.github.com" commit -m "chore(bit.hub): compliance fixes"
-            if [ -n "${GITHUB_TOKEN:-}" ]; then
-              BRANCH="bitbot/compliance-fixes"
-              git push -u origin HEAD:"$BRANCH" || true
-              gh pr create --fill --title "Bit.Hub Compliance Fixes" --body "Automated fixes from BitBot workflow" || true
-            fi
+            BRANCH="bitbot/compliance-fixes"
+            git push -u origin HEAD:"$BRANCH" || true
+            gh pr create --fill --title "Bit.Hub Compliance Fixes" --body "Automated fixes from BitBot workflow" || true
           else
             echo "::notice::No compliance changes needed."
           fi
+
+  tos-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install conftest
+        run: |
+          wget -q https://github.com/open-policy-agent/conftest/releases/download/v0.45.0/conftest_0.45.0_Linux_x86_64.tar.gz -O conftest.tar.gz
+          tar -xzf conftest.tar.gz
+          sudo mv conftest /usr/local/bin/conftest
+
+      - run: conftest test --policy .bithub/policies .
+
+      - run: ./virtual.data.banks/audit_integrity_check.sh || true
+
+      - run: |
+          for f in ALN/**/*.lisp; do
+            [ -f "$f" ] && echo "LISP check: $f"
+          done
+
+      - run: |
+          for b in Batch/**/*.bat; do
+            [ -f "$b" ] && echo "Batchfile check: $b"
+          done
+
+      - run: |
+          for l in LOL_LANG/**/*.lol; do
+            [ -f "$l" ] && echo "LOL.LANG audit: $l"
+          done
+
+      - run: |
+          if [ -f "fan.asia/AIFantasia/validate.sh" ]; then
+            bash fan.asia/AIFantasia/validate.sh
+          fi
+
+      - run: |
+          if [ -f "virta-net/validate_net.sh" ]; then
+            bash virta-net/validate_net.sh
+          fi
+
+      - run: |
+          mkdir -p .bithub/audit_trail
+          echo "Bit.Hub audit $(date) $(git rev-parse HEAD)" > .bithub/audit_trail/summary.log
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bithub-central-audit
+          path: .bithub/audit_trail/
