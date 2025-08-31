@@ -1,0 +1,56 @@
+version: 1.0.0
+name: Bit.Hub Universal Runner Compliance
+description: >
+  Defines baseline rules for any GitHub runner executing workflows in this repo.
+  Ensures consistent permissions, concurrency, timeouts, and policy evaluation.
+
+power:
+  default: standard
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+
+runner:
+  required_labels:
+    - bit.hub
+    - linux
+  forbidden_labels:
+    - untrusted
+  min_os: ubuntu-20.04
+  adaptive_runs_on:
+    - self-hosted
+    - bit.hub
+    - linux
+
+workflow_defaults:
+  permissions:
+    contents: read
+  concurrency:
+    group: wf-${{ github.ref }}
+    cancel-in-progress: false
+  timeout-minutes: 30
+  checkout_version: actions/checkout@v4
+
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+    - path: .bithub/policy/container.rego
+      package: bithub.container
+    - path: .bithub/policy/runner.rego
+      package: bithub.runner
+
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - block_merge
+  self_heal: true
+
+notes:
+  - This file is read by the Bit.Hub bootstrap harness at runner startup.
+  - Any missing defaults are injected into workflows before execution.
+  - In strict/paranoid, denials from linked policies can block merges or deploys.
