@@ -1,0 +1,16 @@
+- name: Bit.Hub .NET Policy Harness
+  uses: ./.github/actions/dotnet-policy-harness
+  continue-on-error: true
+[Unit]
+Description=Bit.Hub Runner Guard
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/bit-hub
+ExecStart=/usr/bin/dotnet /srv/bit-hub/src/BitHub.PolicyHarness/bin/Release/net8.0/BitHub.PolicyHarness.dll pre
+User=runner
+Group=runner
+
+[Install]
+WantedBy=multi-user.target
