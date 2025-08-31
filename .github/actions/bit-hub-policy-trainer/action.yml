@@ -1,0 +1,50 @@
+name: Bit.Hub Policy Trainer (Runner Education Functions)
+description: Educates GitHub runners about Bit.Hub policies, emits notices, and writes a training report.
+inputs:
+  power_threshold:
+    description: standard | strict | paranoid
+    default: standard
+outputs:
+  report:
+    description: Path to the generated training report JSON
+    value: ${{ steps.train.outputs.report_path }}
+runs:
+  using: composite
+  steps:
+    - id: train
+      shell: bash
+      run: |
+        set -euo pipefail
+        REPORT_DIR=".bithub/reports"; mkdir -p "$REPORT_DIR"
+        REPORT_PATH="$REPORT_DIR/runner-training.json"
+
+        echo "::notice title=Bit.Hub::Welcome, GitHub runner. Loading Bit.Hub policy training…"
+        echo "::notice title=Bit.Hub::Use least-privilege permissions, set concurrency, pin actions to SHAs, add timeout-minutes, and prefer adaptive runs-on."
+
+        # Gather facts
+        kernel="$(uname -sr || true)"
+        labels="${RUNNER_LABELS:-unknown}"
+        docker_present=false
+        docker_priv=false
+        if command -v docker >/dev/null 2>&1; then
+          docker_present=true
+          # Heuristic for privileged — best effort (likely false on hosted)
+          docker info >/dev/null 2>&1 || true
+        fi
+
+        jq -n \
+          --arg threshold "${{ inputs.power_threshold }}" \
+          --arg kernel "$kernel" \
+          --arg labels "$labels" \
+          --argjson docker_present "$docker_present" \
+          --argjson docker_priv "$docker_priv" \
+          '{
+            threshold: $threshold,
+            system: { kernel: $kernel },
+            github_runner: { labels: $labels },
+            tools: { docker: { present: $docker_present, privileged: $docker_priv } }
+          }' > "$REPORT_PATH"
+
+        echo "report_path=$REPORT_PATH" >> "$GITHUB_OUTPUT"
+
+        echo "::notice title=Bit.Hub::Training complete. Report: $REPORT_PATH"
