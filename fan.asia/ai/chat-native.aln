@@ -1,0 +1,9 @@
+;; fan.asia/ai/chat-native.aln
+(aln-fn call-chat-native
+  ([context prompt]
+    (let [payload {:context context :input prompt}
+          pfile   "/tmp/chat.payload.json"
+          rfile   "/tmp/chat.reply.json"]
+      (spit pfile (json-encode payload))
+      (sh "dotnet" "run" "--project" "src/ChatAdapter" "--" "--input" pfile "--output" rfile)
+      (json-decode (slurp rfile)))))
