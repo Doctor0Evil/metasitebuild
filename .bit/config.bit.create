@@ -1,0 +1,60 @@
+version: 1.0.0
+name: Bit.Hub Default Config Injection
+description: >
+  Baseline configuration for workflows, runners, and policies.
+  Applied automatically by Bit.Hub bootstrap scripts and megawall runs.
+
+defaults:
+  workflow:
+    permissions:
+      contents: read
+    concurrency:
+      group: wf-${{ github.ref }}
+      cancel-in-progress: false
+    timeout-minutes: 30
+    checkout_version: actions/checkout@v4
+    adaptive_runs_on:
+      - self-hosted
+      - bit.hub
+      - linux
+
+  runner:
+    required_labels:
+      - bit.hub
+      - linux
+    forbidden_labels:
+      - untrusted
+    min_os: ubuntu-20.04
+
+  container:
+    required_oci_labels:
+      - org.opencontainers.image.source
+      - org.opencontainers.image.description
+      - org.opencontainers.image.licenses
+    forbid_root_user: true
+    disallow_latest_tag_in_publish: true
+
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+    - path: .bithub/policy/container.rego
+      package: bithub.container
+    - path: .bithub/policy/runner.rego
+      package: bithub.runner
+    - path: .bithub/policy/content.rego
+      package: bithub.content
+
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - block_merge
+  self_heal: true
+
+notes:
+  - This file is read by Bit.Hub bootstrap harnesses and Laughter.exe.
+  - Defaults are injected into workflows at runtime if missing.
+  - Policies listed here are evaluated before any job executes.
