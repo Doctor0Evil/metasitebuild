@@ -1,0 +1,87 @@
+name: Compliance Wall
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  compliance-wall:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go environment
+        uses: actions/setup-go@v5.5.0
+        with:
+          go-version: '1.22.3'                  # Set to your compatible version
+          cache: true
+          cache-dependency-path: go.sum
+
+      - name: Cache Go modules (manual fallback)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Resolve Go dependencies
+        run: |
+          if [ -f "go.mod" ]; then
+            go mod download
+          else
+            echo "No go.mod present, skipping go mod download"
+          fi
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3.4.2
+        with:
+          # Optional SDK version(s) to use. If not provided, will install global.json version when available.
+          # Examples: 2.2.104, 3.1, 3.1.x, 3.x, 6.0.2xx
+          dotnet-version: ''
+          # Optional quality of the build: daily, signed, validated, preview, ga.
+          dotnet-quality: ''
+          # Optional global.json location if not in repo root.
+          global-json-file: ''
+          # Optional package source for authentication.
+          source-url: ''
+          # Optional OWNER for using packages from other orgs/users.
+          owner: ''
+          # Optional NuGet.config location if not in repo root.
+          config-file: ''
+          # Optional: enable caching of the NuGet global-packages folder.
+          cache: ''
+          # Optional: path(s) to dependency file(s) for caching.
+          cache-dependency-path: ''
+
+      - name: OPA Policy Eval
+        run: |
+          opa check policies/
+          opa eval --input data/input.json --data policies/ "data.compliance.allow == true"
+
+      - name: Run Compliance Wall
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG_CONTENTS }}
+        run: |
+          bash ./tools/loldeploy_wall.sh
+
+      - name: Archive compliance reports (if available)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-wall-report-${{ github.run_id }}
+          path: |
+            .bithubreports/
+            compliance_report.json
+            compliance_report.aln
+            artifacts/
+            .bit/state/
