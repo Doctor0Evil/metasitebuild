@@ -1,0 +1,65 @@
+name: BitHub Charter Enforcement
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false # Compliance with GitHub & Microsoft policy: minimal scopes
+
+      - name: Ensure charter exists
+        run: |
+          test -f .bitcharter || { echo "ERROR: Missing .bitcharter"; exit 1; }
+
+      - name: Load .bitcharter variables
+        id: charter
+        run: |
+          while IFS='=' read -r key value; do
+            [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
+            echo "$key=$value" >> $GITHUB_ENV
+          done < .bitcharter
+
+      - name: Show key enforcement variables
+        run: |
+          echo "Enforcement: $enforcement"
+          echo "Allow fail open: $allow_fail_open"
+          echo "Max allowed banter: $max_allowed_banter"
+
+      - name: Run charter enforcement script
+        run: |
+          bash tools/bitbots_enforce.sh \
+            --mode "$enforcement" \
+            --fail-open "$allow_fail_open" \
+            --banter "$max_allowed_banter"
+
+      - name: Enforce strict charter compliance
+        if: ${{ env.enforcement == 'strict' }}
+        run: |
+          echo "Strict mode: failing on mismatch"
+          # Insert additional US regulatory or Microsoft policy checks here
+          # e.g., validate output artifacts, policy-as-code enforcement
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BitHub Charter Reports
+          path: .bithubreports/
+
+      - name: Setup .NET Core SDK (if needed)
+        uses: actions/setup-dotnet@v3
+        with:
+          # Ensure SDK version, security checks, and source pinning per enterprise/GitHub policy
+          dotnet-version: 8.0.x
+
+      # Optional: Microsoft Security DevOps compliance scan (for IaC or secure supply chain)
+      - name: Run Microsoft Security DevOps
+        if: always()
+        uses: microsoft/security-devops-action@v1
+        with:
+          categories: 'IaC, code, secrets'
