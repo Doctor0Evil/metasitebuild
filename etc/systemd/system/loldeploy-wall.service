@@ -1,0 +1,25 @@
+# /etc/systemd/system/loldeploy-wall.service
+[Unit]
+Description=Bit.Hub Compliance Wall Sentinel
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=runner
+Group=runner
+WorkingDirectory=/srv/runner-repo
+ExecStart=/srv/runner-repo/tools/loldeploy_wall.sh
+
+ProtectSystem=strict
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target
