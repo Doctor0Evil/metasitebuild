@@ -1,0 +1,39 @@
+; .loldeploy.cont — Compliance Wall Manifest
+@LOLDEPLOY {
+  id: "central-service",
+  version: "1.0",
+  # Immutable supply chain pins
+  pins: {
+    spec_lock: ".bit/ethics-guard.lock",
+    spec_file: ".bit/environment.ethics.yml",
+    guard: "tools/ethics-guard.sh"
+  },
+  require_hashes: true,
+  # Promotion gates
+  gates: {
+    evidence_required: true,
+    signature_required: false,   # flip to true if you enable signing
+    status_required: "pass"      # pass | warn | any
+  },
+  # Redeploy policy on breach
+  breach_policy: {
+    action: "redeploy_last_green",  # redeploy_last_green | freeze
+    notify: ["slack","email"],
+    quarantine_branch: "quarantine/breach-${{commit}}"
+  },
+  # Replication targets (self-replication)
+  mirrors: [
+    { name: "origin",  url: "https://github.com/Doctor0Evil/ALN_Programming_Language.git" },
+    { name: "mirror1", url: "https://bit.hub/git/ALN_Programming_Language.git" }
+  ],
+  # Deploy targets
+  targets: [
+    { name: "prod-us",  kube_context: "prod-us",  namespace: "aln" },
+    { name: "stage-us", kube_context: "stage-us", namespace: "aln" }
+  ],
+  # Artifact registry
+  registry: {
+    image: "ghcr.io/your-org/central-databank",
+    provenance: "artifacts/compliance_report.json"
+  }
+}
