@@ -1,0 +1,102 @@
+name: Bit.Hub SmartRunner Compliance Fixer
+
+on:
+  workflow_dispatch:
+    inputs:
+      power_threshold:
+        description: "standard | strict | paranoid"
+        type: choice
+        default: "standard"
+        options:
+          - standard
+          - strict
+          - paranoid
+  schedule:
+    - cron: "17 4 * * *" # Daily at 04:17 UTC
+  push:
+    paths:
+      - ".github/workflows/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  smartrunner:
+    runs-on: ubuntu-latest
+    env:
+      BIT_HUB_REPO_URL: https://github.com/Doctor0Evil/Bit.Hub.git
+      POWER_THRESHOLD: ${{ inputs.power_threshold || 'standard' }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          mkdir -p $HOME/.local/bin
+          curl -fsSL -o $HOME/.local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          chmod +x $HOME/.local/bin/yq
+          curl -fsSL -o $HOME/.local/bin/opa https://openpolicyagent.org/downloads/v0.64.1/opa_linux_amd64_static
+          chmod +x $HOME/.local/bin/opa
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Sync Bit.Hub rules
+        run: |
+          TMP=$(mktemp -d)
+          if git ls-remote "$BIT_HUB_REPO_URL" &>/dev/null; then
+            git clone --depth=1 "$BIT_HUB_REPO_URL" "$TMP"
+            cp -f "$TMP/.gitcomply" .gitcomply
+            mkdir -p .bit
+            cp -f "$TMP/.bit/config.bit.create" .bit/config.bit.create
+            mkdir -p .bithub/policy
+            rsync -a --ignore-existing "$TMP/.bithub/policy/" .bithub/policy/
+          else
+            echo "::warning::Cannot reach Bit.Hub repo; using existing local rules."
+          fi
+
+      - name: Apply config.bit.create defaults
+        run: |
+          if [ -f ".bit/config.bit.create" ]; then
+            while IFS= read -r wf; do
+              yq -i '.permissions = (.permissions // load(".bit/config.bit.create").defaults.workflow.permissions)' "$wf"
+              yq -i '.concurrency = (.concurrency // load(".bit/config.bit.create").defaults.workflow.concurrency)' "$wf"
+              yq -i '.jobs |= with_entries(.value."timeout-minutes" = (.value."timeout-minutes" // load(".bit/config.bit.create").defaults.workflow.timeout-minutes))' "$wf"
+              yq -i '.. | select(tag == "!!str") |= sub("actions/checkout@v[12]$"; load(".bit/config.bit.create").defaults.workflow.checkout_version)' "$wf"
+            done < <(find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \))
+          else
+            echo "::warning::No config.bit.create found; skipping default injection."
+          fi
+
+      - name: Evaluate workflows against Bit.Hub policy
+        run: |
+          if [ -d ".bithub/policy" ]; then
+            REPORT=".bithub/reports/workflow-policy.ndjson"
+            mkdir -p .bithub/reports
+            : > "$REPORT"
+            while IFS= read -r wf; do
+              jq -n --arg path "$wf" --argjson wf_json "$(yq -o=json '.' "$wf")" \
+                '{path:$path, workflow:$wf_json}' > /tmp/input.json
+              opa eval -f json -I -d ".bithub/policy" -i /tmp/input.json 'data.bithub.workflow' \
+                | jq -c '.result[].expressions[].value | {path: input.path, deny:(.deny // []), warn:(.warn // [])}' --argfile input /tmp/input.json \
+                >> "$REPORT" || true
+            done < <(find .github/workflows -type f \( -name '*.yml' -o -name '*.yaml' \))
+            echo "::notice::Policy report written to $REPORT"
+          else
+            echo "::warning::No policies found; skipping evaluation."
+          fi
+
+      - name: Commit and PR changes
+        run: |
+          git add .github/workflows .gitcomply .bit/config.bit.create || true
+          if ! git diff --cached --quiet; then
+            git -c user.name="bitbot" -c user.email="bitbot@users.noreply.github.com" commit -m "chore(bit.hub): apply runner compliance fixes"
+            if [ -n "${GITHUB_TOKEN:-}" ]; then
+              BRANCH="bitbot/compliance-fixes"
+              git push -u origin HEAD:"$BRANCH" || true
+              gh pr create --fill --title "Bit.Hub Compliance Fixes" --body "Automated fixes from SmartRunner" || true
+            else
+              echo "::warning::No GITHUB_TOKEN; committed locally only."
+            fi
+          else
+            echo "::notice::No compliance changes needed."
+          fi
