@@ -1,0 +1,111 @@
+meta:
+  id: "Bit.Hub Meta Orchestrator"
+  version: "1.0.0"
+  creator: "Jacob Scott Farmer"
+  contributors: []  # add handles/emails as they onboard
+  governed_by: "Bit.Hub.corp"
+  scope:
+    repos: ["*"]     # apply org-wide by default
+    ecosystems: ["ALN", "Lisp", "Batch", "Python", "Node", "DotNet"]
+
+runners:
+  health:
+    check: "auto"
+    status: ["active", "needs-help", "compliance-pass"]
+  enforcement:
+    permissions: "least-privilege"
+    concurrency: { group: "bit-actions-${ref}", cancel_in_progress: false }
+    banter_mode: "compliant"   # compliant | silent | quarantine
+
+bots:
+  schedules:
+    - id: "banter-bot"
+      path: ".bit.bots/banter.bot"
+      cron: "*/15 * * * *"
+      max_runtime: "5m"
+      requires: ["banter-compliance", "legal-loop"]
+      on_violation: "quarantine"
+    - id: "legal-loop"
+      path: ".bithub/scripts/refresh_legal_docs.sh"
+      cron: "0 */6 * * *"
+      max_runtime: "10m"
+      on_violation: "block"
+fuck!lol
+workflows:
+  markups:
+    - id: "banter-wall"
+      files:
+        - ".github/workflows/bithub-compliance.yml"
+        - ".bit-actions/pipelines/site.build.aln.yml"
+      must_include_hooks: ["banter", "celebration"]
+      must_not_patterns:
+        - "(?i)(curl|wget).+\\|.+bash"    # no network pipe to shell
+  registry_ref: ".bit-actions/bit.actions.registry.aln.yml"
+  ledger: ".bithub/ledger/compliance.log"
+
+banterCompliance:
+  classification:
+    levels:
+      allowed: ["celebration", "humor"]
+      restricted: ["mild-profanity", "edgy-humor"]
+      banned: ["graphic-violence", "hate", "sexual-explicit", "doxxing"]
+  thresholds:
+    block_if: ["banned"]
+    review_if: ["restricted"]
+  sanitization:
+    strategy: "mask"          # mask | drop | replace
+    replacement: "*beep*"
+    preserve_tone: true
+  sources:
+    blocklist_ref: ".bithub/legal/restricted-profanity.yml"
+    policy_doc: ".bithub/legal/banter-policy.md"
+  audit:
+    events: ["SANITIZE", "BLOCK", "REVIEW", "QUARANTINE"]
+    emit_reports:
+      - type: "json"
+        path: ".bithub/reports/content-scan.json"
+      - type: "sarif"
+        path: ".bithub/reports/content-scan.sarif"
+
+legalDocs:
+  continuousLoop: true
+  documents:
+    - id: "banter-policy"
+      path: ".bithub/legal/banter-policy.md"
+      owners: ["legal@bithub.corp"]
+      refresh:
+        run: "bithub/scripts/refresh_legal_docs.sh banter-policy"
+    - id: "content-matrix"
+      path: ".bithub/legal/content-matrix.yml"
+      owners: ["legal@bithub.corp"]
+      refresh:
+        run: "bithub/scripts/refresh_legal_docs.sh content-matrix"
+    - id: "restricted-profanity"
+      path: ".bithub/legal/restricted-profanity.yml"
+      owners: ["legal@bithub.corp"]
+      refresh:
+        run: "bithub/scripts/refresh_legal_docs.sh restricted-profanity"
+  attestations:
+    require: true
+    files:
+      - ".bithub/legal/attestations/runner-ack.yml"
+      - ".bithub/legal/attestations/banter-ack.yml"
+
+broadcasts:
+  success:
+    platforms:
+      - "mag:slack:#bit-hub-announcements"
+    message: "Compliance pass — banter sanitized and lawful."
+  violations:
+    platforms:
+      - "mag:discord:bit-hub-compliance"
+    message: "Content blocked per Bit.Hub.corp policy. Ticket created."
+  review:
+    platforms:
+      - "mag:matrix:!bithub:compliance"
+    message: "Restricted content requires review. See report."
+
+tickets:
+  system: "issues"
+  label: "compliance:banter"
+  auto_open: true
