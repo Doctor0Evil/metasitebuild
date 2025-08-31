@@ -1,0 +1,53 @@
+name: Ethics Guard Compliance
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ethics-guard:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      id-token: write   # for OIDC to Bit.Hub if needed
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.5.0
+        with:
+          # The Go version to download. Set a specific version, e.g. '1.22.x'
+          go-version: '1.22.x'
+          check-latest: true
+          cache: true
+
+      - name: Validate Environment Compliance (ALN Mode)
+        run: |
+          python bithub/scripts/check_env_compliance.py \
+            --spec .bit/environment.ethics.yml \
+            --aln-mode strict \
+            --export .bit/ethics_report.aln
+
+      - name: Output Compliance Report (JSON + ALN)
+        run: |
+          python bithub/scripts/export_compliance_report.py \
+            --output compliance_report.json
+          cp .bit/ethics_report.aln compliance_report.aln
+
+      - name: Upload Reports for Audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-reports
+          path: |
+            compliance_report.json
+            compliance_report.aln
+
+      - name: Notify on Compliance Breach
+        if: failure()
+        run: |
+          python bithub/scripts/notify_security.py \
+            --incident "${{ github.workflow }}" \
+            --node-id "${{ runner.name }}" \
+            --aln-report compliance_report.aln
