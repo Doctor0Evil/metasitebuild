@@ -1,0 +1,6 @@
+(deflib fan.asia
+  (export decompression)
+  (export ai-safety-railguards)
+  (export runtime-audit)
+  (export creative-event-emit)
+)
