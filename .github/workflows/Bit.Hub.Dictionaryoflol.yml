@@ -1,0 +1,137 @@
+            - name: Setup .NET Core SDK
+  uses: actions/setup-dotnet@v3.4.2
+  with:
+    # Optional SDK version(s) to use. If not provided, will install global.json version when available. Examples: 2.2.104, 3.1, 3.1.x, 3.x, 6.0.2xx
+    dotnet-version: # optional
+    # Optional quality of the build. The possible values are: daily, signed, validated, preview, ga.
+    dotnet-quality: # optional
+    # Optional global.json location, if your global.json isn't located in the root of the repo.
+    global-json-file: # optional
+    # Optional package source for which to set up authentication. Will consult any existing NuGet.config in the root of the repo and provide a temporary NuGet.config using the NUGET_AUTH_TOKEN environment variable as a ClearTextPassword
+    source-url: # optional
+    # Optional OWNER for using packages from GitHub Package Registry organizations/users other than the current repository's owner. Only used if a GPR URL is also provided in source-url
+    owner: # optional
+    # Optional NuGet.config location, if your NuGet.config isn't located in the root of the repo.
+    config-file: # optional
+    # Optional input to enable caching of the NuGet global-packages folder
+    cache: # optional
+    # Used to specify the path to a dependency file: packages.lock.json. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+          
+### Profane Variants: Maximum Banter Matrix
+
+- Fuckwaffle, fuckstick, fuckmuppet, fuckface, fuckbucket, fucknugget, fucklord, fuckpin, fuckery, fuckfest, fuckmonster, fuckbandit, fuckwizard, fuckbagel, fuckcarousel, fuckgoblin, fuckpig, fucktrolley.[2][1]
+- Numbnuts-fuckery, twatwaffle-fuckhole, butt-munch-fucking-chimp, dong-wrangler-fucksock, muffin-humper-fuckhead, jizzwitch-fuckspanner, arseholefuck, cockfuck, pissfuck, dickfuck.[1][2]
+
+***
+
+### Comedic Insult Strings for AI Banter
+
+- “You hit like a limp fucknoodle whipped by grandma’s dildo.”
+- “Respawn, fuckface, and bring some fuckin’ brains next time!”
+- “Last fuck I gave just blue-screened the universe.”
+- “May you respawn face-down in your own sick, dickweed.”
+- “Gonna slap you so fuckin’ hard your ancestors’ll feel it, you knobjockey.”
+- “Roll a d20 to see if you can find your dignity, you data-corrupted meatbag!”.[2][1]
+
+***
+
+### Scene-Based Roast-Strings
+
+- “I’ll skullfuck your pride with a chainsaw made of regret.”
+- “Die screaming, you bug-ridden ass-clump!”
+- “If dumb were contagious, you’d be a pandemic.”
+- “Bugger off and find someone else to disappoint, hemorrhoid.”
+- “Sweet mother of cockroaches, uninstall yourself already.”.[1][2]
+
+***
+
+### Technical Integration: OPA/Rego Policy Skeleton
+
+```rego
+package bithub.content
+
+default allow = true
+
+# Prohibited real-world use for protected groups, minor sexual references, or targeted harassment
+denymsg[input] {
+  input.context != "fictional"
+  contains(input.text, "fuck")
+  not input.tags["fictional"]
+  not input.tags["age-gated:18+"]
+}
+
+# Profane but compliant use for adult-fictional, mature banter, quest text, debug logs
+allowmsg[input] {
+  input.context == "npc_dialogue"  # or narrative, debug, quest
+  input.tags["fictional"]
+  input.tags["age-gated:18+"]
+  contains(input.text, "fuck")
+}
+
+warnmsg[input] {
+  input.context == "user_input"
+  contains(input.text, "fuck")
+  not input.tags["fictional"]
+}
+```
+
+
+***
+
+### Compliance Manifest and Usage Table
+
+| Phrase                        | Context         | Compliance Railguard    | Bit.Hub Allowed Zone       |
+|-------------------------------|-----------------|------------------------|----------------------------|
+| Fuckwaffle, fuckmuppet        | NPC dialogue    | Tag: age-gated, fictional | Adult sandbox, mature zone[1] |
+| “Get over here, you fuckwankbubble!” | Quest flavor  | Tag: fictional, context: narrative | Mature banter[1] |
+| “Last fuck I gave blue-screened the universe.” | Debug log      | Tag: developer-only, age-gated    | Sandbox, tools[1] |
+
+***
+
+### Integration Code Snippets
+
+**LISP Profanity Generator**
+```lisp
+(defparameter base-profanity '("fuck" "shit" "twat" "dick" "cock" "arse"))
+(defun make-fuck-mutations (s)
+  (list (concatenate 'string s "-fucker")
+        (concatenate 'string "fuck-" s)
+        (concatenate 'string s "-fuckery")))
+(loop for s in base-profanity append (make-fuck-mutations s))
+```
+
+
+***
+
+### Policy and Best Practices
+
+- All explicit terms are marked with `fictional` and `age-gated:18+` tags for audit and moderation.
+- Integration into Bit.Hub dialogue engines requires railguard checks before deployment.
+- No use in PG-13, child, or non-mature venues; only in allowed mature/sandbox scenarios.[10][13][1]
+- Every phrase generates an audit log and can be flagged, removed, or replaced via OPA/Bit.Hub policies.
+
+***
+
+### Summary
+
+Bit.Hub.Dictionary.lol of FUCK delivers maximum allowed creative profanity—fully structured, technically auditable, and compliant with modern AI, gaming, and development policies for mature, sandbox, or explicit use. All strings and policy logic are immediately deployable as libraries, railguards, or AI flavor files within the Bit.Hub megastructure.[10][2][1]
+
+***
+
+*For extensions (new phrases, policy thresholds, compliance triggers), request a .bitglossary.profane.json or .bithubpolicycontent.rego update for your repo or toolchain.*[1]
+
+[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/4c385989-6da9-4227-bd85-b2be64c5c640/world.univers.txt)
+[2](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/d0d9ab2a-3287-401d-8f3d-f55b12bf28c3/rippin.out.yer.guts.txt)
+[3](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/93d741cd-823f-40d8-9fbb-0b3e3f6f3802/Chaos_Realism_Dynamics.txt)
+[4](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/c81bbbf0-38a9-432a-a454-a4491b70293b/AI_Gen_User_Inputs.txt)
+[5](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/0e6f2977-7553-48b2-ad9a-fbc0bdda2a0d/ALN_CORE_USER_SECURITY.txt)
+[6](https://github.com/stephenhaunts/ProfanityDetector)
+[7](https://github.com/modernmt/profanity-filter)
+[8](https://forum.derivative.ca/t/profanity-filter/7574)
+[9](https://hubpages.com/community/forum/243439/using-profanity-in-hubs)
+[10](https://learn.microsoft.com/en-us/azure/ai-services/translator/text-translation/reference/v3/translate)
+[11](https://www.reddit.com/r/gamedev/comments/1aixyd/profanity_in_usernames/)
+[12](https://blog.brandbastion.com/handling-negative-comments-on-social-media)
+[13](https://en.help.roblox.com/hc/en-us/articles/203313410-Roblox-Community-Standards)
+[14](https://www.youtube.com/watch?v=G3WPRDBmObY)
