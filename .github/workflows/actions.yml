@@ -1,3 +1,14 @@
+jobs:
+  compliance:
+    uses: ./.github/workflows/compliance-gatekeeper.yml
+
+  build:
+    needs: [compliance]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "🚀 Safe to build — compliance gate passed"
+
 name: Humor Reasoning Model (Bit.Hub)
 description: CI/CD-aware reasoning that maps code churn + humor tags to an execution plan. Never fails; writes auditable plan.
 inputs:
