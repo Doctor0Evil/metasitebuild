@@ -1,0 +1,32 @@
+name: Bit.Hub Release Enforcement
+version: 1.0.0
+scope: release
+owner: Doctor0Evil/Bit.Hub
+description: Defines preconditions for tagging/releases and artifact publication.
+power:
+  default: strict
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+inputs:
+  include:
+    - "lmfao.bit"
+    - ".github/workflows/release-*.yml"
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+  parameters:
+    require_clean_policy_denials: true
+    require_signed_artifacts: false
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - block_release
+  self_heal: false
+notes:
+  - Ties releases to policy cleanliness; can be extended to require signed assets.
