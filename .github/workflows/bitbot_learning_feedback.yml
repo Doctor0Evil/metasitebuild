@@ -117,3 +117,14 @@ jobs:
         run: |
           mkdir -p .bithub/ledger
           echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"LEARNING_LOOP\",\"detail\":\"Completed with Bit.Keep-aligned bootstrap and compliance checks\"}" >> .bithub/ledger/compliance.log
+
+          jobs:
+  compliance-gate:
+    uses: ./.github/workflows/bitbot-learning-loop.yml
+
+  build-or-deploy:
+    needs: [compliance-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "🚀 Safe to build — compliance gate passed"
