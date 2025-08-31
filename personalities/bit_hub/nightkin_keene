@@ -1,0 +1,24 @@
+# Install first:
+# pip install pyaipersonality
+
+from pyaipersonality import AIPersonality
+from pathlib import Path
+
+# Point to your custom personality folder
+keene_path = Path("personalities/bit_hub/nightkin_keene")
+
+# Load the Keene personality definition
+keene = AIPersonality(str(keene_path))
+
+# Inspect core attributes
+print("Name:", keene.name)
+print("Base tone:", keene.data.get("base_tone"))
+print("Emotions:", keene.data.get("emotions"))
+print("Priorities:", keene.data.get("priorities"))
+
+# Example: match a humor vector to a policy clause
+humor_style = keene.data.get("humor_style", "grim")
+if humor_style == "grim":
+    print("Apply non‑interference clause: auto‑escalate on censorship attempts.")
+
+# You can now integrate this with your UPV materializer and OPA/Rego enforcement
