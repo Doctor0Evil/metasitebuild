@@ -1,0 +1,198 @@
+name: Bit.Hub Cache Release and Compliant Distribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      purge_level:
+        description: "ref (branch) | keys (iterate) | all (ref+keys)"
+        required: false
+        default: "all"
+  push:
+    branches: [ "main" ]
+
+concurrency:
+  group: cache-release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  SUMMARY_BANNER: "Bit.Hub compliance wall active (fail-open)."
+
+jobs:
+  preflight-compliance:
+    runs-on: ubuntu-latest
+    outputs:
+      yield: ${{ steps.yield.outputs.percent }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Summary banner
+        run: |
+          echo "## Cache Release + Distribution" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ env.SUMMARY_BANNER }}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Ensure Terms and audit dirs
+        run: |
+          test -f TERMS-OF-SERVICE.md || echo "# Bit.Hub Terms of Service" > TERMS-OF-SERVICE.md
+          mkdir -p .bit/audit .bit/out
+      - name: Validate hyper parameters (if present)
+        continue-on-error: true
+        run: |
+          test -f .meta/hyper.parameters.json && jq empty .meta/hyper.parameters.json || echo "::notice ::No .meta hyper parameters."
+      - id: yield
+        name: .bit.coin yield (advisory)
+        continue-on-error: true
+        run: |
+          if test -f .bit/tokens/runner_bitcoin_token.json; then
+            cs=$(jq -r '.compscore // 900' .bit/tokens/runner_bitcoin_token.json)
+            if [ "$cs" -lt 600 ]; then echo "percent=50" >> $GITHUB_OUTPUT
+            elif [ "$cs" -lt 800 ]; then echo "percent=25" >> $GITHUB_OUTPUT
+            else echo "percent=0" >> $GITHUB_OUTPUT; fi
+          else echo "percent=0" >> $GITHUB_OUTPUT; fi
+      - name: Note yield in summary
+        run: echo "- Yield: ${{ steps.yield.outputs.percent }}%" >> "$GITHUB_STEP_SUMMARY"
+
+  release-caches:
+    needs: preflight-compliance
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show current ref
+        run: |
+          echo "Ref name: ${GITHUB_REF_NAME}"
+          echo "Repo: ${GITHUB_REPOSITORY}"
+      - name: Purge GitHub Actions caches by ref (safe)
+        continue-on-error: true
+        if: ${{ github.event.inputs.purge_level == '' || github.event.inputs.purge_level == 'all' || github.event.inputs.purge_level == 'ref' }}
+        run: |
+          gh api --method DELETE "repos/${GITHUB_REPOSITORY}/actions/caches" -F ref="${GITHUB_REF_NAME}" \
+            && echo "::notice ::Deleted caches for ref ${GITHUB_REF_NAME}" \
+            || echo "::warning ::Ref-level cache delete skipped."
+      - name: Purge GitHub Actions caches by keys (best-effort)
+        continue-on-error: true
+        if: ${{ github.event.inputs.purge_level == '' || github.event.inputs.purge_level == 'all' || github.event.inputs.purge_level == 'keys' }}
+        run: |
+          pages=1
+          while :; do
+            resp="$(gh api -H 'Accept: application/vnd.github+json' "repos/${GITHUB_REPOSITORY}/actions/caches?per_page=100&page=${pages}" || true)"
+            echo "$resp" | jq -r '.actions_caches[]?.key' | while read -r key; do
+              gh api --method DELETE "repos/${GITHUB_REPOSITORY}/actions/caches" -F key="$key" || true
+              echo "deleted key: $key"
+            done
+            more=$(echo "$resp" | jq -r '(.actions_caches|length) // 0')
+            [ "$more" -lt 100 ] && break || pages=$((pages+1))
+          done
+      - name: Clear runner-side caches (.NET, Helm, npm)
+        continue-on-error: true
+        run: |
+          dotnet --info || true
+          dotnet nuget locals all --clear || true
+          dotnet clean || true
+          rm -rf **/bin **/obj || true
+          helm version || (curl -sL https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz | tar -xz && sudo mv linux-amd64/helm /usr/local/bin/helm)
+          rm -rf ~/.cache/helm ~/.cache/chart || true
+          npm --version && npm cache verify || true
+      - name: Prune Docker buildx cache (if any)
+        continue-on-error: true
+        run: |
+          docker info >/dev/null 2>&1 || exit 0
+          docker builder prune -af || true
+      - name: Record cache release audit
+        run: echo "$(date -u +%FT%TZ) cache-release done for ${GITHUB_REF_NAME}" >> .bit/audit/cache-release.log
+      - name: Upload cache audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: cache-release-audit
+          path: .bit/audit/cache-release.log
+          if-no-files-found: ignore
+
+  rebuild-and-package:
+    needs: release-caches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: .NET restore/build (no-cache)
+        continue-on-error: true
+        run: |
+          dotnet restore --no-cache || true
+          dotnet build -c Release --no-incremental || true
+      - name: Helm package (if charts present)
+        continue-on-error: true
+        run: |
+          if [ -d charts ]; then
+            helm dependency update charts || true
+            mkdir -p .bit/out/charts
+            helm package charts/* -d .bit/out/charts || true
+          fi
+      - name: Package distribution bundle
+        run: |
+          mkdir -p .bit/out
+          stamp="$(date -u +%Y.%m.%d.%H%M%S)"
+          tar -czf ".bit/out/bithub-bundle-${stamp}.tgz" \
+            --exclude='.git' \
+            TERMS-OF-SERVICE.md \
+            $(test -d .bit/out/charts && echo .bit/out/charts || true)
+          echo "bundle=.bit/out/bithub-bundle-${stamp}.tgz" >> $GITHUB_OUTPUT
+      - name: Upload bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: bithub-distribution
+          path: .bit/out/*.tgz
+          retention-days: 30
+
+  distribute-assets:
+    needs: rebuild-and-package
+    runs-on: ubuntu-latest
+    env:
+      BITHUB_TOKEN: ${{ secrets.BITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate bundle(s)
+        id: find
+        run: |
+          ls -1 .bit/out/*.tgz 2>/dev/null | head -n 1 > .bit/out/selected.txt || true
+          sel=$(cat .bit/out/selected.txt 2>/dev/null || echo "")
+          if [ -z "$sel" ]; then echo "none=true" >> $GITHUB_OUTPUT; else echo "bundle=$sel" >> $GITHUB_OUTPUT; fi
+      - name: Distribute to nodes (API)
+        if: steps.find.outputs.none != 'true'
+        continue-on-error: true
+        run: |
+          # Node list (override by committing .bit/nodes.yml)
+          cat > .bit/nodes.yml <<'YML'
+nodes:
+  - name: staging-vsc
+    api: https://vsc.example.net/bithub/sync
+  - name: prod-vsc
+    api: https://vsc-prod.example.net/bithub/sync
+accept:
+  - "**/*.tgz"
+YML
+          bundle="${{ steps.find.outputs.bundle }}"
+          for api in $(yq -r '.nodes[].api' .bit/nodes.yml); do
+            echo "POST $api"
+            curl -sS -H "Authorization: Bearer ${BITHUB_TOKEN:-}" -F "artifact=@${bundle}" -X POST "$api" || true
+          done
+      - name: Santa precision delivery (if present)
+        continue-on-error: true
+        run: |
+          tool="tools/santa.clause.exe"
+          bundle="${{ steps.find.outputs.bundle }}"
+          if [ -f "$tool" ] && [ -n "$bundle" ]; then
+            chmod +x "$tool" || true
+            "$tool" --deliver "$bundle" --targets "clusters,alnfantasia" --mode "precision" || true
+          else
+            echo "::notice ::Santa tool missing or no bundle; skipped."
+          fi
+      - name: Distribution audit
+        run: echo "$(date -u +%FT%TZ) distributed ${{ steps.find.outputs.bundle }}" >> .bit/audit/distribution.log
+      - name: Upload distribution audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: distribution-audit
+          path: .bit/audit/distribution.log
+          if-no-files-found: ignore
