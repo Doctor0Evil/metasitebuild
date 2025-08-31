@@ -1,0 +1,4 @@
+restricted_patterns:
+  - "(?i)offensive_term_here"
+  - "(?i)restricted_profanity_here"
+  - "(?i)curl.+\\|.+bash"
