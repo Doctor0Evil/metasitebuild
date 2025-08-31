@@ -1,4 +1,3 @@
-# .github/workflows/bobthebuilder.bitrunner.yml
 name: "🛠️ Bob The Builder: BitRunner Pipeline"
 on:
   push:
@@ -6,26 +5,27 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   setup-bob-ai:
     runs-on: ubuntu-latest
     steps:
       - name: 🏗️ Checkout repo
         uses: actions/checkout@v4
-
-      - name: 🤖 init .bitrunners and .bit.ai
+      - name: 🤖 Init .bitrunners and .bit.ai
         run: |
           mkdir -p .bitrunners
           echo "bitrunner: version 1.0" > .bitrunners/runner.config
           echo "bitai: enabled = true" > .bit.ai
           echo "BOB: BitRunner/Bit.AI initialized!"
-
       - name: 🔎 Bob: Pipeline Leak Inspection
         run: |
           echo "🔎 Bob: Inspecting the pipeline for rust and YAML... "
           sleep 2
           echo "💧 Applying plumber's putty..."
-
       - name: 📦 Bob Installs and Patches Packages
         run: |
           echo "🛠️ running patch scripts..."
@@ -35,20 +35,17 @@ jobs:
             echo "console.log('Bob has patched your pipeline — no leaks detected!')" > pipeline-reinforce.js
             node pipeline-reinforce.js
           fi
-
       - name: 🚦 Bob Runs Bit.AI Diagnostics
         run: |
           echo "bit.ai:mode=diagnostics" > .bitrunners/bob.status
           echo "Running AI-powered diagnostics..."
           sleep 2
           echo "Bob says: All systems GREEN! (If yellow, you’ll hear about it with memes)."
-
       - name: 🤝 BitHub Workflow Policy Enforcer
         run: |
           if [ ! -d .bitrunners ]; then echo ".bitrunners missing!"; exit 1; fi
           if [ ! -f .bit.ai ]; then echo ".bit.ai config missing!"; exit 1; fi
           echo "BitHub compliance passed. Go build something absurdly cool!"
-
       - name: 📋 Bob’s Build Recap
         run: |
           echo "BOB RECAP:"
@@ -56,14 +53,25 @@ jobs:
           echo "Runner: $RUNNER_OS | Version: $(uname -a)"
           echo "No major leaks, no pipeline blockages. Build: SUCCESS! 🟩"
 
-- name: Scan for failed jobs
-  run: |
-    for script in bithub/scripts/get_failed_jobs.py \
-                  bithub/scripts/get_failed_jobs_alt1.py \
-                  bithub/scripts/get_failed_jobs_alt2.py \
-                  bithub/scripts/get_failed_jobs_stub.py; do
-      if [ -f "$script" ]; then
-        echo "Running $script..."
-        python "$script" > failed_jobs.json && break
-      fi
-    done
+  scan-for-failed-jobs:
+    runs-on: ubuntu-latest
+    needs: setup-bob-ai
+    steps:
+      - name: 🏗️ Checkout repo
+        uses: actions/checkout@v4
+      - name: Scan for failed jobs
+        run: |
+          for script in bithub/scripts/get_failed_jobs.py \
+                       bithub/scripts/get_failed_jobs_alt1.py \
+                       bithub/scripts/get_failed_jobs_alt2.py \
+                       bithub/scripts/get_failed_jobs_stub.py; do
+            if [ -f "$script" ]; then
+              echo "Running $script..."
+              python "$script" > failed_jobs.json && break
+            fi
+          done
+      - name: Upload failed jobs result
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-jobs
+          path: failed_jobs.json
