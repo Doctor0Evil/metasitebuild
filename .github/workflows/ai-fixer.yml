@@ -1,5 +1,13 @@
-# Fixed/compatible workflow file for Genius Workflow All-Fixer
-# Powershell-compliant YAML content with corrected indentation, steps, and shell usage for all Bit.Hub bots/policies
+jobs:
+  compliance:
+    uses: ./.github/workflows/compliance-gatekeeper.yml
+
+  build:
+    needs: [compliance]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "🚀 Safe to build — compliance gate passed"
 
 $workflowContent = @'
 name: Genius Workflow All-Fixer
