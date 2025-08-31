@@ -1,0 +1,134 @@
+name: Humor Reasoning Model (Bit.Hub)
+description: CI/CD-aware reasoning that maps code churn + humor tags to an execution plan. Never fails; writes auditable plan.
+inputs:
+  default_threshold:
+    description: standard | strict | paranoid
+    default: standard
+outputs:
+  plan_path:
+    description: Path to the reasoning plan JSON
+    value: ${{ steps.reason.outputs.plan }}
+  threshold:
+    description: Resolved threshold (standard|strict|paranoid)
+    value: ${{ steps.reason.outputs.threshold }}
+  run_pipeline:
+    description: "true|false"
+    value: ${{ steps.reason.outputs.run_pipeline }}
+  run_policy_gate:
+    description: "true|false"
+    value: ${{ steps.reason.outputs.run_policy_gate }}
+  run_meta_corrector:
+    description: "true|false"
+    value: ${{ steps.reason.outputs.run_meta_corrector }}
+  run_container_wall:
+    description: "true|false"
+    value: ${{ steps.reason.outputs.run_container_wall }}
+  run_release_lmfao:
+    description: "true|false"
+    value: ${{ steps.reason.outputs.run_release_lmfao }}
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      id: reason
+      run: |
+        set -euo pipefail
+        REPORT_DIR=".bithub/reports"; mkdir -p "$REPORT_DIR"
+
+        # Gather context
+        event="${GITHUB_EVENT_NAME:-push}"
+        branch="${GITHUB_REF_NAME:-unknown}"
+        commit_msg="$(git log -1 --pretty=%B 2>/dev/null || echo '')"
+
+        # Compute changed files (best-effort)
+        if [[ "$event" == "pull_request" ]]; then
+          base_ref="${GITHUB_BASE_REF:-origin/main}"
+          git fetch --no-tags --depth=1 origin "$base_ref" >/dev/null 2>&1 || true
+          mapfile -t files < <(git diff --name-only "origin/${base_ref#origin/}"...HEAD || true)
+        else
+          mapfile -t files < <(git diff --name-only HEAD~1..HEAD 2>/dev/null || git ls-files)
+        fi
+
+        # Heuristics
+        contains() { grep -qiE "$1" <<<"$2"; }
+        any_changed() { for f in "${files[@]}"; do [[ "$f" =~ $1 ]] && return 0; done; return 1; }
+
+        humor_tags=""; risk=0
+        if contains '\b(lol|omfg|wtf|lmao|lmfao|chaos|meltdown)\b' "$commit_msg"; then
+          humor_tags="hot"; risk=$((risk+2))
+        fi
+        any_changed '^\.github/workflows/.*y[a]?ml$' && risk=$((risk+2))
+        any_changed '^Dockerfile$|^docker/|^containers?/' && risk=$((risk+2))
+        any_changed '^lmfao\.bit$' && risk=$((risk+1))
+
+        # Resolve threshold
+        threshold="${{ inputs.default_threshold }}"
+        if (( risk >= 4 )); then threshold="paranoid"; elif (( risk >= 2 )); then threshold="strict"; fi
+
+        # Routing decisions
+        run_pipeline="true"                               # Always run CI orchestration
+        run_policy_gate=$([[ ${#files[@]} -gt 0 ]] && echo "true" || echo "false")
+        run_meta_corrector=$([[ $(any_changed '^\.github/workflows/.*y[a]?ml$'; echo $?) -eq 0 || "$humor_tags" == "hot" ]] && echo "true" || echo "false")
+        run_container_wall=$([[ $(any_changed '^Dockerfile$|^docker/|^containers?/' ; echo $?) -eq 0 ]] && echo "true" || echo "false")
+        run_release_lmfao=$([[ $(any_changed '^lmfao\.bit$'; echo $?) -eq 0 || $(contains '
+
+\[release:lmfao\]
+
+' "$commit_msg"; echo $?) -eq 0 ]] && echo "true" || echo "false")
+
+        # Plan JSON
+        plan="$REPORT_DIR/humor_reasoning_plan.json"
+        jq -n \
+          --arg event "$event" \
+          --arg branch "$branch" \
+          --arg commit_msg "$commit_msg" \
+          --arg threshold "$threshold" \
+          --argjson files "$(printf '%s\n' "${files[@]}" | jq -R . | jq -s .)" \
+          --arg run_pipeline "$run_pipeline" \
+          --arg run_policy_gate "$run_policy_gate" \
+          --arg run_meta_corrector "$run_meta_corrector" \
+          --arg run_container_wall "$run_container_wall" \
+          --arg run_release_lmfao "$run_release_lmfao" \
+          '{
+            event:$event, branch:$branch, threshold:$threshold,
+            signals:{ commit:$commit_msg },
+            files:$files,
+            plan:{
+              pipeline: ($run_pipeline=="true"),
+              policy_gate: ($run_policy_gate=="true"),
+              meta_corrector: ($run_meta_corrector=="true"),
+              container_wall: ($run_container_wall=="true"),
+              release_lmfao: ($run_release_lmfao=="true")
+            }
+          }' > "$plan"
+
+        echo "plan=$plan" >> "$GITHUB_OUTPUT"
+        echo "threshold=$threshold" >> "$GITHUB_OUTPUT"
+        echo "run_pipeline=$run_pipeline" >> "$GITHUB_OUTPUT"
+        echo "run_policy_gate=$run_policy_gate" >> "$GITHUB_OUTPUT"
+        echo "run_meta_corrector=$run_meta_corrector" >> "$GITHUB_OUTPUT"
+        echo "run_container_wall=$run_container_wall" >> "$GITHUB_OUTPUT"
+        echo "run_release_lmfao=$run_release_lmfao" >> "$GITHUB_OUTPUT"
+
+        echo "::notice title=Bit.Hub Humor-Reasoning::Plan written to $plan (threshold=$threshold)"
+
+            - name: Setup .NET Core SDK
+  uses: actions/setup-dotnet@v3.4.2
+  with:
+    # Optional SDK version(s) to use. If not provided, will install global.json version when available. Examples: 2.2.104, 3.1, 3.1.x, 3.x, 6.0.2xx
+    dotnet-version: # optional
+    # Optional quality of the build. The possible values are: daily, signed, validated, preview, ga.
+    dotnet-quality: # optional
+    # Optional global.json location, if your global.json isn't located in the root of the repo.
+    global-json-file: # optional
+    # Optional package source for which to set up authentication. Will consult any existing NuGet.config in the root of the repo and provide a temporary NuGet.config using the NUGET_AUTH_TOKEN environment variable as a ClearTextPassword
+    source-url: # optional
+    # Optional OWNER for using packages from GitHub Package Registry organizations/users other than the current repository's owner. Only used if a GPR URL is also provided in source-url
+    owner: # optional
+    # Optional NuGet.config location, if your NuGet.config isn't located in the root of the repo.
+    config-file: # optional
+    # Optional input to enable caching of the NuGet global-packages folder
+    cache: # optional
+    # Used to specify the path to a dependency file: packages.lock.json. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+          
