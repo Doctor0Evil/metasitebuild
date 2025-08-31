@@ -1,0 +1,37 @@
+auditPolicy:
+  mainPush: "block unless reviewed"
+  forcePush: "warn-loudly"
+
+runnerHealth:
+  check: "auto"
+  status:
+    - "active"
+    - "needs-help"
+    - "compliance-pass"
+
+encouragement:
+  memes: true
+  tips:
+    - "Code reviews up!"
+    - "Docs: #TeamWin"
+    - "Celebrate small merges 🎉"
+
+broadcast:
+  - platform: "mag:slack"
+    channel: "#bit-hub-announcements"
+    message: "New commit landed — compliance and banter intact!"
+  - platform: "mag:matrix"
+    room: "!bithub:compliance"
+    message: "Runner health check passed ✅ — keep the memes flowing."
+  - platform: "mag:discord"
+    channel: "bit-hub-celebrations"
+    message: "🎊 Banter-compliance achieved — Laughter.exe engaged."
+
+banterCompliance:
+  required: true
+  hooks:
+    - id: "banter-laughter"
+      run: "Laughter.exe --volume 11 --style confetti"
+    - id: "banter-magic"
+      run: "magic.lol --trigger success --style fireworks"
+  auditTrail: ".bithub/ledger/compliance.log"
