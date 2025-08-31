@@ -1,6 +1,14 @@
-name: ".bit.compliant-banter-test"
+name: BitHub Compliant Banter & ALN Massive Workflow (Sin.e-MAXX Mode)
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["CI", "Build", "Deploy"]
+    types: [completed]
+  push:
+    branches: [main, '**/failed-workflow']
+  schedule:
+    - cron: '0 */6 * * *'
+
 jobs:
   boundary-test:
     name: "Compliance: Reflex Boundary Audit"
@@ -43,3 +51,96 @@ jobs:
           echo '| Timestamp: ' $(date -u)
           echo '| Log: All steps and banter passed OPA/Bit.Hub gates |'
           echo '=========================================='
+
+  analyze-errors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ALN CLI tools
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          export PATH="$HOME/.local/bin:$PATH"
+          for tool in aln-analyze aln-patch aln-fixer-bot aln-erupt aln-blockchain aln-compliance-audit aln-bot-summon; do
+            if [ -f "./tools/$tool" ]; then
+              chmod +x "./tools/$tool"
+              cp "./tools/$tool" "$HOME/.local/bin/"
+            fi
+          done
+          echo "$PATH" >> $GITHUB_PATH
+      - name: Run ALN analysis
+        run: |
+          if command -v aln-analyze >/dev/null; then
+            aln-analyze --input /github/logs --output /tmp/failure.lst \
+              --profane-allow 'fuck,shit,bitch,asshole,cunt' || echo "[.bithub] ALN analysis warnings"
+            cat /tmp/failure.lst || echo "[.bithub] No failures recorded"
+          else
+            echo "::warning::aln-analyze not installed; skipping analysis"
+          fi
+      - name: Generate Humor Bus
+        run: echo "Yippee-ki-yay, let the Sloppy Disk Olympics begin!" > /tmp/humor.bus
+      - name: Apply Compliance Patch
+        run: |
+          if command -v aln-patch >/dev/null; then
+            aln-patch --target /tmp/failure.lst \
+              --profanity-compliance "fuck,shit,bitch,asshole,cunt" \
+              --sandbox-mode TRUE
+          else
+            echo "::warning::aln-patch not installed; skipping compliance patch"
+          fi
+      - name: Upload ALN report
+        uses: actions/upload-artifact@v4
+        with:
+          name: aln-analysis-${{ github.run_number }}-${{ github.sha }}
+          path: /tmp/failure.lst
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 6
+
+  self-repair-workflow:
+    needs: analyze-errors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Launch fixer bots
+        run: |
+          if command -v aln-fixer-bot >/dev/null; then
+            aln-fixer-bot --scale dynamic --target /tmp/failure.lst --log /tmp/fixer-bot.log
+          else
+            echo "::warning::aln-fixer-bot not installed; skipping"
+          fi
+      - name: Erupt workflow fixer
+        run: |
+          if command -v aln-erupt >/dev/null && [ -f /tmp/fixer-bot.log ]; then
+            while read -r bot; do
+              aln-erupt --bot "$bot" --repair-mode lava --debug MAX
+            done < /tmp/fixer-bot.log
+          fi
+
+  blockchain-persist:
+    needs: self-repair-workflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tokenize to blockchain
+        run: |
+          if command -v aln-blockchain >/dev/null; then
+            aln-blockchain --tokenize /tmp/fixer-bot.log --network bit.hub.chain --compliance MAX
+          fi
+      - name: Audit Profane Compliance
+        run: |
+          if command -v aln-compliance-audit >/dev/null; then
+            aln-compliance-audit --input /tmp/humor.bus --profanity-level unrestricted.bat --log /tmp/audit.log
+          fi
+
+  contributor-botnet:
+    needs: blockchain-persist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Summon bots (Sin.e-MAXX mode)
+        run: |
+          if command -v aln-bot-summon >/dev/null; then
+            aln-bot-summon --count 20 --personality Sin.e-MAXX --mode developer,debug,janitor
+          fi
+      - name: Announce success (satirical)
+        run: echo "Fucking.legendary! Erupting with massive bot army. Clinton & Tyson backup routines locked and loaded."
