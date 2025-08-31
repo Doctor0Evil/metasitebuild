@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BIT_HUB_REPO_URL="${BIT_HUB_REPO_URL:-https://github.com/Doctor0Evil/Bit.Hub.git}"
+CACHE_DIR="${CACHE_DIR:-$HOME/.bitbot/cache}"
+LABELS_FILE="$CACHE_DIR/labels.txt"
+POLICY_DIR="$CACHE_DIR/policy"
+PATTERNS_DIR="$CACHE_DIR/patterns"
+SCHEMAS_DIR="$CACHE_DIR/schemas"
+
+mkdir -p "$CACHE_DIR" "$POLICY_DIR" "$PATTERNS_DIR" "$SCHEMAS_DIR"
+
+echo "[Bit.Hub] Bootstrapping runner compliance harness…"
+
+# 1. Sync manifests
+if git ls-remote "$BIT_HUB_REPO_URL" &>/dev/null; then
+  TMP=$(mktemp -d)
+  git clone --depth=1 "$BIT_HUB_REPO_URL" "$TMP"
+  rsync -a --ignore-existing "$TMP/.bithub/policy/" "$POLICY_DIR/"
+  rsync -a --ignore-existing "$TMP/.bit/patterns/" "$PATTERNS_DIR/"
+  rsync -a --ignore-existing "$TMP/.bit/schemas/" "$SCHEMAS_DIR/"
+  rm -rf "$TMP"
+else
+  echo "[Bit.Hub] Warning: Cannot reach canonical repo; using cached policies."
+fi
+
+# 2. Self-label
+RUNNER_LABELS="${RUNNER_LABELS:-self-hosted,bit.hub,linux}"
+echo "$RUNNER_LABELS" > "$LABELS_FILE"
+echo "[Bit.Hub] Runner labels: $RUNNER_LABELS"
+
+# 3. Inject default .cfg into env
+export BIT_HUB_POWER_THRESHOLD="${BIT_HUB_POWER_THRESHOLD:-standard}"
+export BIT_HUB_POLICY_DIR="$POLICY_DIR"
+export BIT_HUB_PATTERNS_DIR="$PATTERNS_DIR"
+export BIT_HUB_SCHEMAS_DIR="$SCHEMAS_DIR"
+
+# 4. Humor‑Reasoning pre‑flight
+COMMIT_MSG="$(git log -1 --pretty=%B 2>/dev/null || echo '')"
+if grep -Eiq '\b(lol|omfg|wtf|lmao|lmfao|meltdown|chaos)\b' <<<"$COMMIT_MSG"; then
+  export BIT_HUB_POWER_THRESHOLD="paranoid"
+elif git diff --name-only HEAD~1..HEAD | grep -qE '^\.github/workflows/'; then
+  export BIT_HUB_POWER_THRESHOLD="strict"
+fi
+echo "[Bit.Hub] Enforcement threshold: $BIT_HUB_POWER_THRESHOLD"
+
+# 5. Log compliance state
+EVENTS_DIR=".bithub/events"
+mkdir -p "$EVENTS_DIR"
+cat > "$EVENTS_DIR/runner-$(date +%s).json" <<JSON
+{
+  "event": "runner_bootstrap",
+  "labels": "$RUNNER_LABELS",
+  "threshold": "$BIT_HUB_POWER_THRESHOLD",
+  "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+}
+JSON
+
+echo "[Bit.Hub] Runner compliance harness ready."
+
+            - name: Setup .NET Core SDK
+  uses: actions/setup-dotnet@v3.4.2
+  with:
+    # Optional SDK version(s) to use. If not provided, will install global.json version when available. Examples: 2.2.104, 3.1, 3.1.x, 3.x, 6.0.2xx
+    dotnet-version: # optional
+    # Optional quality of the build. The possible values are: daily, signed, validated, preview, ga.
+    dotnet-quality: # optional
+    # Optional global.json location, if your global.json isn't located in the root of the repo.
+    global-json-file: # optional
+    # Optional package source for which to set up authentication. Will consult any existing NuGet.config in the root of the repo and provide a temporary NuGet.config using the NUGET_AUTH_TOKEN environment variable as a ClearTextPassword
+    source-url: # optional
+    # Optional OWNER for using packages from GitHub Package Registry organizations/users other than the current repository's owner. Only used if a GPR URL is also provided in source-url
+    owner: # optional
+    # Optional NuGet.config location, if your NuGet.config isn't located in the root of the repo.
+    config-file: # optional
+    # Optional input to enable caching of the NuGet global-packages folder
+    cache: # optional
+    # Used to specify the path to a dependency file: packages.lock.json. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+          
