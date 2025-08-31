@@ -1,3 +1,11 @@
+# CODEOWNERS
+docs/legal/** @BitHub-Governance
+.bit/schemas/** @BitHub-Governance
+.bit/templates/legal/** @BitHub-Governance
+
+
+
+
 # Bit.Hub
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
