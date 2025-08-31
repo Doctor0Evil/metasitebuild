@@ -1,0 +1,24 @@
+name: Security Guard
+description: Update tools best-effort and prep scanning surfaces (fail-open)
+runs:
+  using: composite
+  steps:
+    - name: Ensure dirs
+      shell: bash
+      run: |
+        mkdir -p .bit/security/{definitions,rules,logs}
+        touch .bit/security/versions.txt
+
+    - name: Install tools (best-effort)
+      shell: bash
+      continue-on-error: true
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clamav clamav-freshclam yara || true
+        sudo systemctl stop clamav-freshclam 2>/dev/null || true
+        sudo freshclam || true
+
+        - name: Validate Go Environment Config
+  uses: openpolicyagent/conftest@v0.45.0
+  with:
+    args: test --policy .bithub/policy --input go_env_config.json
