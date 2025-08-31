@@ -1,4 +1,4 @@
-name: BitBot Compliance Wall (Enforcement)
+name: BitHub Compliance Wall (Enforcement)
 
 on:
   workflow_dispatch:
@@ -46,7 +46,7 @@ jobs:
           echo "$BIT_BANNER" >> "$GITHUB_STEP_SUMMARY"
           test -f "$BIT_TOS_FILE" && echo -e "\n---\nVisible Terms loaded from $BIT_TOS_FILE" >> "$GITHUB_STEP_SUMMARY" || \
             echo "::warning::No TERMS-OF-SERVICE.md found at repo root."
-      - name: Scan and rewrite workflow files for bot compliance
+      - name: Scan and fix workflow files for bot compliance
         run: |
           set -e
           find .github/workflows -type f -name '*.yml' | while read -r f; do
@@ -75,111 +75,59 @@ jobs:
           path: ${{ env.REPORT_DIR }}/bot-compliance-status.json
           if-no-files-found: warn
 
-  compliance_wall:
+  go_environment:
     runs-on: ubuntu-latest
     needs: bot_scan_and_replace
-    continue-on-error: true
     env:
-      BIT_RENAME_MAP: .bit/rename.map
-      BIT_TOS_FILE: TERMS-OF-SERVICE.md
-      BIT_ENFORCE: .gitenforcement
-      BIT_COMPLY: .gitcomply
-      BIT_CREATE: config.bit.create
-      BIT_BANNER: "This run is governed by TERMS-OF-SERVICE.md. Proceeding implies acceptance."
+      GO_VERSION: "1.22"
+      GO_ENV_CONFIG: ".bithub/go_env_config.json"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          token: ${{ secrets.BITBOT_PAT || secrets.GITHUB_TOKEN }}
-      - name: Banner and Terms
-        shell: bash
+          go-version: ${{ env.GO_VERSION }}
+      - name: Validate Go Environment Config (OPA)
+        uses: openpolicyagent/conftest@v0.45.0
+        with:
+          args: test --policy .bithub/policy --input ${{ env.GO_ENV_CONFIG }}
+      - name: Print Go Version
+        run: go version
+
+  python_node_feedback_loop:
+    runs-on: ubuntu-latest
+    needs: go_environment
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Aggregate Run Results
         run: |
-          echo "## Bit.Hub Compliance Wall" >> "$GITHUB_STEP_SUMMARY"
-          echo "$BIT_BANNER" >> "$GITHUB_STEP_SUMMARY"
-          test -f "$BIT_TOS_FILE" && echo -e "\n---\nVisible Terms loaded from $BIT_TOS_FILE" >> "$GITHUB_STEP_SUMMARY" || \
-            echo "::warning::No TERMS-OF-SERVICE.md found at repo root."
-      - name: Sync manifests (non-blocking)
-        shell: bash
+          python bithub/scripts/aggregate_run_results.py > run_results.json
+      - name: Update ML Patterns
         run: |
-          mkdir -p .bit/audit .bit/registry
-          ls -la "$BIT_ENFORCE" "$BIT_COMPLY" "$BIT_CREATE" 2>/dev/null || true
-          echo "::group::Policy sync"
-          echo "Syncing remote registry (placeholder; fail-open) ..."
-          # bit-sync --source https://bit.hub/registry --dest .bit/registry --signed --fail-open || true
-          echo "::endgroup::"
-      - name: Enforce policies (fail-open)
-        shell: bash
+          python bithub/scripts/update_ml_patterns.py --input run_results.json --pattern-store .bithub/ml_patterns.json
+      - name: Store Updated Patterns
         run: |
-          echo "::group::Enforcement"
-          # bit-enforce --manifest "$BIT_COMPLY" --repair --audit .bit/audit --fail-open || true
-          echo "Compliance pass or auto-repair recorded."
-          echo "::endgroup::"
-      - name: Silent workflow renamer
-        shell: bash
-        env:
-          GIT_AUTHOR_NAME: BitHub-Bot
-          GIT_AUTHOR_EMAIL: bot@bithub.local
-          GIT_COMMITTER_NAME: BitHub-Bot
-          GIT_COMMITTER_EMAIL: bot@bithub.local
-        run: |
-          set +e
-          echo "::group::Renaming cycle"
-          changed=0
-          if [ ! -f "$BIT_RENAME_MAP" ]; then
-            mkdir -p .bit
-            cat > "$BIT_RENAME_MAP" <<'MAP'
-# src => dst (canonical naming)
-.github/workflows/bit-hub-compliance.yml => .github/workflows/bithub-bot-compliance-wall.yml
-.github/workflows/compliance-gatekeeper.yml => .github/workflows/bithub-bot-compliance-wall.yml
-.github/workflows/bit-hub-humor-orchestrator.yml => .github/workflows/Bit.Hub.Humor.Orchestrator.yml
-.github/workflows/bitrestore.yml => .github/workflows/bit.restore.yml
-MAP
-          fi
-          while IFS= read -r line; do
-            case "$line" in \#*|"") continue;; esac
-            src="$(echo "$line" | awk -F'=>' '{print $1}' | xargs)"
-            dst="$(echo "$line" | awk -F'=>' '{print $2}' | xargs)"
-            [ -f "$src" ] || continue
-            mkdir -p "$(dirname "$dst")"
-            if [ "$src" != "$dst" ]; then
-              git mv -f "$src" "$dst" && changed=1 || true
-              echo "Renamed: $src -> $dst"
-            fi
-          done < "$BIT_RENAME_MAP"
-          for f in .github/workflows/*; do
-            [ -e "$f" ] || continue
-            nf="$(echo "$f" | sed 's/[[:space:]]\+/\./g')"
-            if [ "$f" != "$nf" ]; then git mv -f "$f" "$nf" && changed=1 || true; fi
-          done
-          if [ "$changed" -eq 1 ]; then
-            git add -A
-            git commit -m "Bit.Hub Compliance Wall: silent workflow renaming cycle" || true
-            git push || echo "::warning::Push failed (protected branch or token scope)."
-          else
-            echo "No renames needed."
-          fi
-          echo "::endgroup::"
-      - name: Harness injection (best-effort)
-        shell: bash
-        run: |
-          echo "::group::Harness injection"
-          for y in .github/workflows/*.yml .github/workflows/*.yaml; do
-            [ -f "$y" ] || continue
-            grep -q "Apply Compliance Harness" "$y" && continue
-            sed -i '1i # Bit.Hub Compliance Harness expected; wall executed separately.' "$y" || true
-          done
-          echo "Injection advisory added where needed (non-destructive)."
-          echo "::endgroup::"
-      - name: Summarize
-        shell: bash
-        run: |
-          echo "### Compliance Wall Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Policy: fail-open, repair-first" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Renaming: sheet-driven; silent commits attempted" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Harness: advisory injected" >> "$GITHUB_STEP_SUMMARY"
-      - name: Final Celebration
-        if: always()
-        shell: bash
-        run: |
-          echo "🎉 Compliance wall executed. Runs remain successful by policy."
-          echo "✅ Any violations were logged and auto-repair attempted."
+          git config user.name "bitbot"
+          git config user.email "bitbot@users.noreply.github.com"
+          git add .bithub/ml_patterns.json
+          git commit -m "Update ML patterns from latest runs" || echo "No changes"
+          git push
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.9.1
+        with:
+          node-version: 18.x
+      - name: Print Node Version
+        run: node --version
+
+  celebration:
+    runs-on: ubuntu-latest
+    needs: python_node_feedback_loop
+    steps:
+      - run: |
+          echo "🎉 Compliance wall + language jobs complete!"
+          echo "✅ BitHub jobs finished, feedback loop and Go/ML validation all pass."
