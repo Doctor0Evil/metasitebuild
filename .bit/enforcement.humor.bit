@@ -1,0 +1,35 @@
+name: Bit.Hub Humor Reasoning Enforcement
+version: 1.0.0
+scope: humor
+owner: Doctor0Evil/Bit.Hub
+description: Maps humor intensity and file-surface risk to enforcement thresholds.
+power:
+  default: standard
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+  parameters:
+    escalate_on_commit_message_patterns:
+      hot_words:
+        - "\\b(lol|omfg|wtf|lmao|lmfao|meltdown|chaos)\\b"
+      surfaces:
+        workflows: "^\\.github/workflows/.*y[a]?ml$"
+        containers: "^Dockerfile$|^docker/|^containers?/"
+        release_bits: "^lmfao\\.bit$"
+    mapping:
+      high: paranoid
+      medium: strict
+      low: standard
+actions:
+  on_warning:
+    - annotate
+  on_denial:
+    - write_report
+  self_heal: false
+notes:
+  - Consumed by the Humor-Reasoning-Model composite action to set POWER_THRESHOLD per run.
