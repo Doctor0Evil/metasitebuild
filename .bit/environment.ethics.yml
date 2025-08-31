@@ -1,0 +1,64 @@
+version: 1
+policy:
+  mode: fail-open
+  audit:
+    job_summary: true
+    file_log: .bit/audit/environment.log
+
+boundaries:
+  compute:
+    cpu_quota_cores: 4           # max CPU cores per job
+    mem_limit_gb: 16             # RAM ceiling
+    gpu:
+      enabled: true
+      max_gpus: 1
+      power_limit_watts: 150     # clamp via vendor tools if available
+      vram_limit_gb: 12
+    io:
+      disk_bw_mbps: 200
+      scratch_ttl_hours: 24
+
+  network:
+    egress_allowlist:
+      - https://api.bithub.local
+      - https://registry.npmjs.org
+      - https://github.com
+    ingress_allowed: false
+    dns_required_suffixes: [".bithub.local", ".github.com"]
+    block_plain_http: true
+
+  data:
+    residency_region: us-phx-1
+    sensitivity: standard        # standard | pii | phi | restricted
+    retention_days: 30
+    export_controls:
+      allow_external_export: false
+      allowed_targets: []
+
+  energy:
+    budget_kwh: 0.75             # soft ceiling per job
+    prefer_low_carbon_windows: true
+    carbon_region: "US-AZ"
+    record_device_mix: true
+
+  ai_maturity:
+    required_personality:
+      banter_min: 0
+      profanity_max: 2
+      compscore_min: 800
+    prohibited_tasks:
+      - "model_training:on_restricted_data"
+      - "content_generation:extreme_violence"
+    human_review_required:
+      - "content_generation:adult"
+      - "data_migration:cross_region"
+
+controls:
+  seccomp_profile: profiles/default-seccomp.json
+  disallow_privileged: true
+  max_parallel_jobs: 2
+
+signing:
+  require_signed_manifests: true
+  trusted_keys:
+    - ssh-ed25519 AAAAC3Nza...jacob
