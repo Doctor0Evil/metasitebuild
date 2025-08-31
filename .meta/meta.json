@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "scope": "Bit.Hub",
+  "appliesTo": [
+    "artifact-builds",
+    "dotnet-core-isolations"
+  ],
+  "independence": {
+    "enforceNonInterference": true,
+    "allowlistEndpoints": [
+      "https://vsc.example.net",
+      "https://vsc-prod.example.net"
+    ]
+  },
+  "build": {
+    "optimizationLevel": "aggressive",
+    "parallelism": 4,
+    "sandbox": true
+  },
+  "runtime": {
+    "maxThreads": 8,
+    "memoryLimitMB": 2048,
+    "enableRailguards": true
+  },
+  "aiCompliance": {
+    "personalityVectorBounds": {
+      "banter": { "min": 0, "max": 1 },
+      "profanity": { "min": 0, "max": 2 },
+      "compscore": { "min": 800, "max": 2000 }
+    },
+    "stickyThresholds": true,
+    "cooldownMinutes": 120
+  }
+}
