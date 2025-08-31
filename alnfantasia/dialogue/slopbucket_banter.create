@@ -1,0 +1,47 @@
+version: 1.0.0
+name: slopbucket_banter
+description: >
+  Curated banter lines for mature contexts. Designed for AI/NPC taunt systems.
+  All entries screened for Bit.Hub compliance.
+
+groups:
+  core_vulgar_insults:
+    - "Shitmuppet"
+    - "Dicktangle"
+    - "Twat-sprocket"
+    - "Jizzwitch"
+    - "Fartmonger"
+    - "Knobgoblin"
+    - "Titwank of the Third Degree"
+
+  playground_taunts:
+    - "Cockwaffle"
+    - "Assgasket"
+    - "Pratfaced slug"
+    - "Douchecanoe with extra crust"
+    - "Shart-blaster"
+    - "Mudhole-mouthed gobshite"
+
+  hybrid_tech_vulgarity:
+    - "Kernel-panic ass-hopper"
+    - "Slack-jawed RAM-scrubber"
+    - "AI hallucination freak"
+    - "Chatbot shitgibbon"
+    - "Dickheaded github reject"
+
+  scene_roasts:
+    - "I’ll skullfuck your pride with a chainsaw made of regret!"
+    - "May you respawn face-down in your own sick every round, dickweed!"
+    - "Last fuck I gave just blue-screened the universe."
+
+  banter_bursts:
+    - "You hit like a wet limp noodle whipped by grandma’s dildo."
+    - "Go gargle scalding slime, you festering sack of afterbirth."
+    - "Your soul must be the beta build—full of bugs and unfinished features."
+
+meta:
+  tags: [banter, insult, mature, sandbox]
+  usage:
+    allowed_contexts: [adult, mature, test_sandbox]
+    blocked_contexts: [child, pg13, public_unrated]
+  compliance_policy: bit.hub/policy/alnfantasia_banter.rego
