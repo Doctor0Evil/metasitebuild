@@ -1,0 +1,77 @@
+version: 1.0.0
+name: Bit.Hub Universal Runner Compliance
+description: >
+  Defines baseline rules for any GitHub runner executing workflows in this repo.
+  Ensures consistent permissions, concurrency, timeouts, and policy evaluation.
+
+power:
+  default: standard
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+
+runner:
+  required_labels:
+    - bit.hub
+    - linux
+  forbidden_labels:
+    - untrusted
+  min_os: ubuntu-20.04
+  adaptive_runs_on:
+    - self-hosted
+    - bit.hub
+    - linux
+
+workflow_defaults:
+  permissions:
+    contents: read
+  concurrency:
+    group: wf-${{ github.ref }}
+    cancel-in-progress: false
+  timeout-minutes: 30
+  checkout_version: actions/checkout@v4
+
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+    - path: .bithub/policy/container.rego
+      package: bithub.container
+    - path: .bithub/policy/runner.rego
+      package: bithub.runner
+
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - block_merge
+  self_heal: true
+
+notes:
+  - This file is read by the Bit.Hub bootstrap harness at runner startup.
+  - Any missing defaults are injected into workflows before execution.
+  - In strict/paranoid, denials from linked policies can block merges or deploys.
+
+              - name: Cache
+  uses: actions/cache@v4.2.4
+  with:
+    # A list of files, directories, and wildcard patterns to cache and restore
+    path: 
+    # An explicit key for restoring and saving the cache
+    key: 
+    # An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
+    restore-keys: # optional
+    # The chunk size used to split up large files during upload, in bytes
+    upload-chunk-size: # optional
+    # An optional boolean when enabled, allows windows runners to save or restore caches that can be restored or saved respectively on other platforms
+    enableCrossOsArchive: # optional, default is false
+    # Fail the workflow if cache entry is not found
+    fail-on-cache-miss: # optional, default is false
+    # Check if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache
+    lookup-only: # optional, default is false
+    # Run the post step to save the cache even if another step before fails
+    save-always: # optional, default is false
+          
