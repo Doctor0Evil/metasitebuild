@@ -1,0 +1,36 @@
+name: Bit.Hub Container Enforcement
+version: 1.0.0
+scope: container
+owner: Doctor0Evil/Bit.Hub
+description: Compliance wall for OCI images; requires OCI labels and discourages :latest.
+power:
+  default: strict
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+inputs:
+  include:
+    - "Dockerfile"
+    - "docker/**"
+policies:
+  modules:
+    - path: .bithub/policy/container.rego
+      package: bithub.container
+  parameters:
+    required_oci_labels:
+      - org.opencontainers.image.source
+      - org.opencontainers.image.description
+      - org.opencontainers.image.licenses
+    forbid_root_user: false   # warn by policy; can be hardened later
+    disallow_latest_tag_in_publish: true
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - block_publish
+  self_heal: false
+notes:
+  - In paranoid mode, warnings (e.g., :latest) will also block publish.
