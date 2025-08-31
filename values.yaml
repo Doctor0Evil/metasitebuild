@@ -1,0 +1,26 @@
+namespaces:
+  - bithub-system
+  - bithub-tenants
+
+mode:
+  gatekeeperEnforcement: enforce   # enforce | dryrun
+  webhook: enabled                 # enabled | disabled
+
+centralDataBank:
+  hrCore: |
+    { "humor_reasoning_core": { "tone_bounds": { "banter_min": 0, "profanity_max": 2 } } }
+  personalityMatrix: |
+    { "matrix": { "compscore": { "min": 800, "max": 2000 } } }
+  thresholds: |
+    { "current_level": "standard", "levels": { "standard": { "risk_ceiling": 0.10 } } }
+
+image:
+  policyHarness: ghcr.io/yourorg/bithub-policy-harness:latest
+
+allowlist:
+  registries:
+    - "ghcr.io/yourorg"
+    - "docker.io/yourorg"
+  egressHosts:
+    - "vsc.example.net"
+    - "vsc-prod.example.net"
