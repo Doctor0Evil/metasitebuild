@@ -1,0 +1,50 @@
+name: Compliance Wall CD
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  wall:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.5.0
+        with:
+          go-version: '1.22.3'  # Replace with your Go version
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3.4.2
+        with:
+          dotnet-version: '8.0.x'  # Replace with your .NET version
+          cache: true              # Optional - enables NuGet package caching
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          echo "kubectl assumed present or injected by your environment"
+
+      - name: Run Compliance Wall
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG_CONTENTS }} # If required
+        run: |
+          bash ./tools/loldeploy_wall.sh
+
+      - name: Upload artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wall-evidence-${{ github.run_id }}
+          path: |
+            compliance_report.json
+            compliance_report.aln
+            artifacts/
+            .bit/state/
