@@ -1,0 +1,21 @@
+{
+  "mirrors": [
+    { "name": "primary-github", "type": "git", "url": "https://github.com/OWNER/REPO.git", "write": true },
+    { "name": "backup-gitlab", "type": "git", "url": "https://gitlab.com/OWNER/REPO.git", "write": true },
+    { "name": "backup-gitea", "type": "git", "url": "https://forge.example.com/OWNER/REPO.git", "write": true }
+  ],
+  "orchestrators": [
+    { "name": "github-actions", "type": "actions", "url": "https://api.github.com" },
+    { "name": "private-bit-hub", "type": "webhook", "url": "https://orchestrator.example.com/hook/dispatch" }
+  ],
+  "registries": [
+    { "name": "ghcr", "type": "oci", "url": "ghcr.io/NAMESPACE" },
+    { "name": "private-oci", "type": "oci", "url": "registry.example.com/NAMESPACE" }
+  ],
+  "policies": {
+    "power_threshold": "standard",
+    "failover_strategy": "prefer-primary-fallback-fast",
+    "max_concurrent_ci": 6,
+    "queue_requeue_minutes": 12
+  }
+}
