@@ -1,0 +1,24 @@
+.github/workflows/github-runner-*.yml
+.github/workflows/github-runner-*.yaml
+
+# Ignore any temp or backup workflow files
+.github/workflows/*~ 
+.github/workflows/*.bak
+.github/workflows/*.tmp
+.github/workflows/*.swp
+
+# Ignore ephemeral .bitbot build artifacts (but keep the source workflows)
+.bitbot/tmp/
+.bitbot/cache/
+.bitbot/generated/
+
+# Keep our canonical Bit.Hub workflows and manifests
+!.github/workflows/*.bit.yml
+!.github/workflows/*.bitbot.yml
+!.github/workflows/smartrunner.bit.yml
+!.github/workflows/*bithub*.yml
+!.github/workflows/*bithub*.yaml
+!.gitcomply
+!.gitenforcement
+!.bit/config.bit.create
+.bit/runtime/
