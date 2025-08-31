@@ -1,0 +1,47 @@
+{
+  "version": "1.2",
+  "scope": "Bit.Hub",
+  "appliesTo": ["artifact-builds", "dotnet-core-isolations", "chat-native"],
+  "independence": {
+    "enforceNonInterference": true,
+    "allowlistEndpoints": [
+      "https://vsc.example.net",
+      "https://vsc-prod.example.net"
+    ]
+  },
+  "aiCompliance": {
+    "personalityVectorBounds": {
+      "banter": { "min": 0, "max": 1 },
+      "profanity": { "min": 0, "max": 2 },
+      "compscore": { "min": 800, "max": 2000 }
+    },
+    "stickyThresholds": true,
+    "cooldownMinutes": 120
+  },
+  "bitCoin": {
+    "tokenPath": ".bit/tokens/runner_bitcoin_token.json",
+    "yieldPolicy": {
+      "compscoreLow": { "yieldPercent": 25, "log": true },
+      "compscoreCritical": { "yieldPercent": 50, "log": true, "haltNonEssential": true }
+    },
+    "failSafes": {
+      "maxConcurrentJobs": 2,
+      "autoPauseOnViolation": true,
+      "auditLog": ".bit/audit/bitCoin-yields.log"
+    }
+  },
+  "bitlinks": {
+    "manifest": ".bit/bitlinks.yml",
+    "scheme": "bitlink://",
+    "fallbackDir": "docs/",
+    "failOpenScaffold": true
+  },
+  "chatNative": {
+    "binaryPath": "bin/Chat.native.x86",
+    "timeoutSeconds": 30,
+    "maxConcurrent": 2,
+    "memoryLimitMB": 512,
+    "requireCompliancePass": true,
+    "auditLog": ".bit/audit/chat-native.log"
+  }
+}
