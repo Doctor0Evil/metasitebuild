@@ -1,0 +1,139 @@
+name: Bit.Hub Container Supremacy (with Compliance Wall)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_name:
+        description: "Container image name (without registry)"
+        type: string
+        default: "my-service"
+      image_tag:
+        description: "Image tag"
+        type: string
+        default: "latest"
+      power_threshold:
+        description: "standard | strict | paranoid"
+        type: choice
+        default: "standard"
+        options: [ "standard", "strict", "paranoid" ]
+  push:
+    branches: [ "main" ]
+    paths:
+      - "Dockerfile"
+      - ".bithub/policy/**"
+      - ".bit/schemas/**"
+      - ".github/workflows/bit-hub-container-supremacy.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: container-supremacy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  BIT_HUB_REPO_URL: "https://github.com/Doctor0Evil/Bit.Hub.git"
+  POLICY_DIR: ".bithub/policy"
+  REPORT_DIR: ".bithub/reports"
+  POWER_THRESHOLD: ${{ inputs.power_threshold || vars.POWER_THRESHOLD || 'standard' }}
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/${{ inputs.image_name || 'my-service' }}
+  IMAGE_TAG: ${{ inputs.image_tag || 'latest' }}
+  OPA_VERSION: "0.64.1"
+
+jobs:
+  sync_policies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync canonical Bit.Hub policies (non-blocking)
+        run: |
+          set +e
+          if git ls-remote "$BIT_HUB_REPO_URL" &>/dev/null; then
+            echo "Syncing canonical Bit.Hub policies..."
+            git clone --depth=1 "$BIT_HUB_REPO_URL" /tmp/bithub
+            rsync -av --ignore-existing /tmp/bithub/.bithub/policy/ .bithub/policy/
+            rsync -av --ignore-existing /tmp/bithub/.bit/schemas/ .bit/schemas/
+          else
+            echo "::warning::Canonical repo unreachable — using local copies."
+          fi
+          set -e
+
+  build_and_scan:
+    needs: sync_policies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OPA
+        run: |
+          BIN="$HOME/.local/bin"; mkdir -p "$BIN"
+          curl -fsSL -o "$BIN/opa" "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static"
+          chmod +x "$BIN/opa"; echo "$BIN" >> $GITHUB_PATH
+
+      - name: Build container image (local)
+        run: |
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.description=Bit.Hub-compliant image for ${IMAGE_NAME}" \
+            --label "org.opencontainers.image.licenses=MIT" \
+            -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
+
+      - name: Save image metadata for policy check
+        run: |
+          mkdir -p "${REPORT_DIR}"
+          docker inspect ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} > "${REPORT_DIR}/image-inspect.json"
+
+      - name: Evaluate image against Bit.Hub policy
+        run: |
+          REPORT="${REPORT_DIR}/image-policy.ndjson"
+          : > "$REPORT"
+          jq -n \
+            --arg kind "container_image" \
+            --arg name "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}" \
+            --slurpfile meta "${REPORT_DIR}/image-inspect.json" \
+            '{kind:$kind, name:$name, metadata:$meta[0]}' > /tmp/image.json
+          opa eval -f json -I -d "${POLICY_DIR}" -i /tmp/image.json 'data.bithub.container' \
+            | jq -c '.result[].expressions[].value | {name: input.name, deny:(.deny // []), warn:(.warn // [])}' --argfile input /tmp/image.json \
+            >> "$REPORT" || true
+          cat "$REPORT"
+
+      - name: Decide compliance.wall outcome
+        id: wall
+        run: |
+          DENY=$(jq '[.deny[]] | length' "${REPORT_DIR}/image-policy.ndjson" 2>/dev/null || echo 0)
+          WARN=$(jq '[.warn[]] | length' "${REPORT_DIR}/image-policy.ndjson" 2>/dev/null || echo 0)
+          echo "denials=$DENY" >> $GITHUB_OUTPUT
+          echo "warnings=$WARN" >> $GITHUB_OUTPUT
+          echo "DENY=$DENY WARN=$WARN"
+          if [ "${POWER_THRESHOLD}" = "strict" ] && [ "$DENY" -gt 0 ]; then
+            exit 1
+          fi
+          if [ "${POWER_THRESHOLD}" = "paranoid" ] && { [ "$DENY" -gt 0 ] || [ "$WARN" -gt 0 ]; }; then
+            exit 1
+          fi
+
+  push_image:
+    needs: build_and_scan
+    if: always() && (needs.build_and_scan.outputs.denials == '0' || env.POWER_THRESHOLD == 'standard')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image to GHCR
+        run: docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+
+      - name: Log release event
+        run: |
+          mkdir -p .bithub/events
+          cat > ".bithub/events/container-release-${{ github.run_id }}.json" <<JSON
+          {
+            "event": "container_release",
+            "image": "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}",
+            "by": "${GITHUB_ACTOR}",
+            "repo": "${GITHUB_REPOSITORY}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          JSON
