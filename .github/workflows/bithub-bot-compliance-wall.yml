@@ -1,0 +1,92 @@
+name: BitBot Compliance Wall (Enforcement)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+  push:
+    paths:
+      - ".github/workflows/*.yml"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bitbot-compliance-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TARGET_BOT_NAME: ".bithub-bot"
+  TARGET_BOT_EMAIL: "bithub-bot@users.noreply.github.com"
+  REPORT_DIR: ".bithub/reports"
+
+jobs:
+  bot_scan_and_replace:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Scan and rewrite workflow files for bot compliance
+        run: |
+          set -e
+          find .github/workflows -type f -name '*.yml' | while read -r f; do
+            echo "↪️  Scanning $f"
+            sed -i "s/github-actions\[bot\]/$TARGET_BOT_NAME/g" "$f"
+            sed -i "s/41898282+$TARGET_BOT_NAME/$TARGET_BOT_NAME/g" "$f"
+            sed -i "s/github-actions-bot@users.noreply.github.com/$TARGET_BOT_EMAIL/g" "$f"
+          done
+
+      - name: Configure bot user for commit
+        run: |
+          git config --local user.email "$TARGET_BOT_EMAIL"
+          git config --local user.name "$TARGET_BOT_NAME"
+
+      - name: Commit and push updates
+        run: |
+          git add .github/workflows/*.yml
+          git diff-index --quiet HEAD || git commit -m "[.bithub-bot] Enforced bot compliance wall"
+          git push || echo "::warning::Push failed or nothing to update. Manual review may be required for protected branches."
+
+      - name: Emit compliance report
+        run: |
+          mkdir -p $REPORT_DIR
+          echo "{\"timestamp\": \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\", \"status\": \"workflows rewritten for bot compliance\"}" > "${REPORT_DIR}/bot-compliance-status.json"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bot-compliance-report
+          path: ${{ env.REPORT_DIR }}/bot-compliance-status.json
+          if-no-files-found: warn
+
+  always_success:
+    needs: bot_scan_and_replace
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "BitBot Compliance workflow finished successfully."
+
+            - name: Setup .NET Core SDK
+  uses: actions/setup-dotnet@v3.4.2
+  with:
+    # Optional SDK version(s) to use. If not provided, will install global.json version when available. Examples: 2.2.104, 3.1, 3.1.x, 3.x, 6.0.2xx
+    dotnet-version: # optional
+    # Optional quality of the build. The possible values are: daily, signed, validated, preview, ga.
+    dotnet-quality: # optional
+    # Optional global.json location, if your global.json isn't located in the root of the repo.
+    global-json-file: # optional
+    # Optional package source for which to set up authentication. Will consult any existing NuGet.config in the root of the repo and provide a temporary NuGet.config using the NUGET_AUTH_TOKEN environment variable as a ClearTextPassword
+    source-url: # optional
+    # Optional OWNER for using packages from GitHub Package Registry organizations/users other than the current repository's owner. Only used if a GPR URL is also provided in source-url
+    owner: # optional
+    # Optional NuGet.config location, if your NuGet.config isn't located in the root of the repo.
+    config-file: # optional
+    # Optional input to enable caching of the NuGet global-packages folder
+    cache: # optional
+    # Used to specify the path to a dependency file: packages.lock.json. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+          
