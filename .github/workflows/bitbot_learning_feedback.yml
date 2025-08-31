@@ -13,18 +13,57 @@ on:
 jobs:
   learn_from_runs:
     runs-on: ubuntu-latest
+    env:
+      BIT_HUB_REPO_URL: https://github.com/Doctor0Evil/Bit.Hub.git
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.9.1
+        with:
+          node-version: 18.x
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # --- Bootstrap missing scripts from Bit.Hub ---
+      - name: Ensure required scripts
+        run: |
+          mkdir -p bithub/scripts
+          for script in aggregate_run_results.py update_ml_patterns.py; do
+            if [ ! -f "bithub/scripts/$script" ]; then
+              echo "⚠️ $script missing — pulling from Bit.Hub canonical repo..."
+              TMP=$(mktemp -d)
+              git clone --depth=1 "$BIT_HUB_REPO_URL" "$TMP"
+              if [ -f "$TMP/bithub/scripts/$script" ]; then
+                cp "$TMP/bithub/scripts/$script" "bithub/scripts/$script"
+                echo "✅ Pulled $script from Bit.Hub"
+              else
+                echo "::error::$script not found in Bit.Hub repo — skipping."
+              fi
+            else
+              echo "✅ Found $script locally."
+            fi
+          done
+
       - name: Aggregate Run Results
+        if: hashFiles('bithub/scripts/aggregate_run_results.py') != ''
         run: |
           python bithub/scripts/aggregate_run_results.py > run_results.json
 
       - name: Update ML Patterns
+        if: hashFiles('bithub/scripts/update_ml_patterns.py') != '' && hashFiles('run_results.json') != ''
         run: |
-          python bithub/scripts/update_ml_patterns.py --input run_results.json --pattern-store .bithub/ml_patterns.json
+          python bithub/scripts/update_ml_patterns.py \
+            --input run_results.json \
+            --pattern-store .bithub/ml_patterns.json
 
       - name: Store Updated Patterns
+        if: hashFiles('.bithub/ml_patterns.json') != ''
         run: |
           git config user.name "bitbot"
           git config user.email "bitbot@users.noreply.github.com"
@@ -32,18 +71,7 @@ jobs:
           git commit -m "Update ML patterns from latest runs" || echo "No changes"
           git push
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3.9.1
-        with:
-          # Set always-auth in npmrc.
-          always-auth: false
-          # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
-          node-version: 18.x
-          # Optional registry to set up for auth.
-          registry-url: https://registry.npmjs.org
-          # Optional scope for authenticating against scoped registries.
-          scope: ""
-          # Used to specify a package manager for caching in the default directory.
-          cache: npm
-          # Used to specify the path to a dependency file.
-          cache-dependency-path: package-lock.json
+      - name: Log to compliance ledger
+        run: |
+          mkdir -p .bithub/ledger
+          echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"LEARNING_LOOP\",\"detail\":\"Completed with bootstrap-from-Bit.Hub\"}" >> .bithub/ledger/compliance.log
