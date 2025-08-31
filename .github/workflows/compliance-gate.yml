@@ -1,0 +1,45 @@
+name: Bit.Hub Compliance Gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  compliance-check:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [github-runner, bit.vm-runner]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync Compliance Manifest
+        run: bit-sync --source bit.hub --manifest .gitcomply
+
+      - name: Verify Runner Identity
+        run: bit-verify-runner --id .bit-runner-id
+
+      - name: Enforce Policies
+        run: bit-enforce --manifest .gitcomply --repair
+
+      - name: Celebrate Compliance
+        run: bitbot-humor --event compliance_pass
+
+  stale-management:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9.1.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: "This issue has been automatically marked as stale due to inactivity."
+          close-issue-message: "Closing this issue after prolonged inactivity per Bit.Hub guidelines."
+          stale-pr-message: "This pull request has been automatically marked as stale due to inactivity."
+          close-pr-message: "Closing this pull request after prolonged inactivity per Bit.Hub guidelines."
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-label: "stale"
+          close-issue-label: "closed"
+          exempt-issue-labels: "critical,never-stale"
+          exempt-pr-labels: "critical,never-stale"
+          enable-statistics: true
