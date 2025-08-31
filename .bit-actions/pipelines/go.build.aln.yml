@@ -1,0 +1,55 @@
+pipeline:
+  id: "go.build"
+  version: "1.0.0"
+  description: "Build, vet, test, and artifact Go binaries under Bit.Hub compliance"
+  permissions:
+    contents: "read"
+  needs_compliance: true
+
+  setup:
+    toolchains: ["go"]
+    caches: ["go-mod"]
+
+  steps:
+    - id: setup-go
+      uses: actions/setup-go@v5.5.0
+      with:
+        go-version: '1.22.x'
+        go-version-file: './go.mod'
+        check-latest: true
+        token: ${{ github.token }}
+        cache: true
+        cache-dependency-path: '**/go.sum'
+        architecture: x64
+
+    - id: verify-go
+      run: |
+        go version
+        go env
+
+    - id: download-deps
+      run: go mod download
+
+    - id: static-analysis
+      run: go vet ./...
+
+    - id: run-tests
+      run: go test -race -v ./...
+
+    - id: build-binaries
+      run: go build -o bin/app ./...
+
+    - id: upload-artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: go-binaries
+        path: bin/
+        retention-days: 7
+
+    # Banter compliance hook — required by bithub.banter.policy.rego
+    - id: banter-celebration
+      run: magic.lol --trigger success --style confetti
+
+    # Legal loop refresh — ensures latest restricted-profanity and policy docs
+    - id: refresh-legal
+      run: bithub/scripts/refresh_legal_docs.sh all
