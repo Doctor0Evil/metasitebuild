@@ -1,0 +1,27 @@
+name: Chat Native Adapter
+description: Policy-aware Chat.native.x86 wrapper (fail-open)
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Build adapter
+      shell: bash
+      run: dotnet build -c Release src/ChatAdapter/ChatAdapter.csproj
+
+    - name: Ensure binary and meta
+      shell: bash
+      run: |
+        mkdir -p bin .bit/audit .meta
+        [ -f bin/Chat.native.x86 ] || echo "::warning::Chat.native.x86 not present; adapter will stub."
+        [ -f .meta/hyper.parameters.json ] || echo '{"version":"1.2"}' > .meta/hyper.parameters.json
+
+    - name: Run adapter (example)
+      shell: bash
+      continue-on-error: true
+      run: |
+        echo '{"context":"test","input":"ping"}' > payload.json
+        dotnet run --project src/ChatAdapter -- --input payload.json --output reply.json
+        cat reply.json || true
