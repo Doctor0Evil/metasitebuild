@@ -1,0 +1,36 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8simageregistryallowlist
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sImageRegistryAllowlist
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package bithub.image.registry
+        violation[{"msg": msg}] {
+          input.review.kind.kind == "Pod"
+          some i
+          img := input.review.object.spec.containers[i].image
+          allowed := {{ toJson .Values.allowlist.registries }}
+          not startswith_any(img, allowed)
+          msg := sprintf("image registry not allowed: %v", [img])
+        }
+        startswith_any(s, arr) {
+          some i
+          startswith(s, arr[i])
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sImageRegistryAllowlist
+metadata:
+  name: allow-approved-registries
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  enforcementAction: {{ ternary "deny" "dryrun" (eq .Values.mode.gatekeeperEnforcement "enforce") }}
