@@ -1,0 +1,7 @@
+{
+  "id": "runner‑ubuntu‑24",
+  "node_type": "github‑runner",
+  "voice_enabled": false,
+  "last_compliance_check": "2025‑08‑31T20:05:00Z",
+  "compliance_status": "fail"
+}
