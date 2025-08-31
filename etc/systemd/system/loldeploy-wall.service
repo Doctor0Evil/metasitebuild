@@ -23,3 +23,17 @@ MemoryDenyWriteExecute=true
 
 [Install]
 WantedBy=multi-user.target
+# /etc/systemd/system/loldeploy-wall.timer
+[Unit]
+Description=Run compliance wall every 5 minutes
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=300
+Unit=loldeploy-wall.service
+
+[Install]
+WantedBy=timers.target
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now loldeploy-wall.timer
