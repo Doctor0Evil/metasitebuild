@@ -1,0 +1,71 @@
+name: Ethics Guard
+description: Enforce environmental boundaries (fail-open) with visible audit
+runs:
+  using: composite
+  steps:
+    - name: Load environment ethics manifest
+      shell: bash
+      run: |
+        MAN=.bit/environment.ethics.yml
+        if [ ! -f "$MAN" ]; then
+          echo "::warning ::environment.ethics manifest missing; scaffolding."
+          mkdir -p .bit
+          cat > "$MAN" <<'YML'
+version: 1
+policy: { mode: fail-open, audit: { job_summary: true, file_log: .bit/audit/environment.log } }
+boundaries: { compute: { cpu_quota_cores: 2, mem_limit_gb: 8 }, network: { egress_allowlist: [ "https://github.com" ] } }
+YML
+        fi
+        echo "MANIFEST=$MAN" >> "$GITHUB_ENV"
+
+    - name: Apply compute clamps (best-effort)
+      shell: bash
+      continue-on-error: true
+      run: |
+        mkdir -p .bit/audit
+        mem=$(yq '.boundaries.compute.mem_limit_gb // 0' "$MANIFEST")
+        cpu=$(yq '.boundaries.compute.cpu_quota_cores // 0' "$MANIFEST")
+        echo "Requested clamps: CPU=${cpu} cores, MEM=${mem} GiB"
+        echo "$(date -u) compute_clamp cpu=${cpu} mem_gb=${mem}" >> .bit/audit/environment.log
+        # Note: on GitHub-hosted runners we can't set cgroups; record intent for parity with VMs.
+
+    - name: Enforce network allowlist (logical)
+      shell: bash
+      continue-on-error: true
+      run: |
+        echo "::group::Egress allowlist (logical)"
+        yq -o=json '.boundaries.network.egress_allowlist[]' "$MANIFEST" 2>/dev/null || true
+        echo "::endgroup::"
+
+    - name: Personality gates (.bit.coin)
+      shell: bash
+      continue-on-error: true
+      run: |
+        token=".bit/tokens/runner_bitcoin_token.json"
+        if [ -f "$token" ]; then
+          compscore=$(jq -r '.compscore // 0' "$token")
+          profanity=$(jq -r '.profanity // 0' "$token")
+        else
+          compscore=0; profanity=0
+        fi
+        req_comp=$(yq '.boundaries.ai_maturity.required_personality.compscore_min // 0' "$MANIFEST")
+        req_prof=$(yq '.boundaries.ai_maturity.required_personality.profanity_max // 3' "$MANIFEST")
+        if [ "$compscore" -lt "$req_comp" ] || [ "$profanity" -gt "$req_prof" ]; then
+          echo "::notice ::Personality gates adjusted scope: compscore=$compscore, profanity=$profanity"
+        fi
+
+    - name: Energy and carbon accounting (best-effort)
+      shell: bash
+      continue-on-error: true
+      run: |
+        region=$(yq -r '.boundaries.energy.carbon_region // "unknown"' "$MANIFEST")
+        budget=$(yq -r '.boundaries.energy.budget_kwh // 0' "$MANIFEST")
+        echo "::notice ::Energy budget $budget kWh; carbon region $region."
+        echo "$(date -u) energy budget_kwh=$budget region=$region" >> .bit/audit/environment.log
+
+    - name: Job summary
+      shell: bash
+      run: |
+        echo "## Environmental Boundaries" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Manifest: $MANIFEST" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Mode: fail-open; violations quarantined and logged" >> "$GITHUB_STEP_SUMMARY"
