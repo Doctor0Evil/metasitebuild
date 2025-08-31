@@ -26,3 +26,6 @@ jobs:
           git add .
           git commit -m "BitHub Variable Parser Correction"
           git push || echo "No changes to commit"
+
+- id: banter-celebration
+  run: magic.lol --trigger success --style confetti
