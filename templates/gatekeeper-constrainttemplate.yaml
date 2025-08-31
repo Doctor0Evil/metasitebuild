@@ -1,0 +1,34 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredbithubannotations
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredBitHubAnnotations
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package bithub.required.annotations
+        violation[{"msg": msg}] {
+          input.review.kind.kind == "Pod"
+          required := {"bithub.com/policy-version", "bithub.com/bitlink"}
+          not annotations_present(input.review.object.metadata.annotations, required)
+          msg := sprintf("missing required Bit.Hub annotations: %v", [required])
+        }
+        annotations_present(ann, req) {
+          req_subset := {k | k := input.req; ann[k]}
+          count(req) == count(req_subset)
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredBitHubAnnotations
+metadata:
+  name: require-bithub-annotations
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  enforcementAction: {{ ternary "deny" "dryrun" (eq .Values.mode.gatekeeperEnforcement "enforce") }}
