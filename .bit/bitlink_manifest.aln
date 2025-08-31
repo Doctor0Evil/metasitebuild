@@ -1,0 +1,7 @@
+(aln.bitlinks
+  (world.univers "https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/1cbfc110-37dc-4c02-9426-c37fccfcacf5/world.univers.txt")
+  (guts "https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/d0d9ab2a-3287-401d-8f3d-f55b12bf28c3/rippin.out.yer.guts.txt")
+  (chaos "https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/93d741cd-823f-40d8-9fbb-0b3e3f6f3802/Chaos_Realism_Dynamics.txt")
+  (userinputs "https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/c81bbbf0-38a9-432a-a454-a4491b70293b/AI_Gen_User_Inputs.txt")
+  (securitycore "https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_b9326256-0b7e-47f8-ae92-d4f3d1fd6d19/0e6f2977-7553-48b2-ad9a-fbc0bdda2a0d/ALN_CORE_USER_SECURITY.txt")
+)
