@@ -1,0 +1,5 @@
+# .bitcharter
+enforcement=strict
+allow_fail_open=0
+max_allowed_banter=masked
+persona_registry=.bit/persona_registry.json
