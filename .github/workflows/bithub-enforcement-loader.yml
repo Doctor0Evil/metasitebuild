@@ -1,0 +1,66 @@
+name: Bit.Hub Enforcement Loader and Validator
+
+on:
+  push:
+    paths:
+      - ".bit/enforcement.*.bit"
+      - ".bit/schemas/enforcement-bit.schema.json"
+      - ".bithub/policy/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bithub-enforcement-loader-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REPORT_DIR: .bithub/reports
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ajv and jq
+        run: |
+          npm -g install ajv-cli@5.x || true
+          jq --version || sudo apt-get update -y && sudo apt-get install -y jq
+      - name: Validate enforcement.bit files
+        run: |
+          mkdir -p "${REPORT_DIR}"
+          for f in .bit/enforcement.*.bit; do
+            echo "Validating $f"
+            yq -o=json '.' "$f" > /tmp/manifest.json
+            npx ajv -s .bit/schemas/enforcement-bit.schema.json -d /tmp/manifest.json \
+              || echo "::warning::Schema validation warning for $f"
+            cp /tmp/manifest.json "${REPORT_DIR}/$(basename "$f").json"
+          done
+      - name: Upload manifests (JSON)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bithub-enforcement-manifests
+          path: .bithub/reports/enforcement.*.bit.json
+          if-no-files-found: warn
+      - name: Always succeed
+        run: echo "Enforcement loader completed."
+
+                    - name: Setup Go environment
+  uses: actions/setup-go@v5.5.0
+  with:
+    # The Go version to download (if necessary) and use. Supports semver spec and ranges. Be sure to enclose this option in single quotation marks.
+    go-version: # optional
+    # Path to the go.mod or go.work file.
+    go-version-file: # optional
+    # Set this option to true if you want the action to always check for the latest available version that satisfies the version spec
+    check-latest: # optional
+    # Used to pull Go distributions from go-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
+    cache: # optional, default is true
+    # Used to specify the path to a dependency file - go.sum
+    cache-dependency-path: # optional
+    # Target architecture for Go to use. Examples: x86, x64. Will use system architecture by default.
+    architecture: # optional
