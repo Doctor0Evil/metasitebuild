@@ -1,0 +1,20 @@
+id: runner-bot-01
+kind: bitbots
+owner: Bit.Hub
+license: Apache-2.0
+repository: https://github.com/Doctor0Evil/Bit.Hub
+description: Compliance-aware rendering bot
+personality:
+  banter: 1
+  profanity: 2
+  rep: 450
+  compscore: 980
+  quirk: 5
+compliance:
+  maturity: adult
+  toggles:
+    ai_logic_bounds: strict
+    content_filtering: adaptive
+  references:
+    - TERMS-OF-SERVICE.md
+    - .gitenforcement
