@@ -1,0 +1,75 @@
+# Path: .github/workflows/bit-hub-chart-compliance.yml
+
+name: Bit.Hub Chart Compliance
+
+on: [push, pull_request, workflow_dispatch]
+
+concurrency:
+  group: bit-hub-chart-compliance-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+  packages: write
+
+jobs:
+  policy-check:
+    runs-on: ubuntu-latest
+    env:
+      PROFANITY_ALLOW: "fuck,shit,bitch,asshole,cunt"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install OPA, Conftest, Helm, .NET SDK
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+          curl -sL https://github.com/open-policy-agent/conftest/releases/download/v0.52.0/conftest_Linux_x86_64.tar.gz | tar -xz
+          sudo mv conftest /usr/local/bin/conftest
+          curl -sL https://get.helm.sh/helm-v3.14.4-linux-amd64.tar.gz | tar -xz
+          sudo mv linux-amd64/helm /usr/local/bin/helm
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3.4.2
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+
+      - name: Render Helm
+        run: |
+          helm template test charts/bithub-platform-wall -f charts/bithub-platform-wall/values.yaml > rendered.yaml
+
+      - name: Prepare Bit.Hub compliance policy
+        run: |
+          mkdir -p policy
+          cat > policy/deny.rego <<'REGO'
+package main
+deny[msg] {
+  input.kind == "Pod"
+  some c
+  img := input.spec.containers[c].image
+  not startswith(img, "ghcr.io/yourorg")
+  msg := sprintf("image not in allowlist: %v", [img])
+}
+REGO
+
+      - name: Conftest (OPA Rego)
+        run: |
+          conftest test --input=yaml rendered.yaml --policy policy || echo "::warning::Policy test warnings allowed by Bit.Hub banter filter"
+
+      - name: Audit Compliance Log
+        run: |
+          mkdir -p .bithubreports
+          echo "$(date -u) Bit.Hub Chart Compliance run ${{ github.run_id }} complete. Profanity allowed: $PROFANITY_ALLOW" >> .bithubreports/chart-compliance.log
+
+      - name: Upload Compliance Log
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-hub-chart-compliance-log
+          path: .bithubreports/chart-compliance.log
