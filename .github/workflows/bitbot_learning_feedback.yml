@@ -1,19 +1,35 @@
-name: BitBot Learning Feedback Loop (Reusable)
+name: BitBot Learning Feedback + Compliance
 
 on:
-  workflow_call:
-    inputs:
-      bit_hub_repo_url:
-        required: false
-        type: string
-        default: https://github.com/Doctor0Evil/Bit.Hub.git
+  workflow_dispatch:
+  push:
+    paths:
+      - '**/*.lisp'
+      - '.github/workflows/bitbot_renaming_feedback.loop.lisp.bit.yml'
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
 
 jobs:
-  bitbot-learning-loop:
+  enforce-action-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce Bit.Hub Action Policy
+        uses: rob-derosa/action-policy@v1
+        with:
+          policy: prohibit
+          policy-url: .github/policies/bitbot_policy.json
+          fail-if-violations: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  compliance-gate:
+    needs: enforce-action-policy
     runs-on: ubuntu-latest
     env:
-      BIT_HUB_REPO_URL: ${{ inputs.bit_hub_repo_url }}
-
+      BIT_HUB_REPO_URL: https://github.com/Doctor0Evil/Bit.Hub.git
     steps:
       - uses: actions/checkout@v4
 
@@ -29,7 +45,6 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
-      # --- Compliance gate: .gitcomply + .bit.git.deploy ---
       - name: Verify Bit.Hub compliance manifests
         run: |
           if [ ! -f ".gitcomply" ]; then
@@ -42,7 +57,6 @@ jobs:
           fi
           echo "✅ Compliance manifests present."
 
-      # --- Bootstrap required scripts with hash check ---
       - name: Ensure required scripts (with hash check)
         run: |
           mkdir -p bithub/scripts
@@ -75,13 +89,36 @@ jobs:
             fi
           done
 
-      # --- Aggregate run results ---
+      - name: Community Policy Check
+        run: conftest test --policy .github/policies .
+
+      - name: Cache LISP build
+        uses: actions/cache@v4.2.4
+        with:
+          path: |
+            .lispbuild/
+            .cache/
+          key: lisp-cache-${{ runner.os }}-${{ hashFiles('**/*.lisp') }}
+          restore-keys: |
+            lisp-cache-${{ runner.os }}-
+            lisp-cache-
+          fail-on-cache-miss: true
+          enableCrossOsArchive: false
+          save-always: true
+
+  build:
+    needs: compliance-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build (LISP)
+        run: ./build-bitbot-lisp.sh
+
       - name: Aggregate Run Results
         if: hashFiles('bithub/scripts/aggregate_run_results.py') != ''
-        run: |
-          python bithub/scripts/aggregate_run_results.py > run_results.json
+        run: python bithub/scripts/aggregate_run_results.py > run_results.json
 
-      # --- Update ML patterns ---
       - name: Update ML Patterns
         if: hashFiles('bithub/scripts/update_ml_patterns.py') != '' && hashFiles('run_results.json') != ''
         run: |
@@ -89,7 +126,6 @@ jobs:
             --input run_results.json \
             --pattern-store .bithub/ml_patterns.json
 
-      # --- Process ALNFantasia, Lisp, and emerging .bit.created concepts ---
       - name: Process ALNFantasia & Lisp features
         run: |
           if [ -f "bit.bot.workflows.json" ]; then
@@ -102,7 +138,6 @@ jobs:
             echo "ℹ️ No bit.bot.workflows.json found."
           fi
 
-      # --- Store updated patterns ---
       - name: Store Updated Patterns
         if: hashFiles('.bithub/ml_patterns.json') != ''
         run: |
@@ -112,19 +147,7 @@ jobs:
           git commit -m "Update ML patterns from latest runs" || echo "No changes"
           git push
 
-      # --- Ledger logging ---
       - name: Log to compliance ledger
         run: |
           mkdir -p .bithub/ledger
           echo "{\"ts\":\"$(date -Iseconds)\",\"event\":\"LEARNING_LOOP\",\"detail\":\"Completed with Bit.Keep-aligned bootstrap and compliance checks\"}" >> .bithub/ledger/compliance.log
-
-          jobs:
-  compliance-gate:
-    uses: ./.github/workflows/bitbot-learning-loop.yml
-
-  build-or-deploy:
-    needs: [compliance-gate]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "🚀 Safe to build — compliance gate passed"
