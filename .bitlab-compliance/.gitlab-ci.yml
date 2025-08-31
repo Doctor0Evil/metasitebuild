@@ -1,0 +1,17 @@
+compliance_pipeline:
+  image: company/compliance:latest
+  rules:
+    - if: $COMPLIANCE_FRAMEWORK
+  script:
+    - bash run_compliance_checks.sh
+  tags:
+    - compliance
+  allow_failure: false
+  artifacts:
+    paths:
+      - compliance_report.json
+    expire_in: 180 days
+  approvals:
+    - legal
+    - engineering
+    - security
