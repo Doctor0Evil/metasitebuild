@@ -234,3 +234,4 @@ cp -f "${OUT_ALN}" "${ARTIFACTS_DIR}/" || true
 [[ -f "${EVIDENCE_SIG_FILE}" ]] && cp -f "${EVIDENCE_SIG_FILE}" "${ARTIFACTS_DIR}/"
 
 info "Compliance passed. Artifacts in ${ARTIFACTS_DIR}."
+chmod +x tools/ethics-guard.sh
