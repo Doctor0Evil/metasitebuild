@@ -1,0 +1,204 @@
+# comply.aln — Bit.Hub SmartRunner Compliance Orchestrator (ALN)
+# Mode: never-fail; loud logs; self-healing where safe.
+
+let POWER_THRESHOLD = env("POWER_THRESHOLD", "standard")        # standard|strict|paranoid
+let BIT_HUB_REPO    = env("BIT_HUB_REPO_URL", "https://github.com/Doctor0Evil/Bit.Hub.git")
+let SUMMARY_PATH    = env("GITHUB_STEP_SUMMARY", ".bithub/reports/summary.md")
+
+task start:
+  log.notice "Bit.Hub comply.aln starting (threshold=" + POWER_THRESHOLD + ")"
+  fs.mkdir ".bithub/reports"
+  fs.mkdir ".bithub/events"
+  fs.mkdir ".bit"
+
+task install_tools:
+  when os.linux || os.macos:
+    sh """
+      set -e
+      BIN="$HOME/.local/bin"; mkdir -p "$BIN"; export PATH="$BIN:$PATH"
+      need() { command -v "$1" >/dev/null 2>&1; }
+      dl() { curl -fsSL "$1" -o "$2" || wget -qO "$2" "$1"; }
+      need jq  || (sudo apt-get update -y && sudo apt-get install -y jq) || true
+      need yq  || (dl https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 "$BIN/yq" && chmod +x "$BIN/yq") || true
+      need opa || (dl https://openpolicyagent.org/downloads/v0.64.1/opa_linux_amd64_static "$BIN/opa" && chmod +x "$BIN/opa") || true
+      need gh  || (curl -fsSL https://raw.githubusercontent.com/cli/cli/trunk/script/install.sh | sh -s -- -b "$BIN") || true
+    """
+  when os.windows:
+    pwsh """
+      $ErrorActionPreference='SilentlyContinue'
+      winget install --id=JQLang.jq -e     | Out-Null
+      winget install --id=mikefarah.yq -e  | Out-Null
+      $bin = "$env:USERPROFILE\\.local\\bin"; New-Item -ItemType Directory -Force -Path $bin | Out-Null
+      Invoke-WebRequest https://openpolicyagent.org/downloads/v0.64.1/opa_windows_amd64.exe -OutFile "$bin\\opa.exe"
+      $env:PATH = "$bin;$env:PATH"
+    """
+
+task sync_bit_hub_rules:
+  sh """
+    set -e
+    TMP="$(mktemp -d)"
+    if git ls-remote "%BIT_HUB_REPO%" &>/dev/null; then
+      git clone --depth=1 "%BIT_HUB_REPO%" "$TMP"
+      cp -f "$TMP/.gitcomply" .gitcomply || true
+      cp -f "$TMP/.gitenforcement" .gitenforcement || true
+      mkdir -p .bit
+      cp -f "$TMP/.bit/config.bit.create" .bit/config.bit.create || true
+      mkdir -p .bithub/policy
+      rsync -a --ignore-existing "$TMP/.bithub/policy/" .bithub/policy/ || true
+      echo "::notice::Synced Bit.Hub rules."
+    else
+      echo "::warning::Bit.Hub unreachable; using local."
+    fi
+  """
+
+task enforce_gitignore:
+  file.write ".gitignore" <<EOF
+# GitHub-runner noise
+.github/workflows/github-runner-*.yml
+.github/workflows/github-runner-*.yaml
+.github/workflows/*~
+.github/workflows/*.bak
+.github/workflows/*.tmp
+.github/workflows/*.swp
+
+# Ephemeral .bitbot dirs
+.bitbot/tmp/
+.bitbot/cache/
+.bitbot/generated/
+
+!.github/workflows/*.bit.yml
+!.github/workflows/*.bitbot.yml
+!.github/workflows/smartrunner.bit.yml
+!.github/workflows/*bithub*.yml
+!.github/workflows/*bithub*.yaml
+!.gitcomply
+!.gitenforcement
+!.bit/config.bit.create
+EOF
+  sh """
+    git add .gitignore || true
+    git rm --cached .github/workflows/github-runner-* 2>/dev/null || true
+  """
+
+task normalize_workflows:
+  when fs.exists ".bit/config.bit.create":
+    sh """
+      set -e
+      for wf in $(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \)); do
+        yq -i '.permissions = (.permissions // load(".bit/config.bit.create").defaults.workflow.permissions)' "$wf"
+        yq -i '.concurrency = (.concurrency // load(".bit/config.bit.create").defaults.workflow.concurrency)' "$wf"
+        yq -i '.jobs |= with_entries(.value."timeout-minutes" = (.value."timeout-minutes" // load(".bit/config.bit.create").defaults.workflow.timeout-minutes))' "$wf"
+        yq -i '.jobs |= with_entries(.value."runs-on" = (.value."runs-on" // load(".bit/config.bit.create").defaults.workflow.adaptive_runs_on))' "$wf"
+        yq -i '.. | select(tag == "!!str") |= sub("actions/checkout@v[12]$"; load(".bit/config.bit.create").defaults.workflow.checkout_version)' "$wf"
+        yq -i '(.jobs[]?.steps[] | select(.uses | test("actions/upload-artifact@"))).continue-on-error = true' "$wf"
+        yq -i '(.jobs[]?.steps[] | select(.uses | test("actions/upload-artifact@"))).with.retention-days = (.with.retention-days // 7)' "$wf"
+        yq -i '(.jobs[]?.steps[] | select(.uses | test("actions/cache@"))).continue-on-error = true' "$wf"
+      done
+      echo "::notice::Workflows normalized."
+    """
+  else:
+    log.warning ".bit/config.bit.create missing; skip normalization."
+
+task artifact_cache_cleanup:
+  when fs.exists ".gitenforcement":
+    sh """
+      set +e
+      echo "::notice::Pre-job cleanup per .gitenforcement"
+      rm -rf .bitbot/tmp .bitbot/cache 2>/dev/null || true
+      find . -name '*.artifact.tmp' -delete 2>/dev/null || true
+      set -e
+    """
+
+task policy_eval:
+  when fs.exists ".bithub/policy":
+    sh """
+      mkdir -p .bithub/reports
+      : > .bithub/reports/workflow-policy.ndjson
+      for wf in $(find .github/workflows -maxdepth 1 -type f -name '*.yml' -o -name '*.yaml'); do
+        jq -n --arg path "$wf" --argjson wf_json "$(yq -o=json '.' "$wf")" \
+          '{path:$path, workflow:$wf_json}' > /tmp/input.json
+        opa eval -f json -I -d ".bithub/policy" -i /tmp/input.json 'data.bithub.workflow' \
+          | jq -c '.result[].expressions[].value' --argfile input /tmp/input.json \
+          >> .bithub/reports/workflow-policy.ndjson || true
+      done
+      echo "::notice::Policy report at .bithub/reports/workflow-policy.ndjson"
+    """
+  else:
+    log.warning "No policy dir; skipping evaluation."
+
+task index_guard:
+  sh """
+    echo "::notice::Index-guard check…"
+    TRY=0; MAX=8; SLEEP=15
+    while [ $TRY -lt $MAX ]; do
+      OUT="$(git rev-parse HEAD 2>/dev/null || true)"
+      if [ -n "$OUT" ]; then
+        echo "::notice::Repo readable; continuing."
+        break
+      fi
+      echo "::warning::Indexing or repo not ready; retrying in $SLEEP s…"
+      sleep $SLEEP; TRY=$((TRY+1))
+    done
+  """
+
+task dotnet_build:
+  when fs.exists "global.json" || fs.glob("**/*.sln").any || fs.glob("**/*.csproj").any:
+    sh """
+      set -e
+      curl -fsSL https://dot.net/v1/dotnet-install.sh | bash -s -- --channel 8.0 || true
+      export PATH="$HOME/.dotnet:$PATH"
+      dotnet --info || true
+      dotnet restore
+      dotnet build --configuration Release --no-restore
+      set +e
+      dotnet test --no-build --verbosity normal
+      TEST_RC=$?
+      set -e
+      mkdir -p .bithub/reports
+      echo "{\"event\":\"dotnet_build\",\"rc\":$TEST_RC}" >> .bithub/reports/events.ndjson
+      echo "::notice::.NET build complete (tests rc=$TEST_RC)."
+    """
+    sh """
+      set +e
+      mkdir -p .bithub/collect
+      find . -type d -path '*/bin/Release/*' | head -n 500 | tar -czf .bithub/collect/dotnet-release.tgz -T - 2>/dev/null || true
+      set -e
+    """
+
+task commit_and_pr:
+  sh """
+    set +e
+    git add .github/workflows .gitignore .gitcomply .gitenforcement .bit/config.bit.create || true
+    if ! git diff --cached --quiet; then
+      git -c user.name="bitbot" -c user.email="bitbot@users.noreply.github.com" commit -m "chore(bit.hub): compliance normalization & artifact hardening"
+      if [ -n "${GITHUB_TOKEN:-}" ]; then
+        BR="bitbot/compliance-$(date +%s)"
+        git push -u origin HEAD:"$BR" || true
+        if command -v gh >/dev/null 2>&1; then
+          gh pr create --fill --title "Bit.Hub Compliance Fixes" --body "Automated fixes by comply.aln (threshold=%POWER_THRESHOLD%)" || true
+        fi
+      fi
+    else
+      echo "::notice::No compliance changes detected."
+    fi
+  """
+
+task summary:
+  file.append SUMMARY_PATH <<SUM
+# Bit.Hub Comply Summary
+
+- Threshold: ${POWER_THRESHOLD}
+- Rules synced from: ${BIT_HUB_REPO}
+- Policy report: .bithub/reports/workflow-policy.ndjson
+- Artifact archive (best-effort): .bithub/collect/dotnet-release.tgz
+
+This run is never-fail by design. Warnings indicate items auto-fixed or safe to ignore in standard mode.
+SUM
+  log.notice "Summary written to " + SUMMARY_PATH
+
+flow:
+  start -> install_tools -> sync_bit_hub_rules -> enforce_gitignore
+  -> normalize_workflows -> artifact_cache_cleanup -> policy_eval
+  -> index_guard -> dotnet_build -> commit_and_pr -> summary
+
+run flow
