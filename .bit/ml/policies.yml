@@ -1,0 +1,12 @@
+version: 1
+rules:
+  - id: high-risk-large-change
+    when: { changed_files_gt: 40 }
+    then: { risk_score: 0.40, allow_deploy: false }
+  - id: low-compscore-caution
+    when: { compscore_lt: 800 }
+    then: { risk_score: 0.30, allow_deploy: false }
+  - id: adult-content-tighten
+    when: { profanity_ge: 3 }
+    then: { risk_score: 0.20, allow_deploy: true }
+fallback: { risk_score: 0.05, allow_deploy: true }
