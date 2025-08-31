@@ -9,3 +9,12 @@ registry:
     - actions/setup-python@v5
     - actions/upload-artifact@v4
     - ./.github/actions/bithub-compliance-gate
+ 
+  safelist_actions:
+    - actions/setup-go@v5.5.0
+  toolchains:
+    go: { version: "1.22.x" }
+  caches:
+    go-mod:
+      paths: ["~/go/pkg/mod"]
+      keys: ["**/go.sum"]
