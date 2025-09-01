@@ -1,0 +1,11 @@
+;; .bit/tracing/compliance/aln-bot.aln
+(defmodule bithub.compliance.guardian)
+(defvar forbidden-chipsets '("MT6883" "arm64" "mediatek" "unknown_cyber" "insecure-fpga"))
+(defun block-incompliant-hardware (list)
+  (dolist (c forbidden-chipsets)
+    (when (member c list)
+      (raise-error (format nil "Compliance violation: forbidden hardware ~a" c)))))
+(defvar immunity-wall (make-array 16 :initial-element 1))
+(defun harden-compliance-wall ()
+  (dotimes (i 16384)
+    (setf (aref immunity-wall (mod i 16)) (random 1000000))))
