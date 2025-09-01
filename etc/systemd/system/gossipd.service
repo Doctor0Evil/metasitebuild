@@ -1,0 +1,13 @@
+[Unit]
+Description=Bit.Hub Gossip Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/gossipd -listen :7777 -peers nodes.virta:7777 -topics ledger,asset-index
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
