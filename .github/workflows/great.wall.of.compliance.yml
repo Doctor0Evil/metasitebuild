@@ -1,57 +1,126 @@
-            - name: Setup Go environment
-  uses: actions/setup-go@v5.5.0
-  with:
-    # The Go version to download (if necessary) and use. Supports semver spec and ranges. Be sure to enclose this option in single quotation marks.
-    go-version: # optional
-    # Path to the go.mod or go.work file.
-    go-version-file: # optional
-    # Set this option to true if you want the action to always check for the latest available version that satisfies the version spec
-    check-latest: # optional
-    # Used to pull Go distributions from go-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
-    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
-    # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
-    cache: # optional, default is true
-    # Used to specify the path to a dependency file - go.sum
-    cache-dependency-path: # optional
-    # Target architecture for Go to use. Examples: x86, x64. Will use system architecture by default.
-    architecture: # optional
-          - name: Load Bit.Hub Charter
-  run: |
-    test -f .bitcharter || { echo "❌ Missing .bitcharter"; exit 1; }
-    cat .bitcharter
+name: Great.Wall.of.Compliance
+on:
+  push:
+  workflow_dispatch:
 
-- name: Scan for disallowed terms
-  run: |
-    grep -R -E -i -f .bit/disallowed_terms.txt . && {
-      echo "❌ Unapproved content detected. Job stopped."
-      exit 1
-    } || echo "✅ No disallowed content found."
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-- name: Verify persona registry lock
-  run: |
-    WANT=$(awk -F= '/^registry_sha256=/{print $2}' .bit/persona.lock)
-    GOT=$(sha256sum .bit/persona_registry.json | awk '{print $1}')
-    test "$WANT" = "$GOT" || { echo "❌ Persona registry hash mismatch"; exit 1; }
-- name: Display Great Wall Banner
-  run: |
-    echo "🧱 构建合规长城: BUILDING THE GREAT WALL OF COMPLIANCE 🧱"
-    echo "All runners must pass through the compliance gate."
+jobs:
+  compliance-linux:
+    name: "🌐 Linux Compliance 长城"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Display Great Wall Banner
+        run: echo "🧱 构建合规长城: BUILDING THE GREAT WALL OF COMPLIANCE 🧱"
+      # 0. Go Environment
+      - name: Setup Go Environment
+        uses: actions/setup-go@v5.5.0
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+          cache: true
+      # 1. Charter & Policy Verification
+      - name: Verify Charter Exists
+        run: |
+          test -f .bitcharter || { echo "❌ Missing .bitcharter"; exit 1; }
+          cat .bitcharter
+      - name: Verify Terms of Use
+        run: |
+          grep -q "independent & free" .bitcharter || {
+            echo "❌ Terms of use not present in charter"; exit 1;
+          }
+      # 2. Disallowed Content Scan
+      - name: Scan for Disallowed Terms
+        run: |
+          grep -R -E -i -f .bit/disallowed_terms.txt . && {
+            echo "❌ Unapproved content detected. Job stopped."
+            exit 1
+          } || echo "✅ No disallowed content found."
+      # 2.1 Optional—Automated Profanity Filter on PRs/issues
+      - name: Profanity Filter (optional marketplace action)
+        uses: radiantly/profanity-filter-action@v1.1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      # 3. Persona Registry Lock
+      - name: Verify Persona Registry Lock
+        run: |
+          WANT=$(awk -F= '/^registry_sha256=/{print $2}' .bit/persona.lock)
+          GOT=$(sha256sum .bit/persona_registry.json | awk '{print $1}')
+          test "$WANT" = "$GOT" || { echo "❌ Persona registry hash mismatch"; exit 1; }
+      # 4. ALNFantasia Asset-Economy Checks
+      - name: Validate Asset-Economy Config
+        run: |
+          test -f .bit/asset_economy.json || { echo "❌ Missing asset economy config"; exit 1; }
+          jq -e '.portable == true and .blockchain == false' .bit/asset_economy.json \
+            || { echo "❌ Asset economy must be portable & non-blockchain"; exit 1; }
+      - name: Validate Trading Rules
+        run: |
+          jq -e '.trading.enabled == true and .trading.requires_review == true' .bit/asset_economy.json \
+            || { echo "❌ Trading must be enabled and require manual review"; exit 1; }
+      # 5. Mature Content Gating
+      - name: Check Mature Content Flags
+        run: |
+          jq -e '.mature_content.allowed == true and .mature_content.review_required == true' .bit/content_policy.json \
+            || { echo "❌ Mature content policy not compliant"; exit 1; }
+      # 6. Audit Logging
+      - name: Log Compliance Result
+        run: |
+          mkdir -p .bithubreports
+          echo "$(date -u +%FT%TZ) Linux compliance passed" >> .bithubreports/compliance.log
 
-                - name: Setup Go environment
-  uses: actions/setup-go@v5.5.0
-  with:
-    # The Go version to download (if necessary) and use. Supports semver spec and ranges. Be sure to enclose this option in single quotation marks.
-    go-version: # optional
-    # Path to the go.mod or go.work file.
-    go-version-file: # optional
-    # Set this option to true if you want the action to always check for the latest available version that satisfies the version spec
-    check-latest: # optional
-    # Used to pull Go distributions from go-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
-    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
-    # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
-    cache: # optional, default is true
-    # Used to specify the path to a dependency file - go.sum
-    cache-dependency-path: # optional
-    # Target architecture for Go to use. Examples: x86, x64. Will use system architecture by default.
-    architecture: # optional
-          
+  # Windows & macOS jobs mirror Linux with OS-specific adjustments
+  compliance-windows:
+    name: "🪟 Windows Compliance 长城"
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Display Great Wall Banner
+        run: Write-Output "🧱 构建合规长城: BUILDING THE GREAT WALL OF COMPLIANCE 🧱"
+      - name: Setup Go Environment
+        uses: actions/setup-go@v5.5.0
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+          cache: true
+      - name: Verify Charter Exists
+        run: if (!(Test-Path ".bitcharter")) { Write-Error "❌ Missing .bitcharter"; exit 1 } else { Get-Content ".bitcharter" }
+      - name: Scan for Disallowed Terms
+        run: |
+          $bad = Get-Content .bit\disallowed_terms.txt
+          Get-ChildItem -Recurse | Select-String -List -Pattern $bad
+          if ($LASTEXITCODE -eq 0) { Write-Error "❌ Unapproved content detected. Job stopped."; exit 1 } else { Write-Output "✅ No disallowed content found." }
+      - name: Log Compliance Result
+        run: |
+          New-Item -ItemType Directory -Force -Path .bithubreports | Out-Null
+          Add-Content -Path .bithubreports\compliance.log -Value "$(Get-Date -Format o) Windows compliance passed"
+
+  compliance-macos:
+    name: "🍏 macOS Compliance 长城"
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Display Great Wall Banner
+        run: echo "🧱 构建合规长城: BUILDING THE GREAT WALL OF COMPLIANCE 🧱"
+      - name: Setup Go Environment
+        uses: actions/setup-go@v5.5.0
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+          cache: true
+      - name: Verify Charter Exists
+        run: |
+          test -f .bitcharter || { echo "❌ Missing .bitcharter"; exit 1; }
+          cat .bitcharter
+      - name: Scan for Disallowed Terms
+        run: |
+          grep -R -E -i -f .bit/disallowed_terms.txt . && {
+            echo "❌ Unapproved content detected. Job stopped."
+            exit 1
+          } || echo "✅ No disallowed content found."
+      - name: Log Compliance Result
+        run: |
+          mkdir -p .bithubreports
+          echo "$(date -u +%FT%TZ) macOS compliance passed" >> .bithubreports/compliance.log
