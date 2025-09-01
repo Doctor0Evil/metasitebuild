@@ -1,0 +1,69 @@
+# .bit.yml (Bit.Hub Workflow Configuration)
+env:
+  PYTHONPATH: src/
+
+pipelines:
+  default:
+    - name: Setup Environment & Install Dependencies
+      run: |
+        echo "Setting up Bit.Hub environment..."
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+
+    - name: Pre-Indexing Compliance Check
+      # This step is critical. It uses the dedicated compliance script
+      # to scan incoming data against the .aln policy.
+      # Data that fails this check is immediately flagged and not indexed.
+      run: |
+        echo "Running pre-indexing compliance audit against .aln policy..."
+        python scripts/compliance_auditor.py \
+          --policy config/compliance_policy.aln \
+          --data-source data/raw_ingestion_queue/ \
+          --output logs/compliance_audit.json
+
+    - name: Process & Index Eligible Data
+      # This step only runs if the previous compliance check passed.
+      # It takes the clean, approved data and preps it for AI indexing.
+      run: |
+        echo "Processing and indexing eligible data..."
+        python scripts/ai_indexer.py \
+          --audit logs/compliance_audit.json \
+          --output logs/indexing_summary.json
+
+    - name: Log Indexing Status
+      run: |
+        if [ -f logs/indexing_summary.json ]; then
+          echo "Indexing summary created. Ready for review."
+        else
+          echo "Indexing process failed to produce a log!" && exit 1
+        fi
+
+# ====================
+# [Optional: Additional Stages for Federated Learning]
+# ====================
+  federated_learning:
+    - name: Execute Federated Learning
+      # This step ensures that federated learning only uses a secure, sanitized data pool.
+      run: |
+        echo "Executing federated learning with compliant data pool."
+        python scripts/federated_learning_runner.py \
+          --data-pool data/sanitized/ \
+          --policy config/compliance_policy.aln
+
+    - name: Validate Federated Model Gradients
+      # This step uses the compliance auditor to check if the outgoing model gradients
+      # contain any sensitive, unredacted data before they are federated.
+      run: |
+        echo "Validating model gradients for compliance..."
+        python scripts/compliance_auditor.py \
+          --policy config/compliance_policy.aln \
+          --data-source model_gradients/ \
+          --check-gradients-only
+
+# ====================
+# [Workflow Triggers]
+# ====================
+triggers:
+  on_push: true
+  on_merge_request: true
