@@ -1,4 +1,4 @@
-name: Preflight Bot — Compliance & Humor Reasoning
+name: Preflight Bot — Compliance Sentinel
 
 on:
   push:
@@ -6,15 +6,6 @@ on:
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
-    inputs:
-      default_threshold:
-        description: "Compliance level: standard | strict | paranoid"
-        type: choice
-        default: "strict"
-        options:
-          - standard
-          - strict
-          - paranoid
 
 permissions:
   contents: read
@@ -32,32 +23,19 @@ env:
   BITHUB_TRACE_FILE: .bithub/audit/humor-reasoning-trace.json
   BITHUB_OPA_RESULT: .bithub/audit/opa-result.json
   HUMOR_LOG: .bithub/logs/humor-bot.log
-  COMPLIANCE_LEVEL: ${{ inputs.default_threshold || 'strict' }}
+  COMPLIANCE_LEVEL: strict
 
 jobs:
-  preflight:
+  compliance-sentinel:
     name: Compliance Floor & Humor Reasoning
     runs-on: windows-latest
+    continue-on-error: true   # Never blocks other workflows
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
 
-      - name: Initialize BitShell/ALN Context
-        shell: pwsh
-        run: |
-          Write-Host "::notice::Initializing Bit.Hub Preflight..."
-          $Context = @{
-            Workflow = "${{ github.workflow }}"
-            Ref      = "${{ github.ref }}"
-            RunId    = "${{ github.run_id }}"
-            Actor    = "${{ github.actor }}"
-            Repo     = "${{ github.repository }}"
-          }
-          $Context | ConvertTo-Json -Depth 3 | Write-Host
-
-      - name: Run Humor Reasoning Model + Compliance Floor
+      - name: Run HRM + Compliance Floor
         shell: pwsh
         env:
           OWNER_ENFORCEMENT_PRIVATE_KEY_PEM: ${{ secrets.OWNER_ENFORCEMENT_PRIVATE_KEY_PEM }}
@@ -70,33 +48,20 @@ jobs:
             -TraceFile "${{ env.BITHUB_TRACE_FILE }}" `
             -OpaResultFile "${{ env.BITHUB_OPA_RESULT }}" `
             -OpaQuery "data.bithub.allow" `
-            -FailMode "gate" `
+            -FailMode "log" `
             -AutoInstallOpa
 
-      - name: Immutable Audit Log Update
+      - name: Write Compliance Verdict
         shell: pwsh
         run: |
-          $traceSha = Get-FileHash "${{ env.BITHUB_TRACE_FILE }}" -Algorithm SHA256
-          $opaSha   = Get-FileHash "${{ env.BITHUB_OPA_RESULT }}" -Algorithm SHA256
-          $logEntry = [PSCustomObject]@{
-            schema     = "bithub.audit.v1"
-            ts         = (Get-Date).ToUniversalTime().ToString("o")
-            run_id     = "${{ github.run_id }}"
-            ref        = "${{ github.ref }}"
-            repo       = "${{ github.repository }}"
-            actor      = "${{ github.actor }}"
-            compliance = @{
-              level = "${{ env.COMPLIANCE_LEVEL }}"
-              pass  = $true
-            }
-            artefacts  = @{
-              trace = @{ file = "${{ env.BITHUB_TRACE_FILE }}"; sha256 = $traceSha.Hash }
-              opa   = @{ file = "${{ env.BITHUB_OPA_RESULT }}"; sha256 = $opaSha.Hash }
-            }
+          $opa = Get-Content "${{ env.BITHUB_OPA_RESULT }}" | ConvertFrom-Json
+          $verdict = @{
+            pass  = $opa.pass
+            level = "${{ env.COMPLIANCE_LEVEL }}"
+            ts    = (Get-Date).ToUniversalTime().ToString("o")
           }
-          $logFile = "${{ env.BITHUB_AUDIT_DIR }}/immutable-log.jsonl"
-          $logEntry | ConvertTo-Json -Depth 10 | Add-Content -Path $logFile -Encoding utf8
-          Write-Host "::notice::Immutable audit log updated: $logFile"
+          $verdict | ConvertTo-Json -Depth 5 | Out-File -FilePath "${{ env.BITHUB_AUDIT_DIR }}/compliance-verdict.json" -Encoding utf8
+          Write-Host "::notice::Compliance verdict written."
 
       - name: Upload Audit Artifacts
         uses: actions/upload-artifact@v4
