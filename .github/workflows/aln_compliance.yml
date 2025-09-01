@@ -1,0 +1,19 @@
+// File: .github/workflows/aln_compliance.yml
+
+name: BitHub ALN Compliance Check
+on:
+  push:
+    paths:
+      - 'src/aln/**'
+      - 'src/lisp/**'
+      - 'src/lolcode/**'
+      - 'config/ALN-Security-Model.aln'
+      - 'scripts/validate_compliance.py'
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Validate ALN Compliance
+        run: python scripts/validate_compliance.py
