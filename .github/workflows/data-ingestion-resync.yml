@@ -1,0 +1,44 @@
+# .github/workflows/data-ingestion-resync.yml
+
+name: Data Ingestion Resync Pipeline
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Resilient Smart Work AI Pipeline"
+      - "Dynamic Resilient AI Pipeline"
+    types:
+      - completed
+
+jobs:
+  data-ingestion-resync:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code and submodules
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Debug workspace files
+      - name: List files in workspace (debug)
+        run: ls -lah
+
+      # Check if the resync script exists before running
+      - name: Check for resync-ingestion.sh
+        id: check_script
+        run: |
+          if [[ ! -f ./resync-ingestion.sh ]]; then
+            echo "❌ ERROR: resync-ingestion.sh script not found in workspace."
+            exit 1
+          fi
+
+      # Actually run the resync pipeline if the script is present
+      - name: Resync Data Ingestion Streams
+        if: steps.check_script.outcome == 'success'
+        run: |
+          echo "Re-syncing Kafka, telemetry, and ingestion pipelines..."
+          chmod +x ./resync-ingestion.sh
+          ./resync-ingestion.sh
+
+      # Optionally: Add error handling, notification, or logging here
+
