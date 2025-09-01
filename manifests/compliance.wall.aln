@@ -1,0 +1,58 @@
+policy.spec "1.1"
+meta {
+  id = "bit.hub.compliance.wall"
+  owners = ["governance@bit.hub"]
+  purpose = "Zero-trust egress, signed operations, hermetic builds, federated replication."
+}
+
+egress {
+  allow.domains = [
+    "ghcr.io",       # container registry (mirrored)
+    "packages.local",# internal mirror
+    "nodes.virta",   # federation
+    "time.cloudflare.com" # time sync if needed
+  ]
+  deny.domains = ["github.com", "api.github.com", "google.com", "www.google.com", "*.gvt1.com", "*.ggpht.com"]
+  allow.protocols = ["https"]
+  rate.window.seconds = 60
+  rate.max.requests = 60
+  redact.headers = ["Authorization", "X-Token"]
+  quarantine.on_violation = true
+}
+
+builds {
+  hermetic = true
+  pin.toolchains = true
+  pin.actions.by = "digest"
+  mirror.required = true
+  offline.ok = true
+}
+
+content {
+  allow.dev.graphic_assets = true
+  restrict.broadcast.channels = ["public-broadcast"]
+  allow.literature.free_use = true
+  classify.paths = {
+    "assets/**" = "dev_asset"
+    "docs/**"   = "literature"
+  }
+}
+
+signing {
+  algo = "ed25519"
+  required.files = ["manifests/*.aln", "workflows/**/*.lisp", "scripts/**/*.aln", "registries/**/*.alnlog"]
+  key.pub.path = ".keys/ed25519.public"
+}
+
+replication {
+  transport = "gossip"
+  topics = ["ledger", "asset-index"]
+  verify.signatures = true
+  merge.strategy = "crdt-last-write-wins-with-signature-precedence"
+}
+
+enforcement {
+  mode = "deny-egress-allow-internal"
+  audit.level = "verbose"
+  incident.route = ["#ops-wall", "#governance"]
+}
