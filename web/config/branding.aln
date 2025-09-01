@@ -1,0 +1,14 @@
+branding.spec "1.0"
+site:
+  name: "Bit.Hub"
+  host: "so.bit"
+  logo.light: "/assets/brand/logo-light.svg"
+  logo.dark: "/assets/brand/logo-dark.svg"
+redirects:
+  - from: "bithub.local"
+    to: "https://so.bit"
+  - from: "bit.hub"
+    to: "https://so.bit"
+headers:
+  csp: "default-src 'self' https://so.bit"
+  referrer: "no-referrer"
