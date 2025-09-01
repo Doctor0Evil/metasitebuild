@@ -1,0 +1,112 @@
+name: Compliance Wall compliance-gate (Bit.Hub/BobTheBuilder)
+on:
+  push:
+    branches: [ main, develop, earliest-critical ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+permissions:
+  contents: write
+  id-token: write
+  issues: read
+  actions: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  BITHUB_VNET_ADDR: vnet:address.Bit.Hub
+  BITHUB_AUDIT_DIR: .bithub/audit
+  HUMOR_LOG: .bithub/logs/humor-bot.log
+  OPA_POLICY_DIR: .bithub/policies
+  OPA_RESULT_FILE: .bithub/audit/opa-result.json
+  BITHUB_TRACE_FILE: .bithub/audit/humor-bot-trace.json
+
+jobs:
+  compliance-gate:
+    name: 🛡️ Compliance Wall (Bit.Bob Builder)
+    runs-on: [self-hosted, bitbot-secure-group]
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2.7.0
+        with:
+          egress-policy: 'audit'
+      - name: Validate PR and Initiator
+        uses: actions/github-script@v7
+        env:
+          PR_BODY: ${{ github.event.pull_request.body || '' }}
+        with:
+          script: |
+            const allowedAuthors = ['trusted-dev1', 'trusted-dev2', 'github-actions[bot]']
+            if (!allowedAuthors.includes(context.actor)) {
+              core.setFailed(`Unauthorized workflow initiator: '${context.actor}'.`);
+              return;
+            }
+            const prBody = process.env.PR_BODY;
+            const blockedPatterns = [/ignore.*above/i, /break.*compliance/i, /system prompt/i];
+            if (blockedPatterns.some(pat => pat.test(prBody))) {
+              core.setFailed('Potential prompt injection detected in PR body.');
+              return;
+            }
+            console.log('✔ Compliance checks passed.');
+      - name: Write VNet Address
+        run: |
+          echo "BitHub VNet Address: $BITHUB_VNET_ADDR"
+          echo $BITHUB_VNET_ADDR > .bithub/audit/vnet-address.log
+
+  correct-files:
+    name: 🔧 Correct Files (multi-OS)
+    needs: compliance-gate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Install PowerShell (non-Windows)
+        if: runner.os != 'Windows'
+        uses: actions/setup-pwsh@v3
+        with:
+          pwsh-version: 'latest'
+      - name: Run BobTheBuilder file corrector
+        shell: pwsh
+        run: |
+          $scriptsDir = Join-Path $env:GITHUB_WORKSPACE 'scripts'
+          $runnerScript = Join-Path $scriptsDir 'bobthebuilder.ps1'
+          if (-not (Test-Path $runnerScript)) {
+            throw "Correction runner script not found at '$runnerScript'"
+          }
+          & $runnerScript
+
+  humor-bot:
+    name: 🤖 Humor Bot AI Check
+    needs: compliance-gate
+    runs-on: [self-hosted, bitbot-secure-group, windows]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Install Humor Bot module and run
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Posh-Humor -Force -Confirm:$false
+          $joke = "Bit.Bob built a wall so strong, even compliance bots bounced off it!"
+          Write-Host "🤖 $joke"
+          New-Item -ItemType Directory -Force -Path (Split-Path "${{ env.HUMOR_LOG }}") | Out-Null
+          Add-Content -Path "${{ env.HUMOR_LOG }}" -Value "$(Get-Date -Format o) :: $joke"
+      - name: Trace/Audit
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.BITHUB_AUDIT_DIR }}" | Out-Null
+          $result = @{
+            schema = "bithub.trace.v1"
+            component = "humor.bot"
+            run_id = "${{ github.run_id }}"
+            event = "${{ github.event_name }}"
+            timestamp = (Get-Date).ToUniversalTime().ToString("o")
+            status = "completed"
+          } | ConvertTo-Json -Depth 5
+          $result | Out-File -FilePath "${{ env.BITHUB_TRACE_FILE }}" -Encoding utf8
