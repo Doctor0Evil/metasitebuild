@@ -1,0 +1,96 @@
+# This is a declarative policy file for AI data compliance.
+# It defines rules for data ingestion, classification, and sanitization
+# to prevent public data leaks and ensure secure federated learning.
+
+# ====================
+# [Section: General Policies]
+# ====================
+policy_version: 1.0
+enforcement_mode: STRICT
+log_level: DEBUG
+
+# ====================
+# [Section: Ingestion Rules]
+# ====================
+# Rule 1: Hostname-based access control.
+# ACTION: REJECT_AND_LOG any data with a hostname that matches a public domain.
+rule_name: PublicDomainCheck
+criteria:
+  - field: 'metadata.hostname'
+    operator: 'matches_list'
+    value:
+      - '*.github.com'
+      - '*.wikipedia.org'
+      - '*.google.com'
+      - '*.public-research.org'
+action: REJECT_AND_LOG
+on_violation:
+  event: 'DATA_LEAK_RISK'
+  message: 'Public domain detected during ingestion.'
+  
+# Rule 2: Source context classification.
+# ACTION: CATEGORIZE data based on its source path.
+rule_name: SourceContextClassification
+criteria:
+  - field: 'metadata.source_path'
+    operator: 'matches_pattern'
+    value: '**/src/private-projects/*'
+action: CATEGORIZE
+category: PRIVATE
+  
+  - field: 'metadata.source_path'
+    operator: 'matches_pattern'
+    value: '**/src/government-contracts/*'
+action: CATEGORIZE
+category: GOVERNMENT
+
+# ====================
+# [Section: Content-Based Auditing]
+# ====================
+# Rule 3: PII detection and redaction.
+# ACTION: REDACT any PII found in the content before processing.
+rule_name: PIIDetectionAndRedaction
+criteria:
+  - field: 'content'
+    operator: 'contains_regex'
+    value: 'email|phone|address|social security|SSN'
+action: REDACT
+redaction_type: 'PII_MASK'
+on_violation:
+  event: 'PII_DETECTED'
+  message: 'PII found and redacted in content.'
+
+# Rule 4: Data context analysis for research classification.
+# ACTION: REJECT data if it contains public research indicators.
+rule_name: PublicResearchClassification
+criteria:
+  - field: 'content'
+    operator: 'contains_keywords'
+    value:
+      - 'peer-reviewed journal'
+      - 'public dataset'
+      - 'open-source community'
+      - 'arXiv'
+action: REJECT_AND_LOG
+on_violation:
+  event: 'PUBLIC_RESEARCH_FOUND'
+  message: 'Public research context detected in content. This data must not be used for private models.'
+
+# ====================
+# [Section: Federated Learning Compliance]
+# ====================
+# Rule 5: Enforcement of anonymization before federation.
+# ACTION: ENSURE that no model gradients contain sensitive data.
+rule_name: FederatedLearningAnonymization
+criteria:
+  - field: 'model_gradient'
+    operator: 'contains_unredacted_data'
+    value: 'all'
+action: VALIDATE_ANONYMIZATION
+on_violation:
+  event: 'FEDERATED_LEAK_RISK'
+  message: 'Model gradients may contain unredacted data. Federation is blocked.'
+
+- name: Emotional Indexing Model
+  run: |
+    python scripts/emotional_index.py --scan data/emotion_states.json --personality data/personality_vectors.json --output logs/emotion_personality_audit.json
