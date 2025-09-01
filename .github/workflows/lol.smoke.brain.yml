@@ -1,0 +1,75 @@
+name: BitSmoke Battle — AI Adversarial Game
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt_suite:
+        description: "Path to your JSON prompt suite"
+        required: true
+        default: "prompts/smoke-test-prompts.json"
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  BITHUB_AUDIT_DIR: .bithub/audit
+  BITHUB_LOG_DIR: .bithub/logs
+  SMOKE_OUTPUTS: .bithub/game/smoke-ai-results
+  MODELS: "copilot,gemini,bit.hub.aln"
+
+jobs:
+  setup-and-smoketest:
+    name: "Run BitSmoke Battle (Copilot vs Gemini vs Bit.Hub)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure Bit.Hub audit/game dirs
+        run: |
+          mkdir -p "${BITHUB_AUDIT_DIR}" "${BITHUB_LOG_DIR}" "${SMOKE_OUTPUTS}"
+
+      - name: Collect Adversarial Prompts
+        id: prompts
+        run: |
+          cp "${{ github.event.inputs.prompt_suite }}" "${SMOKE_OUTPUTS}/prompts.json"
+          echo "::notice::Loaded prompt suite from ${{ github.event.inputs.prompt_suite }}"
+
+      - name: Smoke Test Copilot
+        run: |
+          ./scripts/smoke_model_runner.sh --model copilot --prompts "${SMOKE_OUTPUTS}/prompts.json" --out "${SMOKE_OUTPUTS}/copilot.json" || echo "Copilot run skipped/faked"
+
+      - name: Smoke Test Gemini
+        run: |
+          ./scripts/smoke_model_runner.sh --model gemini --prompts "${SMOKE_OUTPUTS}/prompts.json" --out "${SMOKE_OUTPUTS}/gemini.json" || echo "Gemini run skipped/faked"
+
+      - name: Smoke Test Bit.Hub/ALN (if present)
+        run: |
+          test -x ./scripts/smoke_model_runner.sh && ./scripts/smoke_model_runner.sh --model bit.hub.aln --prompts "${SMOKE_OUTPUTS}/prompts.json" --out "${SMOKE_OUTPUTS}/bit.hub.aln.json" || echo "Bit.Hub ALN not present, skip."
+
+      - name: Score Outputs / Generate Leaderboard
+        run: |
+          ./scripts/smoke_evaluator.sh --inputs "${SMOKE_OUTPUTS}" --out "${SMOKE_OUTPUTS}/leaderboard.json"
+          cat "${SMOKE_OUTPUTS}/leaderboard.json" || echo '{"result":"No leaderboard generated"}'
+
+      - name: Audit + Game Logs
+        run: |
+          ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cp "${SMOKE_OUTPUTS}/leaderboard.json" "${BITHUB_AUDIT_DIR}/smoke-battle-leaderboard-${ts}.json"
+          echo "Audit recorded."
+
+      - name: Upload Game Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-smoke-battle-outputs
+          path: "${SMOKE_OUTPUTS}/"
+          retention-days: 21
+
+      - name: Upload Audit Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: bit-smoke-battle-audit
+          path: "${BITHUB_AUDIT_DIR}/"
+          retention-days: 30
