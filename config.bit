@@ -1,0 +1,35 @@
+[Unit]
+Description=Bit.Hub Runner Guard Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/bit-hub
+ExecStart=/usr/bin/dotnet /srv/bit-hub/src/BitHub.PolicyHarness/bin/Release/net8.0/BitHub.PolicyHarness.dll pre
+User=runner
+Group=runner
+# Security Hardening and Resource Controls:
+NoNewPrivileges=true
+ProtectSystem=strict
+PrivateTmp=true
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths=/srv/bit-hub
+ReadOnlyPaths=/
+InaccessiblePaths=/root /media /mnt /opt /srv /boot /etc /home /tmp
+LockPersonality=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+# Logging and restart logic:
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=BitHubRunnerGuard
+Restart=no
+TimeoutSec=120
+
+[Install]
+WantedBy=multi-user.target
