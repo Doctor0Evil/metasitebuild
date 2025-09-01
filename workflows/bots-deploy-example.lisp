@@ -1,21 +1,26 @@
 (defworkflow bots-deploy-example
-  ;; Recursive deploy orchestrator with PR fallback and bot attribution
   (let ((bot-id (bot:self))
-        (repo (git:current-repo))
-        (max-attempts 3))
-    (log:info (format nil "Deploy initiated by ~A on ~A" bot-id repo))
+        (repo (git:current-repo)))
+    (require 'services/wall/egress.guard.lisp)
+    (require 'services/wall/github.api.shim.lisp)
+    (require 'workflows/verify-ledger.lisp)
+    (require 'registries/assets/indexer.lisp)
 
-    (loop for attempt from 1 to max-attempts
-          do
-            (log:info (format nil "Attempt ~A/~A" attempt max-attempts))
+    (parsing.block)
+    (assets.indexer)     ;; index + ledger
+    (verify-ledger)      ;; ensure continuity
 
-            ;; Ensure policy + script are present
-            (assert (fs:exists? "manifests/content.policy.aln")
-                    "Missing manifests/content.policy.aln")
-            (assert (fs:exists? "scripts/BitShellALN.ps1.aln")
-                    "Missing scripts/BitShellALN.ps1.aln")
-
-            ;; Parse and validate ALN before running
+    ;; Try deploy with local resources only
+    (let ((ok (aln:exec "scripts/BitShellALN.ps1.aln"
+                        :env `((BOT_ID . ,bot-id) (REPO . ,repo)))))
+      (if ok
+          (log:info "Local deploy succeeded.")
+          (progn
+            (log:warn "Local deploy failed; opening internal PR and attempting shim passthrough when allowed.")
+            (internal:pr:open repo "bot-fallback" "main" '("bot-fallback"))
+            (gh:open-pr repo "bot-fallback" "main" '("bot-fallback")))))
+    t))
+   ;; Parse and validate ALN before running
             (parsing.block)
 
             ;; Execute ALN-wrapped PowerShell pipeline
