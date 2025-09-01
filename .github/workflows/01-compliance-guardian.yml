@@ -1,0 +1,75 @@
+name: ComplianceGuardian — ALN Compliance Run
+
+on:
+  push:
+    branches: [ main, develop, earliest-critical ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+concurrency:
+  group: "compliance-guardian-${{ github.ref }}"
+  cancel-in-progress: false
+
+env:
+  BITHUB_AUDIT_DIR: .bithub/audit
+  BITHUB_LOG_DIR: .bithub/logs
+  BITHUB_POLICY_DIR: .bithub/policies
+  BITHUB_TRACE_FILE: .bithub/audit/humor-reasoning-trace.json
+  BITHUB_OPA_RESULT: .bithub/audit/opa-result.json
+  BITHUB_VERDICT_FILE: .bithub/audit/compliance-verdict.json
+  HUMOR_LOG: .bithub/logs/humor-bot.log
+  COMPLIANCE_LEVEL: strict
+
+jobs:
+  build-and-run:
+    name: Compliance Floor & Humor Reasoning
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run HRM + Compliance Floor
+        shell: pwsh
+        env:
+          OWNER_ENFORCEMENT_PRIVATE_KEY_PEM: ${{ secrets.OWNER_ENFORCEMENT_PRIVATE_KEY_PEM }}
+        run: |
+          ./scripts/run-hrm-compliance.ps1 `
+            -ComplianceLevel "${{ env.COMPLIANCE_LEVEL }}" `
+            -AuditDir "${{ env.BITHUB_AUDIT_DIR }}" `
+            -PolicyDir "${{ env.BITHUB_POLICY_DIR }}" `
+            -HumorLog "${{ env.HUMOR_LOG }}" `
+            -TraceFile "${{ env.BITHUB_TRACE_FILE }}" `
+            -OpaResultFile "${{ env.BITHUB_OPA_RESULT }}" `
+            -OpaQuery "data.bithub.allow" `
+            -FailMode "log" `
+            -AutoInstallOpa
+
+      - name: Write Compliance Verdict
+        shell: pwsh
+        run: |
+          $opa = Get-Content "${{ env.BITHUB_OPA_RESULT }}" | ConvertFrom-Json
+          $pass = $true
+          if ($opa.pass -is [bool]) { $pass = $opa.pass } elseif ($opa.pass) { $pass = $true } else { $pass = $false }
+          $verdict = @{
+            pass  = $pass
+            level = "${{ env.COMPLIANCE_LEVEL }}"
+            ts    = (Get-Date).ToUniversalTime().ToString("o")
+            run   = "${{ github.run_id }}"
+            sha   = "${{ github.sha }}"
+          }
+          $verdict | ConvertTo-Json -Depth 5 | Out-File -FilePath "${{ env.BITHUB_VERDICT_FILE }}" -Encoding utf8
+          Write-Host "::notice::Compliance verdict written to ${{ env.BITHUB_VERDICT_FILE }}"
+
+      - name: Upload Audit Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: complianceguardian-audit
+          path: |
+            ${{ env.BITHUB_AUDIT_DIR }}
+            ${{ env.BITHUB_LOG_DIR }}
