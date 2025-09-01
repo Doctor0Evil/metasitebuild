@@ -1,0 +1,56 @@
+bot.spec "1.0"
+meta:
+  name: bitcomply
+  purpose: "Local compliance scan/patch/fix, manifest-signed, ledgered."
+env:
+  LEDGER: registries/command-ledger.alnlog
+  MANIFEST: manifests/master-enforcement.aln
+  PUBKEY: .keys/ed25519.public
+
+bootstrap:
+  steps:
+    - sh: |
+        set -e
+        mkdir -p "$HOME/.aln/bin"
+        export PATH="$HOME/.aln/bin:$PATH"
+        if ! command -v aln-analyze >/dev/null 2>&1; then
+          curl -sSL https://bit.hub/tools/install-aln.sh | bash
+        fi
+        for t in aln-analyze aln-patch aln-fixer-bot; do
+          command -v "$t" >/dev/null 2>&1 || { echo "missing $t" >&2; exit 1; }
+        done
+
+policy:
+  steps:
+    - sh: |
+        set -e
+        verify-ed25519 "$MANIFEST" "$PUBKEY"
+
+scan:
+  steps:
+    - sh: |
+        set -e
+        aln-analyze --manifest "$MANIFEST" --output /tmp/failure.lst || true
+        if [ -s /tmp/failure.lst ]; then
+          echo "violations=true" >> "$GITHUB_OUTPUT" 2>/dev/null || true
+        fi
+
+repair:
+  steps:
+    - sh: |
+        set -e
+        if [ -s /tmp/failure.lst ]; then
+          aln-patch /tmp/failure.lst || true
+          aln-fixer-bot --context "compliance" || true
+        fi
+
+ledger:
+  steps:
+    - sh: |
+        set -e
+        HASH=$(sha256sum "$MANIFEST" | awk '{print $1}')
+        printf '{"ts":"%s","bot":"bitcomply","repo":"%s","payload":"%s"}\n' \
+          "$(date -u +%FT%TZ)" "${REPO:-local}" "$HASH" >> "$LEDGER"
+
+run:
+  order: [bootstrap, policy, scan, repair, ledger]
