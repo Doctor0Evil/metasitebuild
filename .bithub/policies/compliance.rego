@@ -1,10 +1,9 @@
 package bithub
 
-# Default decision is to deny
-default allow := false
+default allow = false
 
 # Owners that must sign the trace
-required_owners := {"owner:bithub", "owner:perplexity"}
+required_owners = {"owner:bithub", "owner:perplexity"}
 
 # Both required owners have signed
 has_required_signatures {
@@ -18,10 +17,12 @@ has_required_signatures {
 level_ok {
     lvl := lower(input.complianceLevel)
     lvl == "standard"
-} or {
+}
+level_ok {
     lvl := lower(input.complianceLevel)
     lvl == "strict"
-} or {
+}
+level_ok {
     lvl := lower(input.complianceLevel)
     lvl == "paranoid"
 }
