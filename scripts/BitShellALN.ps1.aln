@@ -1,0 +1,138 @@
+aln.spec "1.0"
+meta {
+  name = "BitShellALN"
+  theme = "Post-Apocalyptic RPG"
+  description = "Hybrid ALN wrapper embedding PowerShell pipeline with Ed25519-signed command ledger."
+}
+
+vars {
+  LEDGER_PATH = "registries/command-ledger.alnlog"
+  KEY_DIR     = ".keys"
+  KEY_PRIV    = ".keys/ed25519.private"
+  KEY_PUB     = ".keys/ed25519.public"
+  ED25519_CLI = "tools/ed25519/ed25519-cli"
+  BOT_ID      = env.BOT_ID
+  REPO        = env.REPO
+}
+
+policy {
+  allow.graphic.dev_assets = true
+  restrict.distribution.channels = ["public-broadcast"]
+  allow.literature.free_use = true
+  audit.level = "verbose"
+}
+
+pipeline {
+  step "prepare"
+  step "ensure-keys"
+  step "sign-payload"
+  step "append-ledger"
+  step "report"
+}
+
+ps1 step "prepare" <<'PS'
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+# Ensure directories
+$ledgerPath = "${env:LEDGER_PATH}"
+$keyDir     = "${env:KEY_DIR}"
+$cli        = "${env:ED25519_CLI}"
+
+New-Item -ItemType Directory -Force -Path (Split-Path $ledgerPath) | Out-Null
+New-Item -ItemType Directory -Force -Path $keyDir | Out-Null
+
+if (-not (Test-Path $cli)) {
+  throw "Missing Ed25519 CLI at $cli. Build tools/ed25519/ed25519-cli first."
+}
+
+# Prepare a payload describing this build step
+$payload = [PSCustomObject]@{
+  ts    = (Get-Date).ToUniversalTime().ToString("o")
+  bot   = "${env:BOT_ID}"
+  repo  = "${env:REPO}"
+  kind  = "deploy-event"
+  note  = "BitShellALN pipeline executed (prepare)"
+} | ConvertTo-Json -Compress
+
+Set-Content -LiteralPath "$env:TEMP\aln.payload.json" -Value $payload -Encoding UTF8
+PS
+
+ps1 step "ensure-keys" <<'PS'
+$priv = "${env:KEY_PRIV}"
+$pub  = "${env:KEY_PUB}"
+$cli  = "${env:ED25519_CLI}"
+
+if (-not (Test-Path $priv) -or -not (Test-Path $pub)) {
+  Write-Host "Generating Ed25519 keypair..."
+  & $cli gen -priv $priv -pub $pub | Out-Null
+  Write-Host "Keypair generated."
+} else {
+  Write-Host "Existing Ed25519 keypair found."
+}
+PS
+
+ps1 step "sign-payload" <<'PS'
+$cli  = "${env:ED25519_CLI}"
+$priv = "${env:KEY_PRIV}"
+
+$payloadFile = "$env:TEMP\aln.payload.json"
+if (-not (Test-Path $payloadFile)) { throw "Missing payload file." }
+
+# Compute SHA256 of payload for stable signing
+$payload      = Get-Content -Raw -LiteralPath $payloadFile -Encoding UTF8
+$sha256       = [System.Security.Cryptography.SHA256]::Create()
+$payloadBytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
+$hashBytes    = $sha256.ComputeHash($payloadBytes)
+$hashHex      = ($hashBytes | ForEach-Object { $_.ToString("x2") }) -join ""
+
+# Sign hash
+$signature = & $cli sign -priv $priv -msg $hashHex
+if ($LASTEXITCODE -ne 0) { throw "Signing failed." }
+
+$env:ALN_PAYLOAD_HASH = $hashHex
+$env:ALN_SIGNATURE    = $signature
+PS
+
+ps1 step "append-ledger" <<'PS'
+$ledger = "${env:LEDGER_PATH}"
+$pub    = "${env:KEY_PUB}"
+$hash   = $env:ALN_PAYLOAD_HASH
+$sig    = $env:ALN_SIGNATURE
+
+# Determine prev hash
+$prev = if (Test-Path $ledger) {
+  (Get-Content -LiteralPath $ledger -Tail 1) -replace '.*"entry_hash":"([^"]+)".*','$1'
+} else { "" }
+
+# Compose entry
+$entry = [PSCustomObject]@{
+  ts         = (Get-Date).ToUniversalTime().ToString("o")
+  bot        = "${env:BOT_ID}"
+  repo       = "${env:REPO}"
+  payload    = $hash
+  signature  = $sig
+  pubkey     = (Get-Content -LiteralPath $pub -Raw)
+  prev_hash  = $prev
+  entry_hash = ""
+}
+
+# Compute entry hash (without entry_hash)
+$tmp = $entry | Select-Object ts,bot,repo,payload,signature,pubkey,prev_hash | ConvertTo-Json -Compress
+$sha256 = [System.Security.Cryptography.SHA256]::Create()
+$eb     = [System.Text.Encoding]::UTF8.GetBytes($tmp)
+$eh     = ($sha256.ComputeHash($eb) | ForEach-Object { $_.ToString("x2") }) -join ""
+$entry.entry_hash = $eh
+
+# Append
+$line = ($entry | ConvertTo-Json -Compress)
+Add-Content -LiteralPath $ledger -Value $line -Encoding UTF8
+Write-Host "Ledger appended: $eh"
+PS
+
+ps1 step "report" <<'PS'
+Write-Host "BitShellALN pipeline completed."
+Write-Host "Payload hash: $env:ALN_PAYLOAD_HASH"
+Write-Host "Signature:    $env:ALN_SIGNATURE"
+Write-Host "Ledger:       ${env:LEDGER_PATH}"
+PS
