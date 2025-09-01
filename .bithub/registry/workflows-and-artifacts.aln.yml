@@ -4,59 +4,41 @@ source:
   repo: Doctor0Evil/Bit.Hub
   maintainer: XboxTeeJay
   note: >
-    Registry entries for core Bit.Hub workflows and their build artefacts,
-    including Compliance Guardian, Embedded Multi-Surface Build, Rust targets,
-    SBOMs, and IPFS-published metadata.
-
+    Registry for Bit.Hub/ALN core workflows, CI artefacts, and audits.
+    Each entry is indexed for BitShell, BitHub, interpreter-compat, and signature.
 entries:
-  # === Workflows ===
+  # --- Workflows ---
   - pkg: workflows
     kind: github-actions
     symbol: compliance-guardian
     path: .github/workflows/01-compliance-guardian.yml
     status: ok
-    policies:
-      - opa
-      - audit-trace
+    policies: [opa, audit-trace]
     description: >
-      Runs Humor‑Reasoning‑Model and compliance‑floor checks, writes immutable
-      audit logs, and emits a machine‑readable compliance verdict for other
-      workflows to consume.
+      Runs humor-reasoning model and compliance checks, producing signed, machine-readable verdicts for downstream jobs.
 
   - pkg: workflows
     kind: github-actions
     symbol: embedded-multisurface
     path: .github/workflows/02-embedded-multisurface.yml
     status: ok
-    depends_on:
-      - compliance-guardian
+    depends_on: [compliance-guardian]
     description: >
-      Builds Rust embedded target (aarch64), Node, and Python components;
-      generates SBOM; publishes to IPFS; reads compliance verdict from
-      Compliance Guardian and logs it in build audit.
+      Multi-surface embedded build: Rust (aarch64, x86_64), Node, Python. Generates SBOM, pushes result to IPFS. Reads verdict and records audit.
 
-  # === Rust Targets ===
+  # --- Build Artefacts ---
   - pkg: artefacts
     kind: rust-binary
     symbol: firmware-aarch64
     path: target/aarch64-unknown-linux-gnu/release
-    status: ok
+    status: gated
     build_from: embedded-multisurface
+    requires:
+      policies: [opa]
+      signatures: [owner:bithub, owner:perplexity]
     description: >
-      Cross-compiled Rust firmware for aarch64 embedded target, built with
-      no_std and panic-halt for Bit.Hub IoT/AI edge devices.
+      Cross-built Rust firmware for IoT/edge (aarch64, no_std, panic-halt).
 
-  - pkg: artefacts
-    kind: rust-binary
-    symbol: firmware-x86_64
-    path: target/x86_64-unknown-linux-gnu/release
-    status: optional
-    build_from: embedded-multisurface
-    description: >
-      Host-compiled Rust binary for x86_64, used for simulation, testing,
-      and CI/CD validation.
-
-  # === SBOM Artefacts ===
   - pkg: artefacts
     kind: sbom
     symbol: cyclonedx-json
@@ -64,10 +46,8 @@ entries:
     status: ok
     generated_by: embedded-multisurface
     description: >
-      CycloneDX 1.4 Software Bill of Materials for the Rust/Node/Python
-      multi-surface build, used for CVE scanning and supply-chain audits.
+      CycloneDX 1.4 Software Bill of Materials for multi-surface builds.
 
-  # === IPFS Publishing ===
   - pkg: artefacts
     kind: ipfs-cid
     symbol: sbom-ipfs
@@ -75,5 +55,4 @@ entries:
     status: ok
     generated_by: embedded-multisurface
     description: >
-      JSON record containing IPFS CID and metadata for the published SBOM,
-      enabling decentralised retrieval and verification.
+      JSON record of IPFS CID and SBOM metadata for decentralized audit.
