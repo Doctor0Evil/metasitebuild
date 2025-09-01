@@ -1,0 +1,15 @@
+policy.spec "1.0"
+scope {
+  name = "ALN Dev Assets"
+}
+rules {
+  allow.graphic.dev_assets      = true
+  allow.literature.free_use     = true
+  restrict.distribution.channels = ["public-broadcast"]
+  restrict.export.geo            = []
+  audit.level                    = "verbose"
+}
+enforcement {
+  mode = "log-and-continue"
+  quarantine.on_violation = false
+}
