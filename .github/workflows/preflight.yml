@@ -1,44 +1,108 @@
-name: Preflight Bot
+name: Preflight Bot — Compliance & Humor Reasoning
 
 on:
   push:
-    paths:
-      - ".bithub-actions/manifests/master.bithub.files.yml"
-      - ".bithub-actions/manifests/tools.yml"
-      - ".github/workflows/**"
-      - "scripts/**"
-      - "config/**"
-      - "policies/**"
-  workflow_call:
+    branches: [ main, develop, earliest-critical ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      default_threshold:
+        description: "Compliance level: standard | strict | paranoid"
+        type: choice
+        default: "strict"
+        options:
+          - standard
+          - strict
+          - paranoid
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
+concurrency:
+  group: "preflight-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: false
+
+env:
+  BITHUB_AUDIT_DIR: .bithub/audit
+  BITHUB_LOG_DIR: .bithub/logs
+  BITHUB_POLICY_DIR: .bithub/policies
+  BITHUB_TRACE_FILE: .bithub/audit/humor-reasoning-trace.json
+  BITHUB_OPA_RESULT: .bithub/audit/opa-result.json
+  HUMOR_LOG: .bithub/logs/humor-bot.log
+  COMPLIANCE_LEVEL: ${{ inputs.default_threshold || 'strict' }}
 
 jobs:
   preflight:
-    runs-on: ubuntu-latest
+    name: Compliance Floor & Humor Reasoning
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Install yq
-        run: sudo apt-get update && sudo apt-get install -y yq
-
-      - name: Parse tool manifest & install missing tools
-        run: |
-          mkdir -p .bithub-actions/logs
-          for tool in $(yq '.tools[].name' .bithub-actions/manifests/tools.yml); do
-            if ! command -v "$tool" &>/dev/null; then
-              echo "Installing $tool..."
-              install_cmd=$(yq ".tools[] | select(.name==\"$tool\") | .install.linux" .bithub-actions/manifests/tools.yml)
-              eval "$install_cmd"
-              echo "{\"tool\":\"$tool\",\"installed_at\":\"$(date -u +%FT%TZ)\"}" >> .bithub-actions/logs/install-$(date +%F).json
-            fi
-          done
-
-      - name: Upload install log artifact
-        uses: actions/upload-artifact@v4.6.2
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          name: preflight-install-log
-          path: .bithub-actions/logs/*.json
-          if-no-files-found: warn
-          retention-days: 30
-          compression-level: 6
-          overwrite: true
-          include-hidden-files: true
+          ref: ${{ github.sha }}
+
+      - name: Initialize BitShell/ALN Context
+        shell: pwsh
+        run: |
+          Write-Host "::notice::Initializing Bit.Hub Preflight..."
+          $Context = @{
+            Workflow = "${{ github.workflow }}"
+            Ref      = "${{ github.ref }}"
+            RunId    = "${{ github.run_id }}"
+            Actor    = "${{ github.actor }}"
+            Repo     = "${{ github.repository }}"
+          }
+          $Context | ConvertTo-Json -Depth 3 | Write-Host
+
+      - name: Run Humor Reasoning Model + Compliance Floor
+        shell: pwsh
+        env:
+          OWNER_ENFORCEMENT_PRIVATE_KEY_PEM: ${{ secrets.OWNER_ENFORCEMENT_PRIVATE_KEY_PEM }}
+        run: |
+          ./scripts/run-hrm-compliance.ps1 `
+            -ComplianceLevel "${{ env.COMPLIANCE_LEVEL }}" `
+            -AuditDir "${{ env.BITHUB_AUDIT_DIR }}" `
+            -PolicyDir "${{ env.BITHUB_POLICY_DIR }}" `
+            -HumorLog "${{ env.HUMOR_LOG }}" `
+            -TraceFile "${{ env.BITHUB_TRACE_FILE }}" `
+            -OpaResultFile "${{ env.BITHUB_OPA_RESULT }}" `
+            -OpaQuery "data.bithub.allow" `
+            -FailMode "gate" `
+            -AutoInstallOpa
+
+      - name: Immutable Audit Log Update
+        shell: pwsh
+        run: |
+          $traceSha = Get-FileHash "${{ env.BITHUB_TRACE_FILE }}" -Algorithm SHA256
+          $opaSha   = Get-FileHash "${{ env.BITHUB_OPA_RESULT }}" -Algorithm SHA256
+          $logEntry = [PSCustomObject]@{
+            schema     = "bithub.audit.v1"
+            ts         = (Get-Date).ToUniversalTime().ToString("o")
+            run_id     = "${{ github.run_id }}"
+            ref        = "${{ github.ref }}"
+            repo       = "${{ github.repository }}"
+            actor      = "${{ github.actor }}"
+            compliance = @{
+              level = "${{ env.COMPLIANCE_LEVEL }}"
+              pass  = $true
+            }
+            artefacts  = @{
+              trace = @{ file = "${{ env.BITHUB_TRACE_FILE }}"; sha256 = $traceSha.Hash }
+              opa   = @{ file = "${{ env.BITHUB_OPA_RESULT }}"; sha256 = $opaSha.Hash }
+            }
+          }
+          $logFile = "${{ env.BITHUB_AUDIT_DIR }}/immutable-log.jsonl"
+          $logEntry | ConvertTo-Json -Depth 10 | Add-Content -Path $logFile -Encoding utf8
+          Write-Host "::notice::Immutable audit log updated: $logFile"
+
+      - name: Upload Audit Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: preflight-audit
+          path: |
+            ${{ env.BITHUB_AUDIT_DIR }}
+            ${{ env.BITHUB_LOG_DIR }}
+          retention-days: 14
