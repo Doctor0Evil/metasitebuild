@@ -1,4 +1,6 @@
-name: correct-files
+# name: correct-files
+name: Correct Files
+
 permissions:
   contents: write
 
@@ -17,6 +19,7 @@ jobs:
   correct-files:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false # Add this so one OS failure doesn't cancel the others
       matrix:
         os: [windows-latest, ubuntu-24.04, macos-latest]
     steps:
@@ -24,17 +27,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # The token is not strictly needed here as the default GITHUB_TOKEN is used by default
+          # token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify Git credentials & token scopes
         id: perms
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           echo "=== Remote URL ==="
-          git remote -v || { echo "No remote found"; exit 1; }
-          echo "=== Credential helpers ==="
-          git config --show-origin --get-all credential.helper || echo "No credential.helper configured"
+          git remote -v
           echo "=== Testing connectivity to origin ==="
           if git ls-remote --exit-code origin &>/dev/null; then
             echo "✔ Can reach remote 'origin'."
@@ -43,26 +47,38 @@ jobs:
             exit 1
           fi
           echo "=== Inspecting GITHUB_TOKEN permissions ==="
-          perms_json=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-                               -H "Accept: application/vnd.github+json" \
-                               https://api.github.com/repos/${GITHUB_REPOSITORY})
-          if echo "$perms_json" | grep -q '"push": true'; then
-            echo "✔ Token has push access."
-            echo "has_push=true" >> "$GITHUB_OUTPUT"
+          # Use the gh CLI for a more reliable permission check if available, otherwise fallback to curl
+          if command -v gh &> /dev/null; then
+            if gh auth status -h api.github.com | grep -q 'repo'; then
+                echo "✔ Token has 'repo' scope (sufficient for push)."
+                echo "has_push=true" >> "$GITHUB_OUTPUT"
+            else
+                echo "⚠ GITHUB_TOKEN may not have push access."
+                echo "has_push=false" >> "$GITHUB_OUTPUT"
+            fi
           else
-            echo "⚠ GITHUB_TOKEN does not have push access — commit/push stage will be skipped."
-            echo "has_push=false" >> "$GITHUB_OUTPUT"
+            echo "gh CLI not found, falling back to API check."
+            perms_json=$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" \
+                                  -H "Accept: application/vnd.github+json" \
+                                  https://api.github.com/repos/${GITHUB_REPOSITORY})
+            if echo "$perms_json" | grep -q '"push": true'; then
+              echo "✔ Token has push access."
+              echo "has_push=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "⚠ GITHUB_TOKEN does not have push access — commit/push stage will be skipped."
+              echo "has_push=false" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Install PowerShell (non-Windows)
         if: runner.os != 'Windows'
-        uses: PSModule/install-powershell@v1
+        uses: actions/setup-pwsh@v3 # Use the official setup-pwsh action
         with:
-          Version: 'latest'
+          version: 'latest'
 
       - name: Show PowerShell version
         shell: pwsh
-        run: $PSVersionTable
+        run: $PSVersionTable.PSVersion
 
       - name: Run manifest-driven ALN corrections
         shell: pwsh
@@ -88,21 +104,22 @@ jobs:
             exit 0
           fi
           git commit -m "Automated ALN file correction (manifest runner)"
-          attempt_push() {
-            git pull --rebase origin "${GITHUB_REF_NAME}" || return 1
-            if [ "$(git rev-list HEAD ^origin/${GITHUB_REF_NAME} --count)" -gt 0 ]; then
-              git push origin "${GITHUB_REF_NAME}" || return 1
-              echo "Push successful."
-            else
-              echo "No new commits to push after rebase."
-            fi
-          }
+          
+          # Retry loop for pushing with rebase
           for i in 1 2 3; do
-            if attempt_push; then exit 0; fi
-            echo "Push failed (attempt $i). Retrying in $((i*5))s..."
-            sleep $((i*5))
+            # Pull with rebase to handle upstream changes
+            if git pull --rebase origin "${GITHUB_REF_NAME}"; then
+              # Push the changes
+              if git push origin "${GITHUB_REF_NAME}"; then
+                echo "Push successful on attempt $i."
+                exit 0
+              fi
+            fi
+            echo "Push failed on attempt $i. Retrying in 5s..."
+            sleep 5
           done
-          echo "Push failed after 3 attempts."
+          
+          echo "::error::Push failed after 3 attempts."
           exit 1
 
       - name: Skip commit/push stage
@@ -110,9 +127,10 @@ jobs:
         run: echo "Skipping commit/push stage — no token push access."
 
       - name: Upload Correction Audit Logs
+        if: always() # Ensure artifacts upload even if a step fails
         uses: actions/upload-artifact@v4
         with:
-          name: aln-correction-audit-logs
+          name: aln-correction-audit-logs-${{ matrix.os }}
           path: |
             scripts/audit-session.log
             scripts/log-*.txt
