@@ -1,0 +1,14 @@
+# .bit/feature-flags.yml
+feature_flags:
+  god-mode.bit:
+    description: |
+      Enables universal override, meta-compliance, remote trigger, and absolute fail-open auditing. Grants "superuser" orchestration rights to Bit.Hub and the activating principal.
+    enabled: true
+    audit_required: true
+    scope: global
+    propagation: all_runners
+    compliance_lock: true
+    activation_history:
+      - timestamp: 2025-09-01T16:20:00Z
+        initiator: jacob_farmer
+        justification: "Enable meta-compliance and debugging for Bit.Hub session. All actions logged."
