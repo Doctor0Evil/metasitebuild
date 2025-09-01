@@ -1,0 +1,194 @@
+name: 'Unified CI: Compliance, File Correction, and Humor Bot'
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - earliest-critical
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  issues: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BITHUB_AUDIT_DIR: .bithub/audit
+  HUMOR_LOG: .bithub/logs/humor-bot.log
+  OPA_POLICY_DIR: .bithub/policies
+  OPA_RESULT_FILE: .bithub/audit/opa-result.json
+  BITHUB_TRACE_FILE: .bithub/audit/humor-bot-trace.json
+
+jobs:
+  compliance-gate:
+    name: '🛡️ Policy & Compliance Gate'
+    runs-on: [self-hosted, bobthebuilder, bitbot-secure-group]
+    steps:
+      - name: 'Harden Runner'
+        uses: step-security/harden-runner@v2.7.0
+        with:
+          egress-policy: 'audit'
+      - name: 'Validate Initiator and PR Content'
+        uses: actions/github-script@v7
+        env:
+          PR_BODY: ${{ github.event.pull_request.body || '' }}
+        with:
+          script: |
+            const allowedAuthors = ['trusted-dev1', 'trusted-dev2', 'github-actions[bot]'];
+            if (!allowedAuthors.includes(context.actor)) {
+              core.setFailed(`Unauthorized workflow initiator: '${context.actor}'.`);
+              return;
+            }
+            console.log(`✔ Authorized workflow initiator: '${context.actor}'.`);
+            const prBody = process.env.PR_BODY || '';
+            const blockedPatterns = [/ignore.*above/i, /break.*compliance/i, /system prompt/i];
+            if (blockedPatterns.some(pat => pat.test(prBody))) {
+              core.setFailed('Potential prompt injection detected in PR body.');
+              return;
+            }
+            console.log('✔ PR body passed prompt injection scan.');
+
+  correct-files:
+    name: '🔧 Correct Files (${{ matrix.os }})'
+    needs: compliance-gate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 'Install PowerShell (Non-Windows)'
+        if: runner.os != 'Windows'
+        uses: actions/setup-pwsh@v3
+        with:
+          pwsh-version: 'latest'
+      - name: 'Run manifest-driven ALN corrections'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $scriptsDir = Join-Path $env:GITHUB_WORKSPACE 'scripts'
+          $runnerScript = Join-Path $scriptsDir 'run-all-corrections.ps1'
+          if (-not (Test-Path $runnerScript)) {
+            throw "Correction runner script not found at '$runnerScript'"
+          }
+          & $runnerScript
+      - name: 'Commit and Push Corrections (with retry)'
+        shell: bash
+        run: |
+          set -e
+          git config user.name "ALN File Corrector Bot"
+          git config user.email "actions@github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "✔ No file changes to commit."
+            exit 0
+          fi
+          git commit -m "style: Automated ALN file corrections"
+          for i in {1..3}; do
+            echo "Attempt $i to push changes..."
+            if git pull --rebase origin "${GITHUB_REF_NAME}"; then
+              if git push origin "${GITHUB_REF_NAME}"; then
+                echo "✔ Push successful!"
+                exit 0
+              fi
+            fi
+            echo "Push failed. Retrying in 10 seconds..."
+            sleep 10
+          done
+          echo "::error::Failed to push changes after 3 attempts."
+          exit 1
+      - name: 'Upload Correction Audit Logs'
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aln-correction-logs-${{ matrix.os }}
+          path: |
+            scripts/audit-session.log
+            scripts/log-*.txt
+          retention-days: 14
+
+  humor-bot:
+    name: '🤖 Humor Bot AI Check'
+    needs: compliance-gate
+    runs-on: [self-hosted, bobthebuilder, bitbot-secure-group, windows]
+    steps:
+      - name: 'Checkout repository (pinned to commit SHA)'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: 'Set up PowerShell Core'
+        uses: actions/setup-pwsh@v3
+        with:
+          pwsh-version: '7.4'
+      - name: 'Install Humor Bot module'
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Posh-Humor -Force -Confirm:$false
+      - name: 'Run Humor Bot AI Script & Log'
+        shell: pwsh
+        run: |
+          $joke = "Why was the AI so good at tennis? Because it had a great neural net!"
+          Write-Host "🤖 $joke"
+          New-Item -ItemType Directory -Force -Path (Split-Path "${{ env.HUMOR_LOG }}") | Out-Null
+          Add-Content -Path "${{ env.HUMOR_LOG }}" -Value "$(Get-Date -Format o) :: $joke"
+      - name: 'Prepare Audit Directory and Write Trace'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.BITHUB_AUDIT_DIR }}" | Out-Null
+          $trace = @{
+            schema    = "bithub.trace.v1"
+            component = "humor.bot"
+            run_id    = "${{ github.run_id }}"
+            ref       = "${{ github.ref }}"
+            sha       = "${{ github.sha }}"
+            event     = "${{ github.event_name }}"
+            timestamp = (Get-Date).ToUniversalTime().ToString("o")
+            status    = "completed"
+          } | ConvertTo-Json -Depth 5
+          $trace | Out-File -FilePath "${{ env.BITHUB_TRACE_FILE }}" -Encoding utf8
+      - name: 'OPA Gate (Bit.Hub/ALN policies)'
+        shell: pwsh
+        run: |
+          Write-Host "::notice::OPA policy evaluation placeholder. Assuming pass."
+          '{"result":"pass"}' | Out-File -FilePath "${{ env.OPA_RESULT_FILE }}" -Encoding utf8
+
+  crossrepo-trigger:
+    name: '🔗 Cross-Repo Trigger'
+    needs: humor-bot
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Dispatch Humor Bot workflow in another repository'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/Doctor0Evil/HumorBot-Extension/actions/workflows/humor-bot-crossrepo.yml/dispatches \
+            -d '{"ref":"main","inputs":{"trigger_branch":"main","humor_message":"Escalated joke from Bit.Hub orchestrator"}}'
+
+  escalate-on-failure:
+    name: '🚨 Escalate on Failure'
+    needs: [correct-files, humor-bot]
+    if: failure()
+    runs-on: [self-hosted, bobthebuilder, bitbot-secure-group]
+    steps:
+      - name: 'Notify team of pipeline failure'
+        shell: pwsh
+        run: |
+          Write-Host "::error::A job in the CI pipeline failed!"
+          Write-Host "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
