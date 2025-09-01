@@ -49,3 +49,7 @@ HASH=$(sha256sum "$MANIFEST_FILE" | awk '{print $1}')
 echo "{\"ts\":\"$(date -u +%FT%TZ)\",\"bot\":\"resync-ingestion\",\"repo\":\"${GITHUB_REPOSITORY:-local}\",\"payload\":\"$HASH\"}" >> "$LEDGER_FILE"
 
 echo "✅ Ingestion resync complete."
+chmod +x resync-ingestion.sh
+git add resync-ingestion.sh
+git commit -m "Add resync-ingestion.sh for CI ingestion resync"
+git push
