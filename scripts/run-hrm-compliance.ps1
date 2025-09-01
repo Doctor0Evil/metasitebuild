@@ -1,4 +1,5 @@
 name: Run Humor Reasoning Model Compliance
+
 on:
   workflow_dispatch:
   push:
@@ -19,6 +20,9 @@ jobs:
         with:
           ref: ${{ github.sha }}
 
+      - name: Set Up OPA
+        uses: open-policy-agent/setup-opa@v2
+
       - name: BitShell/ALN Hybrid: ALN+Pwsh Init
         shell: pwsh
         run: |
@@ -34,35 +38,21 @@ jobs:
 
       - name: Audit, Compliance & Sovereignty Check
         shell: pwsh
-        env: 
+        env:
           OWNER_BITHUB_PRIVATE_KEY_PEM: ${{ secrets.OWNER_BITHUB_PRIVATE_KEY_PEM }}
           OWNER_PERPLEXITY_PRIVATE_KEY_PEM: ${{ secrets.OWNER_PERPLEXITY_PRIVATE_KEY_PEM }}
         run: |
-          $TraceFile = ".bithub/audit/humor-reasoning-trace.json"
+          # Run main humor-reasoning compliance script (ensure this path exists)
           ./scripts/run-hrm-compliance.ps1 `
             -ComplianceLevel "strict" `
             -AuditDir ".bithub/audit" `
             -PolicyDir ".bithub/policies" `
             -HumorLog ".bithub/logs/humor-bot.log" `
-            -TraceFile $TraceFile `
+            -TraceFile ".bithub/audit/humor-reasoning-trace.json" `
             -OpaResultFile ".bithub/audit/opa-result.json" `
             -OpaQuery "data.bithub.allow" `
             -FailMode "gate" `
             -AutoInstallOpa
-
-          # Signature injection (Bit.Hub + Perplexity signoff)
-          $traceJson = Get-Content $TraceFile -Raw | ConvertFrom-Json
-          $traceJson | Add-Member -Name signatures -MemberType NoteProperty -Value @() -Force
-
-          if ($env:OWNER_BITHUB_PRIVATE_KEY_PEM) {
-            $sig1 = Sign-FileRsa -Path $TraceFile -Pem $env:OWNER_BITHUB_PRIVATE_KEY_PEM -KeyId "owner:bithub"
-            if ($sig1) { $traceJson.signatures += $sig1 }
-          }
-          if ($env:OWNER_PERPLEXITY_PRIVATE_KEY_PEM) {
-            $sig2 = Sign-FileRsa -Path $TraceFile -Pem $env:OWNER_PERPLEXITY_PRIVATE_KEY_PEM -KeyId "owner:perplexity"
-            if ($sig2) { $traceJson.signatures += $sig2 }
-          }
-          $traceJson | ConvertTo-Json -Depth 20 | Out-File -FilePath $TraceFile -Encoding utf8
 
       - name: Audit Immutable Logging
         shell: pwsh
@@ -83,4 +73,4 @@ jobs:
           }
           $logFile = ".bithub/audit/immutable-log.jsonl"
           $logEntry | ConvertTo-Json -Depth 10 | Add-Content -Path $logFile -Encoding utf8
-          Write-Host "::notice::Immutable audit log updated: $logFile"
+          Write-Host "::notice::Immutable audit log updated: $logFile";
