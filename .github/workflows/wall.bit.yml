@@ -1,0 +1,76 @@
+name: Bit.Hub Compliance-Wall
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, develop ]
+  schedule:
+    - cron: "0 3 * * *" # Daily 03:00 UTC
+
+jobs:
+  compliance-wall:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Verify signed enforcement manifest
+      - name: Verify Manifest Signature
+        run: |
+          set -e
+          MANIFEST="manifests/master-enforcement.aln"
+          PUBKEY=".keys/ed25519.public"
+          if ! verify-ed25519 "$MANIFEST" "$PUBKEY"; then
+            echo "::error::Manifest signature invalid"
+            exit 1
+          fi
+
+      # 3. Run ALN compliance analysis
+      - name: Analyze ALN Compliance (Personality, Assets, Workflows)
+        run: |
+          set -e
+          aln-analyze --manifest manifests/master-enforcement.aln \
+            --vectors data/personality_vectors.json \
+            --assets data/assets/ \
+            --output /tmp/compliance_report.lst
+          if [ -s /tmp/compliance_report.lst ]; then
+            echo "::warning::Compliance issues detected"
+            cat /tmp/compliance_report.lst
+          else
+            echo "No compliance violations."
+          fi
+
+      # 4. Auto-patch non-compliance (if violations)
+      - name: Auto-Patch for Compliance
+        if: ${{ success() && hashFiles('/tmp/compliance_report.lst') != '' }}
+        run: |
+          set -e
+          aln-patch /tmp/compliance_report.lst || true
+
+      # 5. Run Auto-Repair for Personality Vectors
+      - name: Auto-Repair (Personality Vectors)
+        if: ${{ success() && hashFiles('/tmp/compliance_report.lst') != '' }}
+        run: |
+          set -e
+          aln-fixer-bot --context "personality" --input data/personality_vectors.json || true
+
+      # 6. Append manifest and repair hash to ledger
+      - name: Append Compliance Action to Ledger
+        run: |
+          set -e
+          HASH=$(sha256sum manifests/master-enforcement.aln | awk '{print $1}')
+          LEDGER="registries/command-ledger.alnlog"
+          echo "{\"ts\":\"$(date -u +%FT%TZ)\",\"bot\":\"${GITHUB_ACTOR}\",\"repo\":\"${GITHUB_REPOSITORY}\",\"payload\":\"$HASH\"}" >> "$LEDGER"
+
+      # 7. Upload compliance artifacts and audit data
+      - name: Upload Compliance Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-wall-artifacts
+          path: |
+            /tmp/compliance_report.lst
+            registries/command-ledger.alnlog
+            data/personality_vectors.json
+            data/assets/**
