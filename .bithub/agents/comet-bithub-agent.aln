@@ -1,0 +1,104 @@
+aln: v1
+kind: agent
+symbol: comet-bithub-agent
+source:
+  maintainer: XboxTeeJay
+  note: >
+    Comet Utility: Cross‑Tab Data Orchestration + Bit.Hub AI Integration.
+    Monitors browser tabs, extracts actionable data, summarizes content,
+    routes to Bit.Hub APIs, and enforces compliance via ALN+OPA.
+
+agent:
+  name: CometAgent
+  requires: [BitHubAPI, TabAI, CometHost]
+  trait: browser-integrated
+  capabilities:
+    - monitor_tabs
+    - extract_data
+    - summarize_content
+    - trigger_workflows
+    - BitHub_policy_enforce
+
+events:
+  - on: browser.tab_update
+    args: [tab]
+    steps:
+      - if: tab.url ~ /mail|inbox|gmail/
+        then:
+          - call: CometAgent.summarize_unread
+            args: [tab]
+      - if: tab.url ~ /spreadsheet|sheet/
+        then:
+          - call: CometAgent.prepare_spreadsheet
+            args: [tab]
+
+functions:
+  - name: CometAgent.summarize_unread
+    args: [tab]
+    steps:
+      - let: new_emails
+        value: TabAI.extract_elements(tab, selector="unread")
+      - for: email in $new_emails
+        do:
+          - let: summary
+            value: TabAI.summarize(email.body)
+          - call: BitHubAPI.write_to_memory
+            args:
+              source: "Comet"
+              object: "EmailSummary"
+              tab_id: $tab.id
+              summary: $summary
+              policy_note: "checked by BitHubCompliance"
+          - call: BitHubAPI.log_audit
+            args:
+              schema: "bithub.trace.v1"
+              component: "comet.email.summary"
+              content: $summary
+
+  - name: CometAgent.prepare_spreadsheet
+    args: [tab]
+    steps:
+      - let: content
+        value: TabAI.extract_table(tab)
+      - let: entries
+        value: TabAI.parse($content, format="rowwise")
+      - call: BitHubAPI.route_data
+        args:
+          context: "spreadsheet_import"
+          data: $entries
+          policy_check: "data_classification"
+      - call: BitHubAPI.log_audit
+        args:
+          schema: "bithub.trace.v1"
+          component: "comet.spreadsheet.import"
+          content: $entries
+
+intents:
+  - on: user.command("orchestrate")
+    steps:
+      - call: CometAgent.monitor_tabs
+      - call: BitHubAPI.enforce_policy
+        args:
+          name: "session_compliance"
+          context: "browser"
+
+compliance_checks:
+  - name: BitHubAPI.enforce_policy
+    args: [name, context]
+    steps:
+      - if: BitHub.policy_violation_detected($name, $context)
+        then:
+          - call: CometAgent.notify_user
+            args:
+              message: "Compliance rule triggered. Action blocked or logged."
+          - call: BitHubAPI.log_audit
+            args:
+              schema: "bithub.violation.v1"
+              component: "comet.policy"
+              content: { name: $name, context: $context }
+
+output:
+  message: >
+    CometAgent is actively observing browser tabs, extracting actionable items,
+    summarizing, and syncing with Bit.Hub workspace memory. All actions subject
+    to Bit.Hub compliance enforcement.
