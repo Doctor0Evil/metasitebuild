@@ -1,0 +1,45 @@
+{
+  "package": "crypto.ed25519",
+  "const": [
+    { "name": "PrivateKeySize", "type": "uint", "value": 64 },
+    { "name": "PublicKeySize", "type": "uint", "value": 32 },
+    { "name": "SeedSize", "type": "uint", "value": 32 },
+    { "name": "SignatureSize", "type": "uint", "value": 64 }
+  ],
+  "type": [
+    { "name": "PrivateKey", "base": "bytes" },
+    { "name": "PublicKey", "base": "bytes" }
+  ],
+  "function": [
+    { "name": "GenerateKey", "params": [
+        { "name": "randomSource", "type": "io.Reader" }
+      ], "returns": [
+        { "name": "publicKey", "type": "PublicKey" },
+        { "name": "privateKey", "type": "PrivateKey" },
+        { "name": "error", "type": "error", "optional": true }
+      ]
+    },
+    { "name": "NewKeyFromSeed", "params": [
+        { "name": "seed", "type": "bytes" }
+      ], "returns": [
+        { "name": "privateKey", "type": "PrivateKey" }
+      ]
+    },
+    { "name": "Sign", "params": [
+        { "name": "priv", "type": "PrivateKey" },
+        { "name": "message", "type": "bytes" }
+      ], "returns": [
+        { "name": "signature", "type": "bytes" }
+      ]
+    },
+    { "name": "Verify", "params": [
+        { "name": "pub", "type": "PublicKey" },
+        { "name": "message", "type": "bytes" },
+        { "name": "signature", "type": "bytes" }
+      ], "returns": [
+        { "name": "valid", "type": "bool" }
+      ]
+    }
+  ],
+  "remark": "Ed25519 cryptography constants and API for use in Bit.Hub compatible ALN contexts"
+}
