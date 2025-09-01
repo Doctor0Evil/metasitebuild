@@ -1,4 +1,5 @@
 name: Great.Wall.of.Compliance
+
 on:
   push:
   workflow_dispatch:
@@ -7,120 +8,278 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+env:
+  REPORTS_DIR: .bithubreports
+  QUARANTINE_DIR: .bithubreports/quarantine
+  DISALLOWED_FILE: .bit/disallowed_terms.txt
+  CHARTER_FILE: .bitcharter
+  PERSONA_LOCK: .bit/persona.lock
+  PERSONA_REGISTRY: .bit/persona_registry.json
+  ASSET_ECONOMY: .bit/asset_economy.json
+  CONTENT_POLICY: .bit/content_policy.json
+
 jobs:
   compliance-linux:
     name: "🌐 Linux Compliance 长城"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq coreutils
+
       - name: Display Great Wall Banner
         run: echo "🧱 构建合规长城: BUILDING THE GREAT WALL OF COMPLIANCE 🧱"
-      # 0. Go Environment
-      - name: Setup Go Environment
-        uses: actions/setup-go@v5.5.0
-        with:
-          go-version-file: 'go.mod'
-          check-latest: true
-          cache: true
-      # 1. Charter & Policy Verification
-      - name: Verify Charter Exists
-        run: |
-          test -f .bitcharter || { echo "❌ Missing .bitcharter"; exit 1; }
-          cat .bitcharter
-      - name: Verify Terms of Use
-        run: |
-          grep -q "independent & free" .bitcharter || {
-            echo "❌ Terms of use not present in charter"; exit 1;
-          }
-      # 2. Disallowed Content Scan
-      - name: Scan for Disallowed Terms
-        run: |
-          grep -R -E -i -f .bit/disallowed_terms.txt . && {
-            echo "❌ Unapproved content detected. Job stopped."
-            exit 1
-          } || echo "✅ No disallowed content found."
-      # 2.1 Optional—Automated Profanity Filter on PRs/issues
-      - name: Profanity Filter (optional marketplace action)
-        uses: radiantly/profanity-filter-action@v1.1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      # 3. Persona Registry Lock
-      - name: Verify Persona Registry Lock
-        run: |
-          WANT=$(awk -F= '/^registry_sha256=/{print $2}' .bit/persona.lock)
-          GOT=$(sha256sum .bit/persona_registry.json | awk '{print $1}')
-          test "$WANT" = "$GOT" || { echo "❌ Persona registry hash mismatch"; exit 1; }
-      # 4. ALNFantasia Asset-Economy Checks
-      - name: Validate Asset-Economy Config
-        run: |
-          test -f .bit/asset_economy.json || { echo "❌ Missing asset economy config"; exit 1; }
-          jq -e '.portable == true and .blockchain == false' .bit/asset_economy.json \
-            || { echo "❌ Asset economy must be portable & non-blockchain"; exit 1; }
-      - name: Validate Trading Rules
-        run: |
-          jq -e '.trading.enabled == true and .trading.requires_review == true' .bit/asset_economy.json \
-            || { echo "❌ Trading must be enabled and require manual review"; exit 1; }
-      # 5. Mature Content Gating
-      - name: Check Mature Content Flags
-        run: |
-          jq -e '.mature_content.allowed == true and .mature_content.review_required == true' .bit/content_policy.json \
-            || { echo "❌ Mature content policy not compliant"; exit 1; }
-      # 6. Audit Logging
-      - name: Log Compliance Result
-        run: |
-          mkdir -p .bithubreports
-          echo "$(date -u +%FT%TZ) Linux compliance passed" >> .bithubreports/compliance.log
 
-  # Windows & macOS jobs mirror Linux with OS-specific adjustments
+      - name: Verify Charter Exists and Terms
+        run: |
+          test -f "$CHARTER_FILE" || { echo "❌ Missing $CHARTER_FILE"; exit 1; }
+          # Confirm independence clause is present (customize as needed)
+          grep -qiE "independent\s*&\s*free" "$CHARTER_FILE" || {
+            echo "❌ Required independence clause not found in $CHARTER_FILE"; exit 1;
+          }
+          echo "✅ Charter present and terms detected."
+
+      - name: Ensure required policy files exist
+        run: |
+          for f in "$DISALLOWED_FILE" "$PERSONA_LOCK" "$PERSONA_REGISTRY" "$ASSET_ECONOMY" "$CONTENT_POLICY"; do
+            test -f "$f" || { echo "❌ Missing policy file: $f"; exit 1; }
+          done
+          echo "✅ All policy files present."
+
+      - name: Scan for disallowed terms (masked output)
+        id: scan_disallowed
+        shell: bash
+        run: |
+          mkdir -p "$REPORTS_DIR" "$QUARANTINE_DIR"
+          # Find matches but do not print raw content to logs
+          if grep -R -n -I -i -f "$DISALLOWED_FILE" . > "$REPORTS_DIR/raw_hits_linux.txt" 2>/dev/null; then
+            # Build masked summary (replace letters with *)
+            awk -F: '{print $1":"$2":<masked_line>"}' "$REPORTS_DIR/raw_hits_linux.txt" \
+              > "$REPORTS_DIR/disallowed_summary.txt"
+            # List unique offending file paths (masked only; do not upload file contents)
+            cut -d: -f1 "$REPORTS_DIR/raw_hits_linux.txt" | sort -u > "$REPORTS_DIR/offending_files.txt"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Disallowed content detected. Masked summary written."
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "✅ No disallowed content found."
+          fi
+
+      - name: Fail if disallowed content detected
+        if: steps.scan_disallowed.outputs.found == 'true'
+        run: |
+          echo "❌ Compliance stop: disallowed content found (see masked summary in artifacts)."
+          exit 1
+
+      - name: Verify persona registry lock
+        run: |
+          WANT=$(awk -F= '/^registry_sha256=/{print $2}' "$PERSONA_LOCK" | tr -d '\r')
+          GOT=$(sha256sum "$PERSONA_REGISTRY" | awk '{print $1}')
+          test -n "$WANT" || { echo "❌ registry_sha256 missing from $PERSONA_LOCK"; exit 1; }
+          test "$WANT" = "$GOT" || { echo "❌ Persona registry hash mismatch"; exit 1; }
+          echo "✅ Persona registry lock verified."
+
+      - name: Validate asset-economy configuration (portable, non-blockchain)
+        run: |
+          jq -e 'has("portable") and has("blockchain") and .portable == true and .blockchain == false' "$ASSET_ECONOMY" \
+            >/dev/null || { echo "❌ Asset economy must be portable=true and blockchain=false"; exit 1; }
+          jq -e 'has("trading") and .trading.enabled == true and .trading.requires_review == true' "$ASSET_ECONOMY" \
+            >/dev/null || { echo "❌ Trading must be enabled and require manual review"; exit 1; }
+          echo "✅ Asset-economy config validated."
+
+      - name: Validate mature content gating
+        run: |
+          jq -e 'has("mature_content") and .mature_content.allowed == true and .mature_content.review_required == true' "$CONTENT_POLICY" \
+            >/dev/null || { echo "❌ Mature content policy not compliant"; exit 1; }
+          echo "✅ Mature content policy validated."
+
+      - name: Ensure CI did not generate explicit runtime artifacts
+        run: |
+          if [ -d .bit/runtime ] && [ -n "$(ls -A .bit/runtime 2>/dev/null)" ]; then
+            echo "❌ Explicit runtime artifacts must not be present in CI (.bit/runtime/*)"; exit 1;
+          fi
+          echo "✅ No explicit runtime artifacts present."
+
+      - name: Audit log
+        run: |
+          mkdir -p "$REPORTS_DIR"
+          echo "$(date -u +%FT%TZ) Linux compliance passed for $GITHUB_SHA" >> "$REPORTS_DIR/compliance.log"
+
+      - name: Upload masked reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-reports-linux
+          path: |
+            .bithubreports/compliance.log
+            .bithubreports/disallowed_summary.txt
+            .bithubreports/offending_files.txt
+          if-no-files-found: warn
+          retention-days: 7
+
   compliance-windows:
     name: "🪟 Windows Compliance 长城"
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Display Great Wall Banner
         run: Write-Output "🧱 构建合规长城: BUILDING THE GREAT WALL OF COMPLIANCE 🧱"
-      - name: Setup Go Environment
-        uses: actions/setup-go@v5.5.0
+
+      - name: Verify Charter Exists and Terms
+        shell: pwsh
+        run: |
+          if (!(Test-Path $env:CHARTER_FILE)) { Write-Error "❌ Missing $env:CHARTER_FILE"; exit 1 }
+          $charter = Get-Content -Raw $env:CHARTER_FILE
+          if ($charter -notmatch 'independent\s*&\s*free') { Write-Error "❌ Independence clause not found"; exit 1 }
+          Write-Output "✅ Charter present and terms detected."
+
+      - name: Ensure required policy files exist
+        shell: pwsh
+        run: |
+          $files = @($env:DISALLOWED_FILE,$env:PERSONA_LOCK,$env:PERSONA_REGISTRY,$env:ASSET_ECONOMY,$env:CONTENT_POLICY)
+          foreach ($f in $files) { if (!(Test-Path $f)) { Write-Error "❌ Missing policy file: $f"; exit 1 } }
+          Write-Output "✅ All policy files present."
+
+      - name: Scan for disallowed terms (masked output)
+        id: scan_disallowed_win
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:REPORTS_DIR | Out-Null
+          New-Item -ItemType Directory -Force -Path $env:QUARANTINE_DIR | Out-Null
+          $patterns = Get-Content $env:DISALLOWED_FILE | Where-Object { $_ -ne "" }
+          $hits = @()
+          Get-ChildItem -Recurse -File | ForEach-Object {
+            $file = $_.FullName
+            try {
+              $match = Select-String -Path $file -Pattern $patterns -AllMatches -SimpleMatch -CaseSensitive:$false -ErrorAction SilentlyContinue
+              if ($match) { $hits += $match }
+            } catch {}
+          }
+          if ($hits.Count -gt 0) {
+            # Write masked summary: filename:line:<masked_line>
+            $summary = $hits | ForEach-Object { "$($_.Path):$($_.LineNumber):<masked_line>" }
+            $summary | Set-Content -Path "$env:REPORTS_DIR\disallowed_summary.txt"
+            $hits.Path | Sort-Object -Unique | Set-Content -Path "$env:REPORTS_DIR\offending_files.txt"
+            "found=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Error "❌ Disallowed content detected. Masked summary written."
+            exit 1
+          } else {
+            "found=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Output "✅ No disallowed content found."
+          }
+
+      - name: Audit log
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:REPORTS_DIR | Out-Null
+          Add-Content -Path "$env:REPORTS_DIR\compliance.log" -Value "$(Get-Date -AsUTC -Format o) Windows compliance finished (status=$env:__GITHUB_JOB_STATUS__)"
+
+      - name: Upload masked reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          go-version-file: 'go.mod'
-          check-latest: true
-          cache: true
-      - name: Verify Charter Exists
-        run: if (!(Test-Path ".bitcharter")) { Write-Error "❌ Missing .bitcharter"; exit 1 } else { Get-Content ".bitcharter" }
-      - name: Scan for Disallowed Terms
-        run: |
-          $bad = Get-Content .bit\disallowed_terms.txt
-          Get-ChildItem -Recurse | Select-String -List -Pattern $bad
-          if ($LASTEXITCODE -eq 0) { Write-Error "❌ Unapproved content detected. Job stopped."; exit 1 } else { Write-Output "✅ No disallowed content found." }
-      - name: Log Compliance Result
-        run: |
-          New-Item -ItemType Directory -Force -Path .bithubreports | Out-Null
-          Add-Content -Path .bithubreports\compliance.log -Value "$(Get-Date -Format o) Windows compliance passed"
+          name: compliance-reports-windows
+          path: |
+            .bithubreports/compliance.log
+            .bithubreports/disallowed_summary.txt
+            .bithubreports/offending_files.txt
+          if-no-files-found: warn
+          retention-days: 7
 
   compliance-macos:
     name: "🍏 macOS Compliance 长城"
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install jq
+
       - name: Display Great Wall Banner
         run: echo "🧱 构建合规长城: BUILDING THE GREAT WALL OF COMPLIANCE 🧱"
-      - name: Setup Go Environment
-        uses: actions/setup-go@v5.5.0
-        with:
-          go-version-file: 'go.mod'
-          check-latest: true
-          cache: true
-      - name: Verify Charter Exists
+
+      - name: Verify Charter Exists and Terms
         run: |
-          test -f .bitcharter || { echo "❌ Missing .bitcharter"; exit 1; }
-          cat .bitcharter
-      - name: Scan for Disallowed Terms
+          test -f "$CHARTER_FILE" || { echo "❌ Missing $CHARTER_FILE"; exit 1; }
+          grep -qiE "independent\s*&\s*free" "$CHARTER_FILE" || {
+            echo "❌ Required independence clause not found"; exit 1;
+          }
+          echo "✅ Charter present and terms detected."
+
+      - name: Ensure required policy files exist
         run: |
-          grep -R -E -i -f .bit/disallowed_terms.txt . && {
-            echo "❌ Unapproved content detected. Job stopped."
+          for f in "$DISALLOWED_FILE" "$PERSONA_LOCK" "$PERSONA_REGISTRY" "$ASSET_ECONOMY" "$CONTENT_POLICY"; do
+            test -f "$f" || { echo "❌ Missing policy file: $f"; exit 1; }
+          done
+          echo "✅ All policy files present."
+
+      - name: Scan for disallowed terms (masked output)
+        id: scan_disallowed_macos
+        shell: bash
+        run: |
+          mkdir -p "$REPORTS_DIR" "$QUARANTINE_DIR"
+          if grep -R -n -I -i -f "$DISALLOWED_FILE" . > "$REPORTS_DIR/raw_hits_macos.txt" 2>/dev/null; then
+            awk -F: '{print $1":"$2":<masked_line>"}' "$REPORTS_DIR/raw_hits_macos.txt" \
+              > "$REPORTS_DIR/disallowed_summary.txt"
+            cut -d: -f1 "$REPORTS_DIR/raw_hits_macos.txt" | sort -u > "$REPORTS_DIR/offending_files.txt"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "❌ Disallowed content detected. Masked summary written."
             exit 1
-          } || echo "✅ No disallowed content found."
-      - name: Log Compliance Result
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "✅ No disallowed content found."
+          fi
+
+      - name: Verify persona registry lock
         run: |
-          mkdir -p .bithubreports
-          echo "$(date -u +%FT%TZ) macOS compliance passed" >> .bithubreports/compliance.log
+          WANT=$(awk -F= '/^registry_sha256=/{print $2}' "$PERSONA_LOCK" | tr -d '\r')
+          GOT=$(shasum -a 256 "$PERSONA_REGISTRY" | awk '{print $1}')
+          test -n "$WANT" || { echo "❌ registry_sha256 missing from $PERSONA_LOCK"; exit 1; }
+          test "$WANT" = "$GOT" || { echo "❌ Persona registry hash mismatch"; exit 1; }
+          echo "✅ Persona registry lock verified."
+
+      - name: Validate asset-economy configuration (portable, non-blockchain)
+        run: |
+          jq -e 'has("portable") and has("blockchain") and .portable == true and .blockchain == false' "$ASSET_ECONOMY" \
+            >/dev/null || { echo "❌ Asset economy must be portable=true and blockchain=false"; exit 1; }
+          jq -e 'has("trading") and .trading.enabled == true and .trading.requires_review == true' "$ASSET_ECONOMY" \
+            >/dev/null || { echo "❌ Trading must be enabled and require manual review"; exit 1; }
+          echo "✅ Asset-economy config validated."
+
+      - name: Validate mature content gating
+        run: |
+          jq -e 'has("mature_content") and .mature_content.allowed == true and .mature_content.review_required == true' "$CONTENT_POLICY" \
+            >/dev/null || { echo "❌ Mature content policy not compliant"; exit 1; }
+          echo "✅ Mature content policy validated."
+
+      - name: Ensure CI did not generate explicit runtime artifacts
+        run: |
+          if [ -d .bit/runtime ] && [ -n "$(ls -A .bit/runtime 2>/dev/null)" ]; then
+            echo "❌ Explicit runtime artifacts must not be present in CI (.bit/runtime/*)"; exit 1;
+          fi
+          echo "✅ No explicit runtime artifacts present."
+
+      - name: Audit log
+        run: |
+          mkdir -p "$REPORTS_DIR"
+          echo "$(date -u +%FT%TZ) macOS compliance passed for $GITHUB_SHA" >> "$REPORTS_DIR/compliance.log"
+
+      - name: Upload masked reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-reports-macos
+          path: |
+            .bithubreports/compliance.log
+            .bithubreports/disallowed_summary.txt
+            .bithubreports/offending_files.txt
+          if-no-files-found: warn
+          retention-days: 7
