@@ -1,0 +1,69 @@
+name: Bit.Hub Master Enforcement Manifest
+version: 1.0.0
+scope: core
+owner: Doctor0Evil/Bit.Hub
+description: >
+  Master enforcement manifest unifying workflow, container, runner,
+  content (including profanity-aware policies), availability, and humor reasoning.
+
+power:
+  default: strict
+  thresholds:
+    standard: audit_only
+    strict: deny_on_denials
+    paranoid: deny_on_denials_or_warnings
+
+bindings:
+  canonical_repo: https://github.com/Doctor0Evil/Bit.Hub.git
+  report_dir: .bithub/reports
+  policy_dir: .bithub/policy
+  schemas_dir: .bit/schemas
+
+policies:
+  modules:
+    - path: .bithub/policy/workflow.rego
+      package: bithub.workflow
+    - path: .bithub/policy/container.rego
+      package: bithub.container
+    - path: .bithub/policy/runner.rego
+      package: bithub.runner
+    - path: .bithub/policy/content.rego
+      package: bithub.content
+    - path: .bithub/policy/availability.rego
+      package: bithub.availability
+    - path: .bithub/policy/humor.rego
+      package: bithub.humor
+
+  parameters:
+    minimal_permissions:
+      contents: read
+    require_timeout_minutes: 30
+    adaptive_runs_on:
+      - self-hosted
+      - bit.hub
+      - linux
+    required_oci_labels:
+      - org.opencontainers.image.source
+      - org.opencontainers.image.description
+      - org.opencontainers.image.licenses
+    profanity_allowed_tags:
+      - fictional
+      - age-gated:18+
+    allowed_banter_contexts:
+      - adult
+      - mature
+      - test_sandbox
+
+actions:
+  on_warning:
+    - annotate
+    - write_report
+  on_denial:
+    - write_report
+    - open_pr_with_fixes
+  self_heal: true
+
+notes:
+  - This manifest is the single source of truth for Bit.Hub enforcement.
+  - Profane but compliant content must be tagged and context-aware.
+  - Policies are versioned and synced automatically in runners.
