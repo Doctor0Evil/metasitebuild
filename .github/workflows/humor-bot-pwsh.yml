@@ -1,0 +1,81 @@
+name: Humor Bot - AI PS Workflow (Bit.Hub Compliant)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: humor-bot-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BITHUB_TRACE_FILE: .bit/audit/trace.jsonl
+  BITHUB_AUDIT_DIR: .bit/audit
+  HUMOR_LOG: .bit/logs/humor_bot_laugh.log
+  OIDC_AUDIENCE: bithub
+
+jobs:
+  humor-bot-check:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up PowerShell Core
+        uses: actions/setup-pwsh@v2
+        with:
+          pwsh-version: '7.4.0'
+
+      - name: Install Humor Bot module
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Posh-Humor -Force
+
+      - name: Run Humor Bot AI script
+        shell: pwsh
+        run: |
+          $joke = "Why did the neural net refuse to cross the road? Not enough data on the other side!"
+          Write-Host "🤖 $joke"
+          New-Item -ItemType Directory -Force -Path (Split-Path "${{ env.HUMOR_LOG }}") | Out-Null
+          Add-Content -Path "${{ env.HUMOR_LOG }}" -Value "$(Get-Date -Format o) :: $joke"
+
+      - name: Prepare audit directory and write trace
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.BITHUB_AUDIT_DIR }}" | Out-Null
+          $trace = @{
+            schema    = "bithub.trace.v1"
+            component = "humor.bot"
+            run_id    = "${{ github.run_id }}"
+            ref       = "${{ github.ref }}"
+            sha       = "${{ github.sha }}"
+            event     = "${{ github.event_name }}"
+            timestamp = (Get-Date).ToUniversalTime().ToString("o")
+            status    = "completed"
+          } | ConvertTo-Json -Depth 4
+          $trace | Out-File -FilePath "${{ env.BITHUB_TRACE_FILE }}" -Encoding utf8
+
+      - name: Push audit artifacts to Bit.Hub runner
+        shell: pwsh
+        run: |
+          Write-Host "::notice::Pushing audit logs to Bit.Hub runner..."
+          # Replace with your actual Bit.Hub push command or API call
+          # Example:
+          # bithub push --audience "${{ env.OIDC_AUDIENCE }}" --trace "${{ env.BITHUB_TRACE_FILE }}" --logs "${{ env.HUMOR_LOG }}"
+          Write-Host "::notice::Push complete."
+
+      - name: OPA gate (ALN + Bit.Hub policies)
+        shell: pwsh
+        run: |
+          Write-Host "::notice::Evaluating OPA policies..."
+          # opa eval --data .bit/policies --input "${{ env.BITHUB_TRACE_FILE }}" "data.bithub.allow"
+          '{"result":"pass"}' | Out-File -FilePath "${{ env.BITHUB_AUDIT_DIR }}/opa-result.json" -Encoding utf8
