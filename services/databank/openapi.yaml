@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: Bit.Hub Data.Bank Ingestion API
+  version: 1.0.0
+servers:
+  - url: https://so.bit
+security:
+  - Ed25519Sig: []
+components:
+  securitySchemes:
+    Ed25519Sig:
+      type: apiKey
+      in: header
+      name: X-Signature
+  headers:
+    X-Public-Key:
+      description: Hex-encoded Ed25519 public key matching signature
+      schema: { type: string }
+    X-Payload-Hash:
+      description: Hex SHA-256 of body (binary)
+      schema: { type: string }
+paths:
+  /ingest/violation:
+    post:
+      summary: Ingest a single violation record (binary line)
+      security:
+        - Ed25519Sig: []
+      parameters:
+        - in: header
+          name: X-Public-Key
+          required: true
+          schema: { type: string }
+        - in: header
+          name: X-Payload-Hash
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '202':
+          description: Accepted and persisted
+  /ingest/status:
+    get:
+      summary: Report latest ingestion status for a repo
+      parameters:
+        - name: repo
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Status JSON
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  violations: { type: boolean }
+                  last_hash: { type: string }
