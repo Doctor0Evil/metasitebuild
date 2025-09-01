@@ -12,3 +12,21 @@ feature_flags:
       - timestamp: 2025-09-01T16:20:00Z
         initiator: jacob_farmer
         justification: "Enable meta-compliance and debugging for Bit.Hub session. All actions logged."
+# On detection (guardian, watchdog, or runner step):
+if matches any("*.exe", "*.scr", "*.js", "*.vbs", "santa-clause.exe"):
+  # Elevate incident
+  cp overlays/incident-mode.aln manifests/.active-overlay
+  echo "incident=1" > .bit/state
+  run scripts/bitshell/incident-response.sh.aln
+  append JSON entry to registries/command-ledger.alnlog
+; Bit.Hub ALN Compliance Gate
+(defvar god-mode.bit true)
+
+(defun godmode-active? ()
+  (and god-mode.bit
+       (bit.compliance.lock?)))
+
+;Override logic
+(when (godmode-active?)
+  (enable-bit.hub-superuser-mode)
+  (audit-event "god-mode enabled" :initiator 'jacob_farmer))
