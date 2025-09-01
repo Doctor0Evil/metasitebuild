@@ -56,3 +56,13 @@ entries:
     generated_by: embedded-multisurface
     description: >
       JSON record of IPFS CID and SBOM metadata for decentralized audit.
+
+- pkg: agents
+  kind: aln-agent
+  symbol: comet-bithub-agent
+  path: .bithub/agents/comet-bithub-agent.aln
+  status: ok
+  policies: [opa, audit-trace]
+  description: >
+    Browser-integrated Comet agent that monitors tabs, extracts/summarizes
+    content, routes data to Bit.Hub APIs, and enforces compliance.
