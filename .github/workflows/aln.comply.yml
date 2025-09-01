@@ -1,0 +1,82 @@
+name: ALN Compliance
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+env:
+  GITHUB_DEFAULT_RUNNER: ubuntu-latest
+  DATABANK_URL: ${{ secrets.DATABANK_URL }}
+  DATABANK_TOKEN: ${{ secrets.DATABANK_TOKEN }}
+  # Treat all egress through local proxy or mirrored URLs
+  NO_PROXY: "localhost,127.0.0.1"
+
+jobs:
+  compliance:
+    runs-on: ${{ env.GITHUB_DEFAULT_RUNNER }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify master policy signature
+        run: |
+          set -e
+          if ! verify-ed25519 manifests/master-enforcement.aln .keys/ed25519.public; then
+            echo "::error::Policy manifest signature invalid"
+            exit 1
+          fi
+
+      - name: Install ALN tools
+        run: |
+          set -e
+          mkdir -p "$HOME/.aln/bin"
+          export PATH="$HOME/.aln/bin:$PATH"
+          curl -sSL https://bit.hub/tools/install-aln.sh | bash
+          for t in aln-analyze aln-patch aln-fixer-bot; do
+            command -v "$t" >/dev/null || { echo "::error::missing $t"; exit 1; }
+          done
+
+      - name: Stream analysis to Data.Bank (low memory)
+        env:
+          DATABANK_URL: ${{ env.DATABANK_URL }}
+          DATABANK_TOKEN: ${{ env.DATABANK_TOKEN }}
+        run: |
+          set -euo pipefail
+          aln-analyze --stream | while IFS= read -r line || [[ -n "$line" ]]; do
+            printf "%s\n" "$line" > tmp_report.aln
+            curl -fsS -X POST \
+              -H "Authorization: Bearer $DATABANK_TOKEN" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @tmp_report.aln \
+              "$DATABANK_URL/ingest/violation"
+            rm -f tmp_report.aln
+            # signal kernel to drop caches periodically to reduce RSS
+            sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches' || true
+          done
+
+      - name: Apply compliance patch if violations exist
+        run: |
+          set -e
+          # If Data.Bank confirms violations, run fixer
+          if curl -fsS "$DATABANK_URL/ingest/status?repo=${GITHUB_REPOSITORY}" | grep -q '"violations":true'; then
+            aln-patch || true
+            aln-fixer-bot --context "compliance" || true
+          fi
+
+      - name: Append manifest hash to ledger
+        run: |
+          set -e
+          HASH=$(sha256sum manifests/master-enforcement.aln | awk '{print $1}')
+          LEDGER="registries/command-ledger.alnlog"
+          printf '{"ts":"%s","bot":"%s","repo":"%s","payload":"%s"}\n' \
+            "$(date -u +%FT%TZ)" "${GITHUB_ACTOR}" "${GITHUB_REPOSITORY}" "$HASH" >> "$LEDGER"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-ledger
+          path: registries/command-ledger.alnlog
