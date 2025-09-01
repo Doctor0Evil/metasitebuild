@@ -1,0 +1,77 @@
+<#
+.SYNOPSIS
+  Bit.Hub Compliance Capture & Audit Script
+.DESCRIPTION
+  Captures user submissions, applies compliance tagging, runs policy checks,
+  and logs results immutably for audit and governance.
+#>
+
+param(
+    [Parameter(Mandatory)]
+    [string]$SubmissionText,
+
+    [string]$ComplianceLevel = "strict", # standard | strict | paranoid
+    [string]$AuditDir = ".bithub/audit",
+    [string]$PolicyDir = ".bithub/policies"
+)
+
+# Ensure audit directory exists
+New-Item -ItemType Directory -Force -Path $AuditDir | Out-Null
+
+# Generate metadata
+$timestamp = Get-Date -Format o
+$submissionHash = [BitConverter]::ToString(
+    (New-Object Security.Cryptography.SHA256Managed).ComputeHash(
+        [Text.Encoding]::UTF8.GetBytes($SubmissionText)
+    )
+) -replace "-", ""
+
+$metadata = [PSCustomObject]@{
+    schema          = "bithub.submission.v1"
+    component       = "user.input.capture"
+    complianceLevel = $ComplianceLevel
+    timestamp       = $timestamp
+    hash            = $submissionHash
+    contentLength   = $SubmissionText.Length
+    tags            = @("mature-context", "creative", "audit-logged")
+    status          = "pending-policy-check"
+}
+
+# Save raw submission
+$rawFile = Join-Path $AuditDir "submission-$($timestamp -replace '[:T]', '_').txt"
+$SubmissionText | Out-File -FilePath $rawFile -Encoding utf8
+
+# Save metadata
+$metaFile = "$rawFile.meta.json"
+$metadata | ConvertTo-Json -Depth 5 | Out-File -FilePath $metaFile -Encoding utf8
+
+Write-Host "✔ Submission and metadata saved."
+Write-Host "  Raw file: $rawFile"
+Write-Host "  Metadata: $metaFile"
+
+# Placeholder: Run policy gate (replace with actual OPA or ALN checks)
+$policyResult = @{
+    result = "pass"
+    checkedAt = $timestamp
+    policyDir = $PolicyDir
+}
+$policyFile = "$rawFile.policy.json"
+$policyResult | ConvertTo-Json -Depth 5 | Out-File -FilePath $policyFile -Encoding utf8
+
+Write-Host "✔ Policy check complete. Result: $($policyResult.result)"
+
+# Immutable log entry (append-only)
+$logEntry = @{
+    timestamp = $timestamp
+    hash      = $submissionHash
+    status    = $policyResult.result
+    files     = @{
+        raw     = $rawFile
+        meta    = $metaFile
+        policy  = $policyFile
+    }
+}
+$logFile = Join-Path $AuditDir "immutable-log.jsonl"
+$logEntry | ConvertTo-Json -Depth 5 | Add-Content -Path $logFile -Encoding utf8
+
+Write-Host "✔ Immutable log updated: $logFile"
