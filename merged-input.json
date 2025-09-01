@@ -1,0 +1,14 @@
+{
+  "schema": "bithub.trace.v1",
+  "component": "humor.reasoning.compliance",
+  "complianceLevel": "strict",
+  "content": "Bit.Hub compliance is like a good punchline — it lands every time.",
+  "signatures": [
+    { "key_id": "owner:bithub", "alg": "RS256", "signature": "BASE64_BITHUB_SIG" },
+    { "key_id": "owner:perplexity", "alg": "RS256", "signature": "BASE64_PERPLEXITY_SIG" }
+  ],
+  "opa": {
+    "decisionPath": "data.bithub.allow",
+    "pass": true
+  }
+}
