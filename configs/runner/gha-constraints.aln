@@ -1,0 +1,7 @@
+constraints.spec "1.0"
+allowed_runner_labels: ["self-hosted", "bit.hub", "linux"]
+denied_runner_labels: ["macos-latest", "windows-latest"]
+allowed_orgs: ["Doctor0Evil", "BitHubOrg"]
+require_dispatch_sig: true
+allowed_domains: ["packages.local", "nodes.virta", "time.cloudflare.com", "ghcr.io", "so.bit"]
+denied_domains: ["github.com", "api.github.com", "google.com", "www.google.com", "*.gvt1.com", "*.ggpht.com"]
