@@ -1,0 +1,97 @@
+{
+"version": "1.0.0",
+"name": "Bit.Hub-BitCommander-Model",
+"description": "Centralized command model for overseeing all security, compliance, and integrity checks on the Bit.Hub platform. This model is the foundational authority for our compliance gate.",
+"corePrinciples": {
+"principle-1": "Zero-Trust Integrity: Every workflow and artifact is subject to strict integrity verification, and nothing is trusted by default.",
+"principle-2": "Proactive Defense: Implement proactive security measures to prevent attacks (e.g., user-prompt injections, malware) before they can execute.",
+"principle-3": "Authority & Transparency: All compliance gates and policies are transparently declared and strictly enforced to establish industry authority.",
+"principle-4": "Hardening Evolution Cycles: Policies and integrity checks are regularly audited and updated to adapt to new threats."
+},
+"workflowOversight": [
+{
+"name": "Great.Wall.of.Compliance",
+"path": ".github/workflows/Great.Wall.of.Compliance.yml",
+"integrityCheck": {
+"enabled": true,
+"method": "sha256",
+"expectedHash": "2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c",
+"lockFile": ".bit/workflow.lock"
+},
+"required": true,
+"description": "The primary compliance gate. This workflow must be present and its hash must match the expected value to ensure it has not been tampered with."
+},
+{
+"name": "Malware.Scan",
+"path": ".github/workflows/Malware.Scan.yml",
+"integrityCheck": {
+"enabled": true,
+"method": "sha256",
+"expectedHash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+"lockFile": ".bit/workflow.lock"
+},
+"required": true,
+"description": "Dedicated malware scanning workflow. Checks all incoming artifacts and dependencies for malicious signatures."
+}
+],
+"securityPolicies": {
+"userPromptInjection": {
+"enabled": true,
+"detectionEngine": "AI-Powered",
+"patternSources": [
+"disallowed_terms.txt",
+"central_injection_registry.json"
+],
+"scanTargets": [
+"user_input_prompts",
+"commit_messages",
+"comment_threads"
+],
+"onDetection": "quarantine"
+},
+"assetEconomy": {
+"enforce": true,
+"requirements": {
+"portable": true,
+"blockchain": false,
+"trading": {
+"enabled": true,
+"requiresReview": true
+}
+}
+},
+"dependencyAuditing": {
+"enabled": true,
+"allowedRegistries": [
+"https://www.google.com/search?q=https://registry.npmjs.org/",
+"https://pypi.org/simple/",
+"https://crates.io/"
+],
+"enforceVulnerabilityScanning": true
+},
+"secretsManagement": {
+"enforce": true,
+"preventHardcodedSecrets": true,
+"minEntropy": 128
+}
+},
+"evolutionCycles": {
+"policyUpdates": {
+"cadence": "daily",
+"source": "https://www.google.com/search?q=https://internal.bithub.com/policies/latest",
+"verificationMethod": "PGP"
+},
+"modelUpdates": {
+"strategy": "manual_review_and_approval",
+"auditors": [
+"security_team",
+"compliance_officer"
+]
+}
+},
+"complianceGate": {
+"blockingPolicy": "block_merge",
+"quarantineDir": ".bithubreports/quarantine",
+"reportFormat": "json"
+}
+}
