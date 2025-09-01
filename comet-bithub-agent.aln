@@ -1,0 +1,24 @@
+// ALN Script: comet-bithub-agent.aln
+
+DEFINE: agent "CometAgent" {
+  requires: ["BitHubAPI", "TabAI", "CometHost"],
+  trait: "browser-integrated",
+  capabilities: ["monitor_tabs", "extract_data", "summarize_content", "trigger_workflows", "BitHub_policy_enforce"]
+}
+
+EVENT: browser.tab_update(tab) {
+  IF tab.url matches /mail|inbox|gmail/ {
+    TRIGGER CometAgent.summarize_unread(tab);
+  }
+  IF tab.url matches /spreadsheet|sheet/ {
+    TRIGGER CometAgent.prepare_spreadsheet(tab);
+  }
+}
+
+FUNCTION: CometAgent.summarize_unread(tab) { /* ... */ }
+
+FUNCTION: CometAgent.prepare_spreadsheet(tab) { /* ... */ }
+
+INTENT: user.command("orchestrate") { /* ... */ }
+
+COMPLIANCE_CHECK: BitHubAPI.enforce_policy(name, context) { /* ... */ }
