@@ -1,0 +1,3 @@
+# owner/repo@digest url_to_mirror_or_local
+actions/checkout@sha256:abc123... https://mirror.packages.local/actions/checkout/abc123.zip
+actions/setup-go@sha256:def456... https://mirror.packages.local/actions/setup-go/def456.zip
