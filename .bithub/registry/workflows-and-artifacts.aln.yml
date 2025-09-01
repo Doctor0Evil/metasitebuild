@@ -1,0 +1,79 @@
+aln: v1
+kind: workflow.registry
+source:
+  repo: Doctor0Evil/Bit.Hub
+  maintainer: XboxTeeJay
+  note: >
+    Registry entries for core Bit.Hub workflows and their build artefacts,
+    including Compliance Guardian, Embedded Multi-Surface Build, Rust targets,
+    SBOMs, and IPFS-published metadata.
+
+entries:
+  # === Workflows ===
+  - pkg: workflows
+    kind: github-actions
+    symbol: compliance-guardian
+    path: .github/workflows/01-compliance-guardian.yml
+    status: ok
+    policies:
+      - opa
+      - audit-trace
+    description: >
+      Runs Humor‑Reasoning‑Model and compliance‑floor checks, writes immutable
+      audit logs, and emits a machine‑readable compliance verdict for other
+      workflows to consume.
+
+  - pkg: workflows
+    kind: github-actions
+    symbol: embedded-multisurface
+    path: .github/workflows/02-embedded-multisurface.yml
+    status: ok
+    depends_on:
+      - compliance-guardian
+    description: >
+      Builds Rust embedded target (aarch64), Node, and Python components;
+      generates SBOM; publishes to IPFS; reads compliance verdict from
+      Compliance Guardian and logs it in build audit.
+
+  # === Rust Targets ===
+  - pkg: artefacts
+    kind: rust-binary
+    symbol: firmware-aarch64
+    path: target/aarch64-unknown-linux-gnu/release
+    status: ok
+    build_from: embedded-multisurface
+    description: >
+      Cross-compiled Rust firmware for aarch64 embedded target, built with
+      no_std and panic-halt for Bit.Hub IoT/AI edge devices.
+
+  - pkg: artefacts
+    kind: rust-binary
+    symbol: firmware-x86_64
+    path: target/x86_64-unknown-linux-gnu/release
+    status: optional
+    build_from: embedded-multisurface
+    description: >
+      Host-compiled Rust binary for x86_64, used for simulation, testing,
+      and CI/CD validation.
+
+  # === SBOM Artefacts ===
+  - pkg: artefacts
+    kind: sbom
+    symbol: cyclonedx-json
+    path: sbom.json
+    status: ok
+    generated_by: embedded-multisurface
+    description: >
+      CycloneDX 1.4 Software Bill of Materials for the Rust/Node/Python
+      multi-surface build, used for CVE scanning and supply-chain audits.
+
+  # === IPFS Publishing ===
+  - pkg: artefacts
+    kind: ipfs-cid
+    symbol: sbom-ipfs
+    path: .bithub/audit/ipfs-publish.json
+    status: ok
+    generated_by: embedded-multisurface
+    description: >
+      JSON record containing IPFS CID and metadata for the published SBOM,
+      enabling decentralised retrieval and verification.
