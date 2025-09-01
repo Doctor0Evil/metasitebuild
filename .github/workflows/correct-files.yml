@@ -1,0 +1,119 @@
+name: correct-files
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: correct-files-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  correct-files:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-24.04, macos-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Git credentials & token scopes
+        id: perms
+        shell: bash
+        run: |
+          set -e
+          echo "=== Remote URL ==="
+          git remote -v || { echo "No remote found"; exit 1; }
+          echo "=== Credential helpers ==="
+          git config --show-origin --get-all credential.helper || echo "No credential.helper configured"
+          echo "=== Testing connectivity to origin ==="
+          if git ls-remote --exit-code origin &>/dev/null; then
+            echo "✔ Can reach remote 'origin'."
+          else
+            echo "✖ Cannot reach remote 'origin'."
+            exit 1
+          fi
+          echo "=== Inspecting GITHUB_TOKEN permissions ==="
+          perms_json=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+                               -H "Accept: application/vnd.github+json" \
+                               https://api.github.com/repos/${GITHUB_REPOSITORY})
+          if echo "$perms_json" | grep -q '"push": true'; then
+            echo "✔ Token has push access."
+            echo "has_push=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "⚠ GITHUB_TOKEN does not have push access — commit/push stage will be skipped."
+            echo "has_push=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install PowerShell (non-Windows)
+        if: runner.os != 'Windows'
+        uses: PSModule/install-powershell@v1
+        with:
+          Version: 'latest'
+
+      - name: Show PowerShell version
+        shell: pwsh
+        run: $PSVersionTable
+
+      - name: Run manifest-driven ALN corrections
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $scriptsDir   = Join-Path $PWD 'scripts'
+          $runnerScript = Join-Path $scriptsDir 'run-all-corrections.ps1'
+          if (-not (Test-Path $runnerScript)) {
+            throw "Correction runner not found at $runnerScript"
+          }
+          & $runnerScript
+
+      - name: Commit & safe push corrections (auto-rebase and retry)
+        if: steps.perms.outputs.has_push == 'true'
+        shell: bash
+        run: |
+          set -e
+          git config user.name "ALN File Corrector"
+          git config user.email "actions@github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Automated ALN file correction (manifest runner)"
+          attempt_push() {
+            git pull --rebase origin "${GITHUB_REF_NAME}" || return 1
+            if [ "$(git rev-list HEAD ^origin/${GITHUB_REF_NAME} --count)" -gt 0 ]; then
+              git push origin "${GITHUB_REF_NAME}" || return 1
+              echo "Push successful."
+            else
+              echo "No new commits to push after rebase."
+            fi
+          }
+          for i in 1 2 3; do
+            if attempt_push; then exit 0; fi
+            echo "Push failed (attempt $i). Retrying in $((i*5))s..."
+            sleep $((i*5))
+          done
+          echo "Push failed after 3 attempts."
+          exit 1
+
+      - name: Skip commit/push stage
+        if: steps.perms.outputs.has_push != 'true'
+        run: echo "Skipping commit/push stage — no token push access."
+
+      - name: Upload Correction Audit Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: aln-correction-audit-logs
+          path: |
+            scripts/audit-session.log
+            scripts/log-*.txt
+          retention-days: 14
