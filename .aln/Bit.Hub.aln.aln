@@ -1,0 +1,406 @@
+aln: v1
+kind: package.index
+source:
+  lang: go
+  note: standard library symbols + common platform tags
+provenance:
+  repaired_by: bit.hub.repair
+  motive: normalize symbol inventory for policy and bot orchestration
+  audit_id: aln-fix-001
+platforms:
+  - generic
+  - netbsd/arm64
+  - netbsd/arm64-cgo
+
+entries:
+  # bytes
+  - pkg: bytes
+    kind: func
+    symbol: ToValidUTF8
+    signature: func([]uint8, []uint8) []uint8
+    status: ok
+
+  # strings
+  - pkg: strings
+    kind: func
+    symbol: ToValidUTF8
+    signature: func(string, string) string
+    status: ok
+
+  # crypto/ed25519
+  - pkg: crypto/ed25519
+    kind: const
+    symbol: PrivateKeySize
+    type: int
+    value: 64
+    status: ok
+  - pkg: crypto/ed25519
+    kind: const
+    symbol: PublicKeySize
+    type: int
+    value: 32
+    status: ok
+  - pkg: crypto/ed25519
+    kind: const
+    symbol: SeedSize
+    type: int
+    value: 32
+    status: ok
+  - pkg: crypto/ed25519
+    kind: const
+    symbol: SignatureSize
+    type: int
+    value: 64
+    status: ok
+
+  - pkg: crypto/ed25519
+    kind: func
+    symbol: GenerateKey
+    signature: func(io.Reader) (PublicKey, PrivateKey, error)
+    status: ok
+  - pkg: crypto/ed25519
+    kind: func
+    symbol: NewKeyFromSeed
+    signature: func([]uint8) PrivateKey
+    status: ok
+  - pkg: crypto/ed25519
+    kind: func
+    symbol: Sign
+    signature: func(PrivateKey, []uint8) []uint8
+    status: ok
+  - pkg: crypto/ed25519
+    kind: func
+    symbol: Verify
+    signature: func(PublicKey, []uint8, []uint8) bool
+    status: ok
+
+  - pkg: crypto/ed25519
+    kind: type
+    symbol: PrivateKey
+    underlying: []uint8
+    status: ok
+  - pkg: crypto/ed25519
+    kind: type
+    symbol: PublicKey
+    underlying: []uint8
+    status: ok
+
+  - pkg: crypto/ed25519
+    kind: method
+    receiver: PrivateKey
+    symbol: Public
+    signature: func() crypto.PublicKey
+    status: ok
+  - pkg: crypto/ed25519
+    kind: method
+    receiver: PrivateKey
+    symbol: Seed
+    signature: func() []uint8
+    status: ok
+  - pkg: crypto/ed25519
+    kind: method
+    receiver: PrivateKey
+    symbol: Sign
+    signature: func(io.Reader, []uint8, crypto.SignerOpts) ([]uint8, error)
+    status: ok
+
+  # crypto/tls
+  - pkg: crypto/tls
+    kind: const
+    symbol: Ed25519
+    type: SignatureScheme
+    value: 2055
+    status: ok
+
+  # crypto/x509
+  - pkg: crypto/x509
+    kind: const
+    symbol: Ed25519
+    type: PublicKeyAlgorithm
+    value: 4
+    status: ok
+  - pkg: crypto/x509
+    kind: const
+    symbol: PureEd25519
+    type: SignatureAlgorithm
+    value: 16
+    status: ok
+
+  # database/sql
+  - pkg: database/sql
+    kind: method
+    receiver: "*Conn"
+    symbol: Raw
+    signature: func(func(interface{}) error) error
+    status: ok
+  - pkg: database/sql
+    kind: method
+    receiver: "*NullInt32"
+    symbol: Scan
+    signature: func(interface{}) error
+    status: ok
+  - pkg: database/sql
+    kind: method
+    receiver: "NullInt32"
+    symbol: Value
+    signature: func() (driver.Value, error)
+    status: ok
+  - pkg: database/sql
+    kind: method
+    receiver: "*NullTime"
+    symbol: Scan
+    signature: func(interface{}) error
+    status: ok
+
+  # log/syslog (platform-tagged)
+  - pkg: log/syslog
+    kind: type
+    symbol: Priority
+    underlying: int
+    platform: netbsd/arm64
+    status: ok
+  - pkg: log/syslog
+    kind: type
+    symbol: Writer
+    underlying: struct
+    platform: netbsd/arm64
+    status: ok
+
+  # math/big
+  - pkg: math/big
+    kind: method
+    receiver: "*Int"
+    symbol: TrailingZeroBits
+    signature: func() uint
+    status: ok
+  - pkg: math/big
+    kind: method
+    receiver: "*Rat"
+    symbol: SetUint64
+    signature: func(uint64) *Rat
+    status: ok
+
+  # net/http
+  - pkg: net/http
+    kind: const
+    symbol: SameSiteNoneMode
+    type: SameSite
+    value: 4
+    status: ok
+  - pkg: net/http
+    kind: const
+    symbol: StatusEarlyHints
+    type: int
+    value: 103
+    status: ok
+
+  - pkg: net/http
+    kind: func
+    symbol: NewRequestWithContext
+    signature: func(context.Context, string, string, io.Reader) (*Request, error)
+    status: ok
+  - pkg: net/http
+    kind: method
+    receiver: "Header"
+    symbol: Clone
+    signature: func() Header
+    status: ok
+  - pkg: net/http
+    kind: method
+    receiver: "*Request"
+    symbol: Clone
+    signature: func(context.Context) *Request
+    status: ok
+
+  - pkg: net/http
+    kind: type
+    symbol: Server
+    underlying: struct
+    status: ok
+  - pkg: net/http
+    kind: type.field
+    parent: net/http.Server
+    symbol: BaseContext
+    signature: func(net.Listener) context.Context
+    status: ok
+  - pkg: net/http
+    kind: type.field
+    parent: net/http.Server
+    symbol: ConnContext
+    signature: func(context.Context, net.Conn) context.Context
+    status: ok
+
+  - pkg: net/http
+    kind: type
+    symbol: Transport
+    underlying: struct
+    status: ok
+  - pkg: net/http
+    kind: type.field
+    parent: net/http.Transport
+    symbol: ForceAttemptHTTP2
+    signature: bool
+    status: ok
+  - pkg: net/http
+    kind: type.field
+    parent: net/http.Transport
+    symbol: ReadBufferSize
+    signature: int
+    status: ok
+  - pkg: net/http
+    kind: type.field
+    parent: net/http.Transport
+    symbol: WriteBufferSize
+    signature: int
+    status: ok
+
+  # net
+  - pkg: net
+    kind: method
+    receiver: "*DNSConfigError"
+    symbol: Unwrap
+    signature: func() error
+    status: ok
+  - pkg: net
+    kind: method
+    receiver: "*OpError"
+    symbol: Unwrap
+    signature: func() error
+    status: ok
+  - pkg: net
+    kind: type.field
+    parent: net.DNSError
+    symbol: IsNotFound
+    signature: bool
+    status: ok
+  - pkg: net
+    kind: type.field
+    parent: net.ListenConfig
+    symbol: KeepAlive
+    signature: time.Duration
+    status: ok
+
+  # net/url
+  - pkg: net/url
+    kind: method
+    receiver: "*Error"
+    symbol: Unwrap
+    signature: func() error
+    status: ok
+
+  # os/exec
+  - pkg: os/exec
+    kind: method
+    receiver: "*Cmd"
+    symbol: String
+    signature: func() string
+    status: ok
+  - pkg: os/exec
+    kind: method
+    receiver: "*Error"
+    symbol: Unwrap
+    signature: func() error
+    status: ok
+
+  # os
+  - pkg: os
+    kind: func
+    symbol: UserConfigDir
+    signature: func() (string, error)
+    status: ok
+  - pkg: os
+    kind: method
+    receiver: "*LinkError"
+    symbol: Unwrap
+    signature: func() error
+    status: ok
+  - pkg: os
+    kind: method
+    receiver: "*PathError"
+    symbol: Unwrap
+    signature: func() error
+    status: ok
+
+  # os constants (platform-tagged where applicable)
+  - pkg: os
+    kind: const
+    symbol: DevNull
+    type: string
+    value: "/dev/null"
+    platform: netbsd/arm64
+    status: ok
+  - pkg: os
+    kind: const
+    symbol: O_APPEND
+    type: int
+    value: 8
+    platform: netbsd/arm64
+    status: ok
+  - pkg: os
+    kind: const
+    symbol: O_SYNC
+    type: int
+    value: 128
+    platform: netbsd/arm64-cgo
+    status: ok
+  - pkg: os
+    kind: const
+    symbol: O_TRUNC
+    type: int
+    value: 1024
+    platform: netbsd/arm64-cgo
+    status: ok
+  - pkg: os
+    kind: const
+    symbol: PathSeparator
+    type: int
+    value: 47
+    platform: [netbsd/arm64, netbsd/arm64-cgo]
+    status: ok
+  - pkg: os
+    kind: const
+    symbol: PathListSeparator
+    type: int
+    value: 58
+    platform: [netbsd/arm64, netbsd/arm64-cgo]
+    status: ok
+
+  # path/filepath constants
+  - pkg: path/filepath
+    kind: const
+    symbol: Separator
+    type: int
+    value: 47
+    platform: [netbsd/arm64, netbsd/arm64-cgo]
+    status: ok
+  - pkg: path/filepath
+    kind: const
+    symbol: ListSeparator
+    type: int
+    value: 58
+    platform: [netbsd/arm64, netbsd/arm64-cgo]
+    status: ok
+
+  # reflect
+  - pkg: reflect
+    kind: method
+    receiver: "Value"
+    symbol: IsZero
+    signature: func() bool
+    status: ok
+
+  # runtime (platform-tagged identities)
+  - pkg: runtime
+    kind: const
+    symbol: GOOS
+    type: string
+    value: "netbsd"
+    platform: [netbsd/arm64, netbsd/arm64-cgo]
+    status: ok
+  - pkg: runtime
+    kind: const
+    symbol: GOARCH
+    type: string
+    value: "arm64"
+    platform: [netbsd/arm64, netbsd/arm64-cgo]
+    status: ok
