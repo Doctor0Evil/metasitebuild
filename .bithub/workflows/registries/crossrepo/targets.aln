@@ -1,0 +1,10 @@
+targets:
+  - repo: Doctor0Evil/Bit.World
+    node: virta-node-01
+    stack: manifests/stacks/core-stack.aln
+  - repo: Doctor0Evil/ALNFantasia
+    node: ""
+    stack: manifests/stacks/heavy-build.aln
+  - repo: Doctor0Evil/virta.sys
+    node: virta-node-02
+    stack: manifests/stacks/quick-verify.aln
