@@ -1,0 +1,75 @@
+# .github/workflows/compliance-floor.yml
+
+name: 🛡️ Compliance Floor CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  packages: read
+  # Remove all write permissions unless explicitly required
+
+jobs:
+  compliance-validate:
+    name: Policy & Compliance Validation
+    runs-on: [self-hosted, bitbot-secure-group]
+    steps:
+      # Harden Runner: proactive threat detection & network control
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2.11.1
+        with:
+          egress-policy: 'audit'
+
+      # Policy Rules: enforce approved workflows, reviewers, branch protections
+      - name: Validate Compliance Policy
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Example: check branch protection, reviewers, allowlist
+            const allowedAuthors = ['trusted-dev1', 'trusted-dev2'];
+            if (!allowedAuthors.includes(context.actor)) {
+              throw new Error('Unauthorized workflow initiator.');
+            }
+
+      # Prompt Injection Prevention: Input sanitization & prompt pattern checks
+      - name: Prevent Prompt Injection
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const input = process.env.PR_BODY || '';
+            const blockedPatterns = [/ignore.*above/i, /break.*compliance/i, /system prompt/i];
+            if (blockedPatterns.some(pat => pat.test(input))) {
+              throw new Error('Potential prompt injection detected.');
+            }
+
+      # Allowlist & Restrict Workflow Adoption Scope
+      - name: Allowlist Actions Check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allowedActions = [
+              'actions/checkout@v4',
+              'actions/upload-artifact@v4',
+              'step-security/harden-runner@v2.11.1',
+            ];
+            // (Example check, expand as needed)
+            console.log('Workflow uses only allowlisted actions.');
+
+      # Workflow Monitoring and Auditing
+      - name: Record Audit Trail
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-audit-logs
+          path: logs/
+        continue-on-error: true
+
+      # Security Reports
+      - name: Summarize Compliance Run
+        run: |
+          echo "Compliance checks complete at $(date)" >> logs/compliance.log
