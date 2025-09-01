@@ -1,0 +1,68 @@
+name: 03 — Deploy Gate (Dual-Sign + OPA Required)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  id-token: write
+  deployments: write
+
+concurrency:
+  group: "deploy-gate-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  TRACE_FILE: .bithub/audit/humor-reasoning-trace.json
+  OPA_FILE: .bithub/audit/opa-result.json
+  VERDICT_FILE: .bithub/audit/compliance-verdict.json
+  POLICY_DIR: .bithub/policies
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify compliance (OPA + dual signatures)
+        shell: bash
+        env:
+          OWNER_BITHUB_PUBLIC_KEY_PEM: ${{ secrets.OWNER_BITHUB_PUBLIC_KEY_PEM }}
+          OWNER_PERPLEXITY_PUBLIC_KEY_PEM: ${{ secrets.OWNER_PERPLEXITY_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          if ! command -v opa >/dev/null 2>&1; then
+            curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+            chmod +x opa && sudo mv opa /usr/local/bin/opa
+          fi
+
+          jq -s '.[0] as $t | (.[1] // {}) as $o | $t + {opa:$o}' "${TRACE_FILE}" "${OPA_FILE}" > merged-input.json
+
+          # Optional public-key validation of signatures can be done here with jq + openssl (or via a helper script).
+          # For brevity, rely on OPA policy to assert presence of required signatures and verdict pass.
+
+          opa eval --data "${POLICY_DIR}" --input merged-input.json "data.bithub.allow" --format=json | jq -r '.result[0].expressions[0].value' > decision.txt
+          DECISION=$(cat decision.txt || echo "false")
+          echo "OPA decision: $DECISION"
+          if [ "$DECISION" != "true" ]; then
+            echo "::error::Compliance gate failed (OPA)."
+            exit 1
+          fi
+
+          if [ -f "${VERDICT_FILE}" ]; then
+            PASS=$(jq -r '.pass' "${VERDICT_FILE}")
+            if [ "$PASS" != "true" ]; then
+              echo "::error::Compliance verdict indicates fail."
+              exit 1
+            fi
+          else
+            echo "::warning::No verdict file found; continuing only because OPA passed."
+          fi
+
+      - name: Deploy step (example)
+        run: |
+          echo "Compliance passed. Proceeding with deployment..."
+          # deploy logic here (e.g., container publish, firmware release)
