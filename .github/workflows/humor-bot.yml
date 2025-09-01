@@ -1,0 +1,86 @@
+name: Humor Bot - AI PS Workflow
+
+on:
+  push:
+    branches: [ main, earliest-critical ]
+    # earliest-critical branch is rebased/created at the earliest needed commit
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: humor-bot-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HUMOR_LOG: logs/humor-bot.log
+  BITHUB_AUDIT_DIR: .bithub/audit
+  BITHUB_TRACE_FILE: .bithub/audit/humor-bot-trace.json
+  OPA_POLICY_DIR: .bithub/policies
+  OPA_RESULT_FILE: .bithub/audit/opa-result.json
+
+jobs:
+  humor-bot-check:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository (pinned to commit SHA for reproducibility)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up PowerShell Core
+        uses: actions/setup-pwsh@v2
+        with:
+          pwsh-version: '7.4.0'
+
+      - name: Install Humor Bot module
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Posh-Humor -Force
+
+      - name: Run Humor Bot AI script
+        shell: pwsh
+        run: |
+          $joke = "Why did the neural net refuse to cross the road? Not enough data on the other side!"
+          Write-Host "🤖 $joke"
+          New-Item -ItemType Directory -Force -Path (Split-Path "${{ env.HUMOR_LOG }}") | Out-Null
+          Add-Content -Path "${{ env.HUMOR_LOG }}" -Value "$(Get-Date -Format o) :: $joke"
+
+      - name: Prepare audit directory and write trace
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.BITHUB_AUDIT_DIR }}" | Out-Null
+          $trace = @{
+            schema    = "bithub.trace.v1"
+            component = "humor.bot"
+            run_id    = "${{ github.run_id }}"
+            ref       = "${{ github.ref }}"
+            sha       = "${{ github.sha }}"
+            event     = "${{ github.event_name }}"
+            timestamp = (Get-Date).ToUniversalTime().ToString("o")
+            status    = "completed"
+          } | ConvertTo-Json -Depth 4
+          $trace | Out-File -FilePath "${{ env.BITHUB_TRACE_FILE }}" -Encoding utf8
+
+      - name: OPA gate (ALN + Bit.Hub policies)
+        shell: pwsh
+        run: |
+          # Example OPA evaluation — replace with your actual policy checks
+          # opa eval --data "${{ env.OPA_POLICY_DIR }}" --input "${{ env.BITHUB_TRACE_FILE }}" "data.bithub.allow"
+          Write-Host "::notice::OPA policy evaluation placeholder"
+          # Save result for audit
+          '{"result":"pass"}' | Out-File -FilePath "${{ env.OPA_RESULT_FILE }}" -Encoding utf8
+
+  escalate_audit:
+    needs: humor-bot-check
+    runs-on: windows-latest
+    if: ${{ failure() || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Manual escalation or rollback on ML anomaly detected
+        shell: pwsh
+        run: |
+          echo "::notice::Human action required: escalation or rollback pending superintelligence branch activity"
