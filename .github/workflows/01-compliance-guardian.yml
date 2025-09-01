@@ -1,10 +1,12 @@
-name: ComplianceGuardian — ALN Compliance Run
+# .github/workflows/compliance-guardian.yml
+
+name: ComplianceGuardian — ALN Compliance Wall
 
 on:
   push:
-    branches: [ main, develop, earliest-critical ]
+    branches: [main, develop, earliest-critical]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:
@@ -27,17 +29,34 @@ env:
   COMPLIANCE_LEVEL: strict
 
 jobs:
-  build-and-run:
-    name: Compliance Floor & Humor Reasoning
+  compliance-wall:
+    name: ALN Gate + Humor/Personality Compliance
     runs-on: windows-latest
+    continue-on-error: false
+    # ALN interpreter invoked as required for distributed compliance
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Run HRM + Compliance Floor
+      - name: ALN Compliance Orchestrator Init
+        shell: pwsh
+        run: |
+          Write-Host "::notice::Initializing ALN meta-compliance-guardian…"
+          # Full context audit structure output for Bit.Hub/ALN enforcement
+          $Context = @{
+            Workflow = "${{ github.workflow }}"
+            Ref      = "${{ github.ref }}"
+            Actor    = "${{ github.actor }}"
+            RunId    = "${{ github.run_id }}"
+            ComplianceHost = "Bit.Hub"
+            Environment = "distributed"
+          }
+          $Context | ConvertTo-Json | Write-Host
+
+      - name: Run ALN+Compliance Floor
         shell: pwsh
         env:
-          OWNER_ENFORCEMENT_PRIVATE_KEY_PEM: ${{ secrets.OWNER_ENFORCEMENT_PRIVATE_KEY_PEM }}
+          OWNER_BITHUB_PRIVATE_KEY_PEM: ${{ secrets.OWNER_BITHUB_PRIVATE_KEY_PEM }}
+          OWNER_PERPLEXITY_PRIVATE_KEY_PEM: ${{ secrets.OWNER_PERPLEXITY_PRIVATE_KEY_PEM }}
         run: |
           ./scripts/run-hrm-compliance.ps1 `
             -ComplianceLevel "${{ env.COMPLIANCE_LEVEL }}" `
@@ -47,29 +66,92 @@ jobs:
             -TraceFile "${{ env.BITHUB_TRACE_FILE }}" `
             -OpaResultFile "${{ env.BITHUB_OPA_RESULT }}" `
             -OpaQuery "data.bithub.allow" `
-            -FailMode "log" `
+            -FailMode "gate" `
             -AutoInstallOpa
 
-      - name: Write Compliance Verdict
+      - name: ALN: Personality/Emotion Vector Indexing
+        shell: pwsh
+        run: |
+          # Example: calls ALN script to annotate and classify emotion/personality content
+          ./scripts/aln-compliance-indexer.ps1 `
+            -InputFile "${{ env.BITHUB_TRACE_FILE }}" `
+            -OutputReport "${{ env.BITHUB_LOG_DIR }}/emotion-index.json" `
+            -Model "Bit.Hub.CentralPersonalityMap"
+
+      - name: Write Verdict
         shell: pwsh
         run: |
           $opa = Get-Content "${{ env.BITHUB_OPA_RESULT }}" | ConvertFrom-Json
-          $pass = $true
-          if ($opa.pass -is [bool]) { $pass = $opa.pass } elseif ($opa.pass) { $pass = $true } else { $pass = $false }
           $verdict = @{
-            pass  = $pass
+            pass  = [bool]$opa.pass
             level = "${{ env.COMPLIANCE_LEVEL }}"
             ts    = (Get-Date).ToUniversalTime().ToString("o")
             run   = "${{ github.run_id }}"
             sha   = "${{ github.sha }}"
           }
           $verdict | ConvertTo-Json -Depth 5 | Out-File -FilePath "${{ env.BITHUB_VERDICT_FILE }}" -Encoding utf8
-          Write-Host "::notice::Compliance verdict written to ${{ env.BITHUB_VERDICT_FILE }}"
 
-      - name: Upload Audit Artifacts
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: complianceguardian-audit
           path: |
             ${{ env.BITHUB_AUDIT_DIR }}
             ${{ env.BITHUB_LOG_DIR }}
+
+###############################
+# ALN SECURITY CORE (Hybrid)  #
+###############################
+
+aln:
+  id: bithub.compliance.wall
+  version: 1.0.0
+  description: |
+    Autonomous compliance wall for distributed federated/AI workflows.
+    - Regulates emotion and personality-vector context for all ALN-routable data.
+    - Synergizes with Bit.Hub's Humor-Reasoning-Core.
+    - Enforces non-interference for central models, prohibits harmful actions.
+  policy:
+    - restrict_tokens: true     # No public/PAT tokens in workflow logic.
+    - allow_funny: true         # Humor allowed; direct emotion forbidden at Intelligence core.
+    - central_brain_sealed: true   # No override or external command may alter central model logic.
+    - behavior_schema:
+        - cannot_be_broken: true
+        - cannot_contain_harm: true
+        - manual_human_override: false
+    - regulate_public_domain:
+        - federated_learning: true
+        - filter_domains:
+            - type: exclude
+              match: public
+              contexts: [government, open-data, insecure-host]
+    - context_indexing:
+        - enabled: true
+        - annotate: [personality_vector, emotion, compliance_level]
+        - index_model: aln-compliance-figure-v1
+    - auto_escalate_on_violation: true   # All leaks/incidents escalate, no opt-out.
+    - exclude_github_pat: true
+    - forbidden_actions:
+        - inject_emotion_core: true
+        - incite_harm: true
+        - manual_seeding: false
+    - authorized_owner_enforcement:
+        - strict_id: "jacob_farmer"
+        - dual_sign: ["owner:bithub","owner:perplexity"]
+
+###############################
+# INTERPRETER MAPPINGS (YAML) #
+###############################
+
+interpreters:
+  - id: ALN
+    entrypoints: [aln_compliance_wall, run-hrm-compliance.ps1, aln-compliance-indexer.ps1]
+    environments: [BitHub, CentralPersonalityMap]
+  - id: Lisp
+    entrypoints: [bit.lisp.compliance-enforce]
+    environments: [BitHub, DataBank, HumorReasoningCore]
+  - id: LOLCODE
+    entrypoints: [lolcode_perimeter_enforcer, lolcode_index_annotate]
+    environments: [BitHub]
+
+# END HYBRID CONFIG
