@@ -1,0 +1,34 @@
+aln: v1
+kind: workflow.registry
+source:
+  repo: Doctor0Evil/Bit.Hub
+  maintainer: XboxTeeJay
+  note: >
+    Registry entries for core Bit.Hub workflows — Compliance Guardian and
+    Embedded Multi-Surface Build — for ALN indexing and policy enforcement.
+
+entries:
+  - pkg: workflows
+    kind: github-actions
+    symbol: compliance-guardian
+    path: .github/workflows/01-compliance-guardian.yml
+    status: ok
+    policies:
+      - opa
+      - audit-trace
+    description: >
+      Runs Humor‑Reasoning‑Model and compliance‑floor checks, writes immutable
+      audit logs, and emits a machine‑readable compliance verdict for other
+      workflows to consume.
+
+  - pkg: workflows
+    kind: github-actions
+    symbol: embedded-multisurface
+    path: .github/workflows/02-embedded-multisurface.yml
+    status: ok
+    depends_on:
+      - compliance-guardian
+    description: >
+      Builds Rust embedded target (aarch64), Node, and Python components;
+      generates SBOM; publishes to IPFS; reads compliance verdict from
+      Compliance Guardian and logs it in build audit.
