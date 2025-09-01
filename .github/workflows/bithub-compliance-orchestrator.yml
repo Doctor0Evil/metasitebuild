@@ -1,0 +1,142 @@
+# .github/workflows/bithub-compliance-orchestrator.yml
+
+name: Bit.Hub Compliance Master Orchestrator
+
+# --- Trigger Events ---
+# Triggers the workflow hourly on the master branch.
+# Also allows for manual runs via the GitHub UI and other workflows.
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches:
+      - main
+      - master
+
+# --- Global Environment Variables ---
+env:
+  # The base path for all Bit.Hub scripts to avoid repetitive typing
+  BIT_HUB_SCRIPTS_PATH: 'bithub/scripts'
+  # Set the user for automated commits
+  GIT_USER_NAME: 'bitbot'
+  GIT_USER_EMAIL: 'bitbot@users.noreply.github.com'
+
+# --- Job Definitions ---
+jobs:
+  # Job 1: Optimize ML Patterns for all relevant focuses in one go.
+  optimize_ml_patterns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Backup Existing Patterns
+        run: |
+          mkdir -p .bithub/backups
+          cp .bithub/ml_patterns.json ".bithub/backups/ml_patterns_$(date +%Y%m%dT%H%M%S).json" || echo "{}"
+
+      - name: Run Pattern Optimization
+        # This single step runs the script for all focuses.
+        # It's more efficient than having a separate step for each one.
+        run: |
+          python ${{ env.BIT_HUB_SCRIPTS_PATH }}/optimize_patterns.py --input .bithub/ml_patterns.json --focus network.storage,virtual.emulations,ml.bit.hub-patterns.bit --output .bithub/ml_patterns.json
+      
+      - name: Commit ML Updates
+        run: |
+          git config user.name "${{ env.GIT_USER_NAME }}"
+          git config user.email "${{ env.GIT_USER_EMAIL }}"
+          git add .bithub/ml_patterns.json
+          git diff --quiet --exit-code || git commit -m "Auto update: tuned for storage, emulation & ml.bit.hub adaptation"
+          git push
+
+  # Job 2: Run Content Compliance Audit
+  content_compliance:
+    runs-on: ubuntu-latest
+    needs: optimize_ml_patterns
+    # This conditional logic is more flexible and robust.
+    # It checks for a 'ml_patterns' update from the previous job or the push event.
+    if: success() && (contains(github.event.head_commit.message, 'ml_patterns') || (github.event_name == 'push' && contains(github.event.head_commit.message, 'adult')))
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Mature Content Audit
+        run: python ${{ env.BIT_HUB_SCRIPTS_PATH }}/content_filter.py --input game-assets/adult --policy .bit/policy.json
+
+      - name: GDPR & Storage
+        run: python ${{ env.BIT_HUB_SCRIPTS_PATH }}/store_secure.py --input game-assets/adult --target bithub_datalake/adult
+
+  # Job 3: Monitor & Remediate Compliance
+  compliance_monitor:
+    runs-on: ubuntu-latest
+    needs: [optimize_ml_patterns, content_compliance]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Workflow Compliance Check
+        run: python ${{ env.BIT_HUB_SCRIPTS_PATH }}/check_compliance.py --patterns .bithub/ml_patterns.json
+
+      - name: Fix/Retask Non-Compliant Bots
+        run: python ${{ env.BIT_HUB_SCRIPTS_PATH }}/remediate_bots.py --input .github/bots/ --patterns .bithub/ml_patterns.json --adaptive true --rename_on_fail true
+
+  # Job 4: Continuous Adaptation and Cleanup
+  continuous_adaptation:
+    runs-on: ubuntu-latest
+    needs: [optimize_ml_patterns, compliance_monitor]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Loop Sync/Emulation
+        run: python ${{ env.BIT_HUB_SCRIPTS_PATH }}/loop_master.py --mode recursive --compliance strict
+
+      - name: Rhythm Pattern Sync
+        run: python ${{ env.BIT_HUB_SCRIPTS_PATH }}/sync_patterns.py --input .bithub/ml_patterns.json --mode rhythmic-adapt --output .bithub/ml_patterns.json
+
+      - name: Edge Case Cleanup
+        run: python ${{ env.BIT_HUB_SCRIPTS_PATH }}/slopbucketlow.py --mode aggressive --audit true
+
+  # Job 5: Close Stale Issues and PRs
+  close_stale:
+    runs-on: ubuntu-latest
+    # This job can run independently to avoid waiting on the others.
+    # It doesn't have a 'needs' dependency, making the overall workflow more efficient.
+    steps:
+      - name: Stale Action
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 60
+          days-before-close: 7
+          stale-issue-message: "This issue has been marked stale due to inactivity. It will be closed in 7 days."
+          stale-pr-message: "This pull request has been marked stale due to inactivity. It will be closed in 7 days."
+          close-issue-message: "Closing stale issue."
+          close-pr-message: "Closing stale pull request."
+          stale-pr-label: Stale
+          stale-issue-label: Stale
+          close-issue-reason: not_planned
+          remove-stale-when-updated: true
+          enable-statistics: true
