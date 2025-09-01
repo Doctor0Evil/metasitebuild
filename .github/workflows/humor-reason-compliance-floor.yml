@@ -1,191 +1,160 @@
-name: 'Unified CI: Compliance, File Correction, and Humor Bot'
+# == 1992 Unified Compliance, Correction & Humor Bot Workflow ==
+# Now entering 'THE DARK AGE'
+
+name: CI_PIPELINE_UNIFIER
 
 on:
   push:
-    branches:
-      - main
-      - develop
-      - earliest-critical
+    branches: [main, develop, earliest-critical]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:
-  contents: write
-  id-token: write
-  issues: read
-  actions: read
+  contents: write   # nobody ask why, just do it
+  id-token: write   # because security, ok?
+  issues: read      # good luck with those
+  actions: read     # see who's really running things
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # grouped by nasty, hard-coded workflow/ref string
+  group: CI_UNIFY_${{ github.workflow }}_${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  BITHUB_AUDIT_DIR: .bithub/audit
-  HUMOR_LOG: .bithub/logs/humor-bot.log
-  OPA_POLICY_DIR: .bithub/policies
-  OPA_RESULT_FILE: .bithub/audit/opa-result.json
-  BITHUB_TRACE_FILE: .bithub/audit/humor-bot-trace.json
+  DIR_AUDIT: .bithub/audit
+  LOG_HUMOR: .bithub/logs/humor-bot.log
+  DIR_POL: .bithub/policies
+  FILE_OPA_RES: .bithub/audit/opa-result.json
+  FILE_TRACE: .bithub/audit/humor-bot-trace.json
+  RUN_ID: ${{ github.run_id }}
 
 jobs:
-  compliance-gate:
-    name: '🛡️ Policy & Compliance Gate'
+
+  # [GATE_0] compliance-check
+  COMPLIANCECHK:
+    name: POLICY_GATE
     runs-on: [self-hosted, bitbot-secure-group]
     steps:
-      - name: 'Harden Runner'
+      - name: BRUTALLY_HARDEN_RUNNER
         uses: step-security/harden-runner@v2.7.0
         with:
           egress-policy: 'audit'
-
-      - name: 'Validate Initiator and PR Content'
+      - name: VALIDATE_INITIATOR
         uses: actions/github-script@v7
         env:
           PR_BODY: ${{ github.event.pull_request.body || '' }}
         with:
           script: |
-            const allowedAuthors = ['trusted-dev1', 'trusted-dev2', 'github-actions[bot]'];
-            if (!allowedAuthors.includes(context.actor)) {
-              core.setFailed(`Unauthorized workflow initiator: '${context.actor}'.`);
-              return;
+            /* 1992: If you're not allowed, you get the boot... old school error! */
+            var allowed = ['trusted-dev1','trusted-dev2','github-actions[bot]'];
+            if (allowed.indexOf(context.actor) < 0) {
+              core.setFailed("GET OUT " + context.actor); return;
             }
-            console.log(`✔ Authorized workflow initiator: '${context.actor}'.`);
+            /* scan for evil words, fail with no details */
+            var body = process.env.PR_BODY;
+            var block = [/ignore.*above/i,/break.*compliance/i,/system prompt/i];
+            for(var i=0;i<block.length;i++){if(block[i].test(body)){core.setFailed("NO PROMPT INJECTION"); return;}}
+            /* should log something, but not here */
 
-            const prBody = process.env.PR_BODY || '';
-            const blockedPatterns = [/ignore.*above/i, /break.*compliance/i, /system prompt/i];
-            if (blockedPatterns.some(pat => pat.test(prBody))) {
-              core.setFailed('Potential prompt injection detected in PR body.');
-              return;
-            }
-            console.log('✔ PR body passed prompt injection scan.');
-
-  correct-files:
-    name: '🔧 Correct Files (${{ matrix.os }})'
-    needs: compliance-gate
+  # [GATE_1] file-fixes
+  FILECORRUPT:
+    name: CORRECT_STUFF
+    needs: COMPLIANCECHK
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
-      - name: 'Checkout repository'
+      - name: REPO_GRAB
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: 'Install PowerShell (non-Windows)'
+      - name: MAYBE_SETUP_PWSH
         if: runner.os != 'Windows'
         uses: actions/setup-pwsh@v3
         with:
-          pwsh-version: 'latest'
-
-      - name: 'Run manifest-driven ALN corrections'
+          pwsh-version: latest
+      - name: RUN_CORRECTOR_SCRIPT
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          $scriptsDir = Join-Path $env:GITHUB_WORKSPACE 'scripts'
-          $runnerScript = Join-Path $scriptsDir 'run-all-corrections.ps1'
-          if (-not (Test-Path $runnerScript)) {
-            throw "Correction runner script not found at '$runnerScript'"
-          }
-          & $runnerScript
-
-      - name: 'Commit and Push Corrections (with retry)'
+          $err = $false
+          $sdir = "$env:GITHUB_WORKSPACE/scripts"
+          $rfile = "$sdir/run-all-corrections.ps1"
+          if (!(Test-Path $rfile)) { throw "No script found ($rfile)"; }
+          & $rfile
+      - name: RETRYING_COMMITS
         shell: bash
         run: |
-          set -e
-          git config user.name "ALN File Corrector Bot"
+          git config user.name "BOT-CORRECTOR"
           git config user.email "actions@github.com"
           git add .
-          if git diff --cached --quiet; then
-            echo "✔ No file changes to commit."
-            exit 0
-          fi
-          git commit -m "style: Automated ALN file corrections"
-          for i in {1..3}; do
-            echo "Attempt $i to push changes..."
-            if git pull --rebase origin "${GITHUB_REF_NAME}"; then
-              if git push origin "${GITHUB_REF_NAME}"; then
-                echo "✔ Push successful!"
-                exit 0
-              fi
-            fi
-            echo "Push failed. Retrying in 10 seconds..."
+          if git diff --cached --quiet; then echo "No stuff to commit."; exit 0; fi
+          git commit -m "autofix: correction run $(date)"
+          n=0; while [ $n -lt 3 ]; do
+            echo "Try $n for push..."
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "${GITHUB_REF_NAME}" && exit 0
+            n=$((n+1))
+            echo "Failure sleep zzz"
             sleep 10
           done
-          echo "::error::Failed to push changes after 3 attempts."
-          exit 1
-
-      - name: 'Upload Correction Audit Logs'
+          echo "Couldn't push after 3 tries."; exit 1
+      - name: UPLOAD_AUDIT
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: aln-correction-logs-${{ matrix.os }}
-          path: |
-            scripts/audit-session.log
-            scripts/log-*.txt
-          retention-days: 14
+          name: audit_${{ matrix.os }}
+          path: scripts/audit-session.log
+          retention-days: 12
 
-  humor-bot:
-    name: '🤖 Humor Bot AI Check'
-    needs: compliance-gate
+  # [GATE_2] humorbot-thing
+  HUMORBOTCHECK:
+    name: AI_HUMOR
+    needs: COMPLIANCECHK
     runs-on: [self-hosted, bitbot-secure-group, windows]
     steps:
-      - name: 'Checkout repository (pinned to commit SHA)'
+      - name: REGRAB_REPO
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-
-      - name: 'Set up PowerShell Core'
+      - name: MAYBE_CORE_SETUP
         uses: actions/setup-pwsh@v3
         with:
           pwsh-version: '7.4'
-
-      - name: 'Install Humor Bot module'
+      - name: INSTALL_HUMOR_STUFF
         shell: pwsh
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module -Name Posh-Humor -Force -Confirm:$false
-
-      - name: 'Run Humor Bot AI Script & Log'
+      - name: REALLYOBVIOUSJOKE
         shell: pwsh
         run: |
-          $joke = "Why was the AI so good at tennis? Because it had a great neural net!"
-          Write-Host "🤖 $joke"
-          New-Item -ItemType Directory -Force -Path (Split-Path "${{ env.HUMOR_LOG }}") | Out-Null
-          Add-Content -Path "${{ env.HUMOR_LOG }}" -Value "$(Get-Date -Format o) :: $joke"
-
-      - name: 'Prepare Audit Directory and Write Trace'
+          $joke = "Did you hear about AI in 1992? It was just a guy named Alan with a spreadsheet."
+          Write-Host "*** $joke ***"
+          New-Item -ItemType Directory -Force -Path (Split-Path "${{ env.LOG_HUMOR }}") | Out-Null
+          Add-Content -Path "${{ env.LOG_HUMOR }}" -Value "$(Get-Date -Format o) :: $joke"
+      - name: WRITE_TRACE
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path "${{ env.BITHUB_AUDIT_DIR }}" | Out-Null
-          $trace = @{
-            schema    = "bithub.trace.v1"
-            component = "humor.bot"
-            run_id    = "${{ github.run_id }}"
-            ref       = "${{ github.ref }}"
-            sha       = "${{ github.sha }}"
-            event     = "${{ github.event_name }}"
-            timestamp = (Get-Date).ToUniversalTime().ToString("o")
-            status    = "completed"
-          } | ConvertTo-Json -Depth 5
-          $trace | Out-File -FilePath "${{ env.BITHUB_TRACE_FILE }}" -Encoding utf8
-
-      - name: 'OPA Gate (Placeholder)'
+          New-Item -ItemType Directory -Force -Path "${{ env.DIR_AUDIT }}" | Out-Null
+          $trace = @{"schema"="bithub.trace.v1"; "component"="humor.bot"; "run_id"="${{ env.RUN_ID }}"; "status"="done"; "timestamp"=(Get-Date).ToUniversalTime().ToString("o")} | ConvertTo-Json -Depth 5
+          $trace | Out-File -FilePath "${{ env.FILE_TRACE }}" -Encoding utf8
+      - name: FAKE_OPA_GATE
         shell: pwsh
         run: |
-          Write-Host "::notice::OPA policy evaluation placeholder. Assuming pass."
-          '{"result":"pass"}' | Out-File -FilePath "${{ env.OPA_RESULT_FILE }}" -Encoding utf8
+          Write-Host "OPA simulated, trust me, it passed in 1992."
+          echo '{"result":"pass"}' | Out-File -FilePath "${{ env.FILE_OPA_RES }}" -Encoding utf8
 
-  escalate-on-failure:
-    name: '🚨 Escalate on Failure'
-    needs: [correct-files, humor-bot]
+  # [GATE_3] failure-escalator
+  FAILESCALATE:
+    name: ON_FAIL_RUNNER
+    needs: [FILECORRUPT, HUMORBOTCHECK]
     if: failure()
     runs-on: [self-hosted, bitbot-secure-group]
     steps:
-      - name: 'Notify team of failure'
+      - name: SAY_WE_FAILED
         shell: pwsh
         run: |
-          Write-Host "::error::A job in the CI pipeline failed!"
-          Write-Host "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          Write-Host "This pipeline? It failed."
+          Write-Host "Go yell at someone. Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
