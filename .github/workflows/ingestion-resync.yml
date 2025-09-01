@@ -1,0 +1,50 @@
+name: Bit.Hub Ingestion Resync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *" # Every day at 06:00 UTC
+
+jobs:
+  ingestion:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Check for and prepare the ingestion script
+      - name: Check for resync-ingestion.sh
+        run: |
+          if [[ ! -f ./resync-ingestion.sh ]]; then
+            echo "::error::❌ resync-ingestion.sh script not found in workspace."
+            exit 1
+          fi
+          chmod +x ./resync-ingestion.sh
+
+      # 3. OPTIONAL: Bootstrap ALN tools (uncomment if needed for ALN workflows)
+      # - name: Install ALN compliance tools
+      #   run: |
+      #     set -e
+      #     mkdir -p $HOME/.aln/bin
+      #     export PATH="$HOME/.aln/bin:$PATH"
+      #     curl -fsSL https://bit.hub/tools/install-aln.sh | bash
+      #     for tool in aln-analyze aln-patch aln-fixer-bot; do
+      #       if ! command -v "$tool" >/dev/null 2>&1; then
+      #         echo "::error::Missing required tool: $tool"
+      #         exit 1
+      #       fi
+      #     done
+
+      # 4. Run the ingestion resync
+      - name: Execute ingestion resync
+        run: ./resync-ingestion.sh
+
+      # 5. Upload artifacts for audit/review
+      - name: Upload ingestion artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingestion-ledger
+          path: |
+            registries/command-ledger.alnlog
+            data/ingestion/**
