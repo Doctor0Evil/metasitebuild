@@ -1,21 +1,17 @@
-name: ComplianceGuardian — ALN Compliance Wall
-
+!name: ComplianceGuardian — ALN Compliance Wall
 on:
   push:
     branches: [ main, develop, earliest-critical ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
-
 permissions:
   contents: read
   actions: read
-  id-token: write
-
+  id-token: write  # Enables tokenless federated auth via Compliance Authority Mesh (CAM)
 concurrency:
   group: "compliance-guardian-${{ github.ref }}"
   cancel-in-progress: false
-
 env:
   BITHUB_AUDIT_DIR: .bithub/audit
   BITHUB_LOG_DIR: .bithub/logs
@@ -25,14 +21,12 @@ env:
   BITHUB_VERDICT_FILE: .bithub/audit/compliance-verdict.json
   HUMOR_LOG: .bithub/logs/humor-bot.log
   COMPLIANCE_LEVEL: strict
-
 jobs:
   compliance-wall:
     name: ALN Gate + Humor/Personality Compliance
-    runs-on: windows-latest
+    runs-on: windows-latest  # Or specify a federated runner per Bit.Hub guidelines
     steps:
       - uses: actions/checkout@v4
-
       - name: ALN Compliance Orchestrator Init
         shell: pwsh
         run: |
@@ -46,7 +40,6 @@ jobs:
             Environment = "distributed"
           }
           $Context | ConvertTo-Json | Write-Host
-
       - name: Run ALN+Compliance Floor
         shell: pwsh
         env:
@@ -63,7 +56,6 @@ jobs:
             -OpaQuery "data.bithub.allow" `
             -FailMode "gate" `
             -AutoInstallOpa
-
       - name: ALN: Personality/Emotion Vector Indexing
         shell: pwsh
         run: |
@@ -71,7 +63,6 @@ jobs:
             -InputFile "${{ env.BITHUB_TRACE_FILE }}" `
             -OutputReport "${{ env.BITHUB_LOG_DIR }}/emotion-index.json" `
             -Model "Bit.Hub.CentralPersonalityMap"
-
       - name: Write Verdict
         shell: pwsh
         run: |
@@ -84,7 +75,6 @@ jobs:
             sha   = "${{ github.sha }}"
           }
           $verdict | ConvertTo-Json -Depth 5 | Out-File -FilePath "${{ env.BITHUB_VERDICT_FILE }}" -Encoding utf8
-
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
