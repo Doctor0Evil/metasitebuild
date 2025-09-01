@@ -1,0 +1,37 @@
+name: ComplianceGuardian — ALN Compliance Run
+on:
+  push:
+    branches: [ main, develop, earliest-critical ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: "compliance-guardian-${{ github.ref }}"
+  cancel-in-progress: false
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore dependencies
+        run: dotnet restore ./ComplianceGuardian.ALN.csproj
+      - name: Build ComplianceGuardian
+        run: dotnet build ./ComplianceGuardian.ALN.csproj --configuration Release --no-restore
+      - name: Run ComplianceGuardian
+        run: dotnet run --project ./ComplianceGuardian.ALN.csproj --configuration Release
+      - name: Upload Bit.Hub Audit Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: complianceguardian-audit
+          path: |
+            .bithub/audit
+            compliance.log
+          retention-days: 14
