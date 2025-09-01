@@ -175,3 +175,33 @@ jobs:
 
       - name: Validate asset-economy configuration
         shell
+
+- name: Scan for disallowed terms (robust)
+  id: scan_disallowed
+  run: |
+    mkdir -p "$REPORTS_DIR" "$QUARANTINE_DIR"
+
+    # Use a loop to be more resilient to errors
+    OFFENDING_FILES_LIST=""
+    HITS_FOUND=false
+    while IFS= read -r line; do
+      FILE_PATH=$(echo "$line" | cut -d: -f1)
+      LINE_NUM=$(echo "$line" | cut -d: -f2)
+
+      # Log the hit to the summary file
+      echo "${FILE_PATH}:${LINE_NUM}:<masked_line>" >> "$REPORTS_DIR/disallowed_summary.txt"
+      
+      # Add file to the list of offending files
+      OFFENDING_FILES_LIST+="$FILE_PATH"$'\n'
+
+      HITS_FOUND=true
+    done < <(grep -R -n -I -i -f "$DISALLOWED_FILE" . || true)
+    
+    # Save a unique list of offending files
+    echo "$OFFENDING_FILES_LIST" | sort -u > "$REPORTS_DIR/offending_files.txt"
+
+    if [ "$HITS_FOUND" = true ]; then
+      echo "found=true" >> "$GITHUB_OUTPUT"
+    else
+      echo "found=false" >> "$GITHUB_OUTPUT"
+    fi
