@@ -1,0 +1,27 @@
+<manifest ...>
+    <!-- Legacy (API <= 30) BLE permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
+
+    <!-- Android 12+ (API 31+) runtime BLE permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+
+    <!-- Voice commands -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Optional: if you move BLE to a Foreground Service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" tools:targetApi="u" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application ...>
+        <!-- Your activity declaration -->
+        <activity
+            android:name=".mastersecurity.SecureBLEMasterSystem"
+            android:exported="true"
+            android:launchMode="singleTop" />
+    </application>
+</manifest>
