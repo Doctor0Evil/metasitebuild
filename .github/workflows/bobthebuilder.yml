@@ -1,0 +1,100 @@
+name: Bit.Hub Compliance Wall – Bob the Builder
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  bitcomply:
+    runs-on: ubuntu-latest
+    steps:
+      # --------------------------
+      # 0. Checkout repo
+      # --------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --------------------------
+      # 1. Bootstrap ALN toolchain
+      # --------------------------
+      - name: Install ALN compliance tools
+        run: |
+          set -e
+          mkdir -p $HOME/.aln/bin
+          export PATH="$HOME/.aln/bin:$PATH"
+          curl -sSL https://bit.hub/tools/install-aln.sh | bash
+          for tool in aln-analyze aln-patch aln-fixer-bot; do
+            if ! command -v "$tool" >/dev/null 2>&1; then
+              echo "::error::Missing required tool: $tool"
+              exit 1
+            fi
+          done
+
+      # --------------------------
+      # 2. Verify manifest signature
+      # --------------------------
+      - name: Verify master manifest signature
+        run: |
+          set -e
+          MANIFEST="manifests/master-enforcement.aln"
+          PUBKEY=".keys/ed25519.public"
+          if ! verify-ed25519 "$MANIFEST" "$PUBKEY"; then
+            echo "::error::Manifest signature invalid"
+            exit 1
+          fi
+
+      # --------------------------
+      # 3. Run compliance analysis
+      # --------------------------
+      - name: Run ALN compliance analysis
+        run: |
+          set -e
+          aln-analyze --manifest manifests/master-enforcement.aln \
+                      --output /tmp/failure.lst || true
+          if [ ! -s /tmp/failure.lst ]; then
+            echo "No violations found."
+          else
+            echo "::warning::Violations detected:"
+            cat /tmp/failure.lst
+          fi
+
+      # --------------------------
+      # 4. Apply patch if violations
+      # --------------------------
+      - name: Apply compliance patch
+        if: success() && hashFiles('/tmp/failure.lst') != ''
+        run: |
+          set -e
+          aln-patch /tmp/failure.lst || true
+
+      # --------------------------
+      # 5. Self-heal via fixer bot
+      # --------------------------
+      - name: Run fixer bot
+        if: success() && hashFiles('/tmp/failure.lst') != ''
+        run: |
+          set -e
+          aln-fixer-bot --context "compliance" || true
+
+      # --------------------------
+      # 6. Append audit to ledger
+      # --------------------------
+      - name: Append manifest hash to ledger
+        run: |
+          set -e
+          HASH=$(sha256sum manifests/master-enforcement.aln | awk '{print $1}')
+          LEDGER="registries/command-ledger.alnlog"
+          echo "{\"ts\":\"$(date -u +%FT%TZ)\",\"bot\":\"${GITHUB_ACTOR}\",\"repo\":\"${GITHUB_REPOSITORY}\",\"payload\":\"$HASH\"}" >> "$LEDGER"
+
+      # --------------------------
+      # 7. Upload artifacts for review
+      # --------------------------
+      - name: Upload compliance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-artifacts
+          path: |
+            /tmp/failure.lst
+            registries/command-ledger.alnlog
