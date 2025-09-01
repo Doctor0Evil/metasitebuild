@@ -71,38 +71,48 @@ jobs:
     steps:
       - name: Install GitHub CLI
         run: |
-          sudo apt-get update -y && sudo apt-get install -y gh
+          sudo apt-get update -y
+          sudo apt-get install -y gh jq
           gh --version
 
-      - name: Dispatch & track
+      - name: Dispatch and Track
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           THRESHOLD: ${{ needs.bootstrap_and_reason.outputs.threshold }}
         run: |
           mkdir -p "${REPORT_DIR}"
           declare -A wf_ids
+
           trigger() {
             local wf="$1"; shift
             echo "::notice::Dispatching $wf"
+            local id
             id=$(gh workflow run "$wf" "$@" --json run_id --jq .run_id || echo "")
             if [ -n "$id" ]; then wf_ids["$wf"]=$id; fi
           }
 
-          [[ "${{ needs.bootstrap_and_reason.outputs.run_pipeline }}" == "true" ]] && trigger "Bit.Hub Pipeline Supremacy (CI)" -f power_threshold=$THRESHOLD
-          [[ "${{ needs.bootstrap_and_reason.outputs.run_policy_gate }}" == "true" ]] && trigger "Bit.Hub Policy + Scorecard Gate" -f power_threshold=$THRESHOLD
-          [[ "${{ needs.bootstrap_and_reason.outputs.run_meta_corrector }}" == "true" ]] && trigger "Bit.Hub Meta Corrector v3 (Supremacy Alignment)" -f auto_fix=true -f power_threshold=$THRESHOLD -f target_ref=${GITHUB_REF_NAME}
-          [[ "${{ needs.bootstrap_and_reason.outputs.run_container_wall }}" == "true" ]] && trigger "Bit.Hub Container Compliance Wall and Publish — Full Compliance" -f image_name=${GITHUB_REPOSITORY#*/} -f image_tag=latest -f power_threshold=$THRESHOLD
-          [[ "${{ needs.bootstrap_and_reason.outputs.run_release_lmfao }}" == "true" ]] && trigger "Release LMFAO Drop"
+          [[ "${{ needs.bootstrap_and_reason.outputs.run_pipeline }}" == "true" ]] && \
+            trigger "Bit.Hub Pipeline Supremacy (CI)" -f power_threshold="$THRESHOLD"
+
+          [[ "${{ needs.bootstrap_and_reason.outputs.run_policy_gate }}" == "true" ]] && \
+            trigger "Bit.Hub Policy + Scorecard Gate" -f power_threshold="$THRESHOLD"
+
+          [[ "${{ needs.bootstrap_and_reason.outputs.run_meta_corrector }}" == "true" ]] && \
+            trigger "Bit.Hub Meta Corrector v3 (Supremacy Alignment)" -f auto_fix=true -f power_threshold="$THRESHOLD" -f target_ref="${GITHUB_REF_NAME}"
+
+          [[ "${{ needs.bootstrap_and_reason.outputs.run_container_wall }}" == "true" ]] && \
+            trigger "Bit.Hub Container Compliance Wall and Publish Full Compliance" -f imagename="${GITHUB_REPOSITORY}" -f imagetag=latest -f power_threshold="$THRESHOLD"
+
+          [[ "${{ needs.bootstrap_and_reason.outputs.run_release_lmfao }}" == "true" ]] && \
+            trigger "Release LMFAO Drop"
 
           echo "::notice::Waiting for downstream workflows..."
           for wf in "${!wf_ids[@]}"; do
             rid=${wf_ids[$wf]}
-            echo "Polling $wf (run_id=$rid)"
             for i in {1..60}; do
-              status=$(gh run view "$rid" --json status --jq .status || echo "unknown")
-              conclusion=$(gh run view "$rid" --json conclusion --jq .conclusion || echo "")
+              status=$(gh run view "$rid" --json status --jq '.status')
+              conclusion=$(gh run view "$rid" --json conclusion --jq '.conclusion')
               if [[ "$status" == "completed" ]]; then
-                echo "$wf: $conclusion"
                 echo "{\"workflow\":\"$wf\",\"run_id\":\"$rid\",\"conclusion\":\"$conclusion\"}" >> "${REPORT_DIR}/downstream_status.jsonl"
                 break
               fi
@@ -132,7 +142,7 @@ jobs:
             "repo": "${GITHUB_REPOSITORY}",
             "run_id": "${GITHUB_RUN_ID}",
             "threshold": "${{ needs.bootstrap_and_reason.outputs.threshold }}",
-            "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
             "verdict_file": "${REPORT_DIR}/master_orchestrator_verdict.json"
           }
           JSON
@@ -140,24 +150,3 @@ jobs:
 
       - name: Always succeed
         run: echo "Master orchestrator completed (never fails in standard mode)."
-
-            - name: Setup .NET Core SDK
-  uses: actions/setup-dotnet@v3.4.2
-  with:
-    # Optional SDK version(s) to use. If not provided, will install global.json version when available. Examples: 2.2.104, 3.1, 3.1.x, 3.x, 6.0.2xx
-    dotnet-version: # optional
-    # Optional quality of the build. The possible values are: daily, signed, validated, preview, ga.
-    dotnet-quality: # optional
-    # Optional global.json location, if your global.json isn't located in the root of the repo.
-    global-json-file: # optional
-    # Optional package source for which to set up authentication. Will consult any existing NuGet.config in the root of the repo and provide a temporary NuGet.config using the NUGET_AUTH_TOKEN environment variable as a ClearTextPassword
-    source-url: # optional
-    # Optional OWNER for using packages from GitHub Package Registry organizations/users other than the current repository's owner. Only used if a GPR URL is also provided in source-url
-    owner: # optional
-    # Optional NuGet.config location, if your NuGet.config isn't located in the root of the repo.
-    config-file: # optional
-    # Optional input to enable caching of the NuGet global-packages folder
-    cache: # optional
-    # Used to specify the path to a dependency file: packages.lock.json. Supports wildcards or a list of file names for caching multiple dependencies.
-    cache-dependency-path: # optional
-          
