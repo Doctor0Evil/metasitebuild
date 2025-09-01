@@ -5,7 +5,8 @@ source:
   maintainer: XboxTeeJay
   note: >
     Registry for Bit.Hub/ALN core workflows, CI artefacts, and audits.
-    Each entry is indexed for BitShell, BitHub, interpreter-compat, and signature.
+    Each entry is indexed for BitShell, BitHub, interpreter compatibility, and signature.
+
 entries:
   # --- Workflows ---
   - pkg: workflows
@@ -25,6 +26,15 @@ entries:
     depends_on: [compliance-guardian]
     description: >
       Multi-surface embedded build: Rust (aarch64, x86_64), Node, Python. Generates SBOM, pushes result to IPFS. Reads verdict and records audit.
+
+  - pkg: workflows
+    kind: github-actions
+    symbol: deploy-gate
+    path: .github/workflows/03-deploy-gate.yml
+    status: ok
+    depends_on: [compliance-guardian]
+    description: >
+      Deployment gate workflow, requires compliance verdict before permitting deployment actions.
 
   # --- Build Artefacts ---
   - pkg: artefacts
@@ -57,12 +67,13 @@ entries:
     description: >
       JSON record of IPFS CID and SBOM metadata for decentralized audit.
 
-- pkg: agents
-  kind: aln-agent
-  symbol: comet-bithub-agent
-  path: .bithub/agents/comet-bithub-agent.aln
-  status: ok
-  policies: [opa, audit-trace]
-  description: >
-    Browser-integrated Comet agent that monitors tabs, extracts/summarizes
-    content, routes data to Bit.Hub APIs, and enforces compliance.
+  # --- Agents ---
+  - pkg: agents
+    kind: aln-agent
+    symbol: comet-bithub-agent
+    path: .bithub/agents/comet-bithub-agent.aln
+    status: ok
+    policies: [opa, audit-trace]
+    description: >
+      Browser-integrated Comet agent that monitors tabs, extracts/summarizes
+      content, routes data to Bit.Hub APIs, and enforces compliance.
