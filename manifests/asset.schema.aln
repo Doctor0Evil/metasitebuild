@@ -1,0 +1,9 @@
+schema.spec "1.0"
+type asset_entry {
+  path : string
+  hash : string
+  class : enum["dev_asset","literature","misc"]
+  size : int
+}
+type asset_index = list[asset_entry]
+root asset_index
