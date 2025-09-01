@@ -1,0 +1,13 @@
+[Unit]
+Description=Bit.Hub Compliance Wall Watchdog
+After=egress-proxy.service
+
+[Service]
+WorkingDirectory=/opt/bit.hub
+ExecStart=/usr/bin/sbcl --script services/wall/watchdog.lisp
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
