@@ -1,0 +1,20 @@
+name: Bit.Hub Repo Listener
+
+on:
+  repository_dispatch:
+    types: [bithub-crossrepo-job]
+
+jobs:
+  run-stack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Exec requested stack
+        run: |
+          set -e
+          STACK="${{ github.event.client_payload.stack }}"
+          REPO="${{ github.event.client_payload.repo }}"
+          echo "Running stack $STACK for $REPO"
+          runtimes/lisp --script workflows/master-crossrepo.lisp
