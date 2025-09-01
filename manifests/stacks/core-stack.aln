@@ -1,0 +1,17 @@
+stack: core
+pipeline:
+  steps:
+    - name: build
+      kind: :build
+    - name: test
+      kind: :test
+    - name: scan-ledger
+      kind: :scan
+    - name: publish-internal
+      kind: :publish
+constraints:
+  runs_on:
+    - bit.hub
+    - self-hosted
+  timeout_minutes: 30
+  requires_manifest: manifests/master-enforcement.aln
