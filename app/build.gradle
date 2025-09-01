@@ -1,0 +1,13 @@
+android {
+  defaultConfig {
+    // Public address only; never embed private keys
+    buildConfigField "String", "ADMIN_ETH_WALLET", "\"0x519fC0eB4111323Cac44b70e1aE31c30e405802D\""
+  }
+}
+
+dependencies {
+  implementation "androidx.appcompat:appcompat:1.7.0"
+  implementation "androidx.activity:activity:1.9.2"
+  implementation "androidx.core:core-ktx:1.13.1"
+  // plus your realityos.* libraries
+}
