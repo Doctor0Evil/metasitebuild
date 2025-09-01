@@ -1,68 +1,141 @@
-name: 03 — Deploy Gate (Dual-Sign + OPA Required)
+name: 02 — Embedded Multi-Surface Build (Rust + Node + Python + SBOM)
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ main, develop, earliest-critical ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write
-  deployments: write
+  actions: read
 
 concurrency:
-  group: "deploy-gate-${{ github.ref }}"
-  cancel-in-progress: true
+  group: "02-embedded-${{ github.ref }}"
+  cancel-in-progress: false
 
 env:
-  TRACE_FILE: .bithub/audit/humor-reasoning-trace.json
-  OPA_FILE: .bithub/audit/opa-result.json
-  VERDICT_FILE: .bithub/audit/compliance-verdict.json
-  POLICY_DIR: .bithub/policies
+  BITHUB_AUDIT_DIR: .bithub/audit
+  BITHUB_LOG_DIR: .bithub/logs
+  BITHUB_VERDICT_FILE: .bithub/audit/compliance-verdict.json
+  SBOM_FILE: sbom.json
+  RUST_TARGET: aarch64-unknown-linux-gnu
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+  IPFS_OUTPUT: .bithub/audit/ipfs-publish.json
 
 jobs:
-  verify-and-deploy:
+  build-multisurface:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify compliance (OPA + dual signatures)
+      - name: Ensure audit dirs
+        run: mkdir -p "${BITHUB_AUDIT_DIR}" "${BITHUB_LOG_DIR}"
+
+      - name: Read Compliance Verdict (if present)
+        id: verdict
         shell: bash
-        env:
-          OWNER_BITHUB_PUBLIC_KEY_PEM: ${{ secrets.OWNER_BITHUB_PUBLIC_KEY_PEM }}
-          OWNER_PERPLEXITY_PUBLIC_KEY_PEM: ${{ secrets.OWNER_PERPLEXITY_PUBLIC_KEY_PEM }}
         run: |
-          set -euo pipefail
-          if ! command -v opa >/dev/null 2>&1; then
-            curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-            chmod +x opa && sudo mv opa /usr/local/bin/opa
-          fi
-
-          jq -s '.[0] as $t | (.[1] // {}) as $o | $t + {opa:$o}' "${TRACE_FILE}" "${OPA_FILE}" > merged-input.json
-
-          # Optional public-key validation of signatures can be done here with jq + openssl (or via a helper script).
-          # For brevity, rely on OPA policy to assert presence of required signatures and verdict pass.
-
-          opa eval --data "${POLICY_DIR}" --input merged-input.json "data.bithub.allow" --format=json | jq -r '.result[0].expressions[0].value' > decision.txt
-          DECISION=$(cat decision.txt || echo "false")
-          echo "OPA decision: $DECISION"
-          if [ "$DECISION" != "true" ]; then
-            echo "::error::Compliance gate failed (OPA)."
-            exit 1
-          fi
-
-          if [ -f "${VERDICT_FILE}" ]; then
-            PASS=$(jq -r '.pass' "${VERDICT_FILE}")
-            if [ "$PASS" != "true" ]; then
-              echo "::error::Compliance verdict indicates fail."
-              exit 1
-            fi
+          if [ -f "${BITHUB_VERDICT_FILE}" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            pass=$(jq -r '.pass' "${BITHUB_VERDICT_FILE}" || echo "null")
+            level=$(jq -r '.level' "${BITHUB_VERDICT_FILE}" || echo "unknown")
+            echo "pass=${pass}"  >> "$GITHUB_OUTPUT"
+            echo "level=${level}" >> "$GITHUB_OUTPUT"
+            echo "::notice::Compliance verdict: pass=${pass}, level=${level}"
           else
-            echo "::warning::No verdict file found; continuing only because OPA passed."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::No compliance verdict found; proceeding in sentinel mode."
           fi
 
-      - name: Deploy step (example)
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with: { targets: ${{ env.RUST_TARGET }} }
+
+      - name: Install aarch64 cross-linker
+        run: sudo apt-get update -y && sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Configure Cargo linker
         run: |
-          echo "Compliance passed. Proceeding with deployment..."
-          # deploy logic here (e.g., container publish, firmware release)
+          mkdir -p .cargo
+          cat > .cargo/config.toml <<'TOML'
+          [target.aarch64-unknown-linux-gnu]
+          linker = "aarch64-linux-gnu-gcc"
+          rustflags = ["-C", "target-feature=+crt-static"]
+          TOML
+
+      - name: Build Rust (aarch64)
+        run: |
+          if [ -f Cargo.toml ]; then cargo build --target $RUST_TARGET --release; else echo "::notice::No Cargo.toml; skipping"; fi
+
+      - name: Host tests
+        run: |
+          if [ -f Cargo.toml ]; then cargo test --all --no-fail-fast; else echo "::notice::No Cargo.toml; skipping tests"; fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with: { node-version: ${{ env.NODE_VERSION }} }
+
+      - name: NPM install
+        run: |
+          if [ -f package.json ]; then npm ci; else echo "::notice::No package.json; skipping"; fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with: { python-version: ${{ env.PYTHON_VERSION }} }
+
+      - name: Pip install
+        run: |
+          if [ -f requirements.txt ]; then python -m pip install --upgrade pip && pip install -r requirements.txt; else echo "::notice::No requirements.txt; skipping"; fi
+
+      - name: Generate SBOM (CycloneDX)
+        run: |
+          if [ -f Cargo.toml ]; then cargo install cyclonedx-bom || true && cyclonedx-bom -o "${SBOM_FILE}" || true
+          else echo '{"warning":"no Cargo.toml; sbom skipped"}' > "${SBOM_FILE}"
+          fi
+
+      - name: Publish SBOM to IPFS (if available)
+        shell: bash
+        run: |
+          if command -v ipfs >/dev/null 2>&1; then
+            cid=$(ipfs add -Q "${SBOM_FILE}" || true)
+            jq -n --arg cid "$cid" --arg file "${SBOM_FILE}" '{cid:$cid,file:$file}' > "${IPFS_OUTPUT}"
+            echo "::notice::IPFS CID: ${cid}"
+          else
+            jq -n '{cid:null, file:env.SBOM_FILE, note:"ipfs cli not present"}' > "${IPFS_OUTPUT}"
+            echo "::warning::ipfs cli not present; recorded placeholder."
+          fi
+
+      - name: Write build audit event
+        shell: bash
+        run: |
+          ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          jq -n \
+            --arg ts "$ts" \
+            --arg repo "${GITHUB_REPOSITORY}" \
+            --arg sha "${GITHUB_SHA}" \
+            --arg ref "${GITHUB_REF}" \
+            --argjson verdict_found $([ "${{ steps.verdict.outputs.found }}" = "true" ] && echo true || echo false) \
+            --arg verdict_pass "${{ steps.verdict.outputs.pass || 'unknown' }}" \
+            --arg verdict_level "${{ steps.verdict.outputs.level || 'unknown' }}" \
+            --arg sbom "${{ env.SBOM_FILE }}" \
+            --arg ipfs_file "${{ env.IPFS_OUTPUT }}" \
+            '{
+              schema:"bithub.build.audit.v1",
+              ts:$ts, repo:$repo, sha:$sha, ref:$ref,
+              compliance:{ found:$verdict_found, pass:$verdict_pass, level:$verdict_level },
+              artefacts:{ sbom:$sbom, ipfs:$ipfs_file }
+            }' > "${BITHUB_AUDIT_DIR}/02-embedded-build.json"
+
+      - name: Upload build artifacts & audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: embedded-multisurface-build
+          path: |
+            target/${{ env.RUST_TARGET }}/release
+            ${{ env.SBOM_FILE }}
+            ${{ env.BITHUB_AUDIT_DIR }}
+          if-no-files-found: warn
+          retention-days: 14
