@@ -1,0 +1,17 @@
+# CoreDNS config to resolve so.bit inside the federation
+so.bit:53 {
+  hosts {
+    10.10.0.10 so.bit
+    fallthrough
+  }
+  log
+  errors
+  cache 60
+}
+
+.:53 {
+  forward . 1.1.1.1 1.0.0.1
+  cache 120
+  log
+  errors
+}
