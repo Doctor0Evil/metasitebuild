@@ -1,0 +1,15 @@
+aln: v1
+kind: security.owners
+source:
+  note: Dual control for Bit.Hub + Perplexity
+owners:
+  - id: owner:bithub
+    role: primary
+    pubkey_ref: env:OWNER_BITHUB_PUBLIC_KEY_PEM
+  - id: owner:perplexity
+    role: co-owner
+    pubkey_ref: env:OWNER_PERPLEXITY_PUBLIC_KEY_PEM
+requirements:
+  required_signatures:
+    - owner:bithub
+    - owner:perplexity
