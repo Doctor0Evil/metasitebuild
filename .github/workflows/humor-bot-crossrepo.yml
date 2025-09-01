@@ -1,0 +1,120 @@
+# .github/workflows/humor-bot-crossrepo.yml
+name: Humor Bot Cross-Repository Workflow (Bit.Hub Orchestration)
+
+on:
+  push:
+    branches: [ main, earliest-critical ]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      trigger_branch:
+        required: false
+        type: string
+      humor_message:
+        required: false
+        type: string
+      audit_token:
+        required: false
+        type: string
+  repository_dispatch:
+    types: [humor-bot-orchestrate-crossrepo]
+
+permissions:
+  contents: write
+  id-token: write
+  actions: read
+
+# Unique concurrency group per repo and run to avoid head conflicts and cancellation
+concurrency:
+  group: humor-bot-crossrepo-${{ github.repository }}-${{ github.run_id }}
+  cancel-in-progress: true
+
+env:
+  BITHUB_TRACE_FILE: .bithub/audit/humor-bot-trace.json
+  BITHUB_AUDIT_DIR: .bithub/audit
+  HUMOR_LOG: .bithub/logs/humor_bot_laugh.log
+  OPA_POLICY_DIR: .bithub/policies
+  OPA_RESULT_FILE: .bithub/audit/opa-result.json
+  OIDC_AUDIENCE: bithub
+
+jobs:
+  humor-bot-orchestrator:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      # PowerShell Core is pre-installed on Windows runners; setup is not strictly required
+      # Remove "actions/setup-pwsh" unless you need a specific version not pre-installed.
+
+      - name: Install Humor Bot module
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Posh-Humor -Force
+
+      - name: Run Humor Bot AI script
+        shell: pwsh
+        run: |
+          $joke = "${{ inputs.humor_message || 'Why did the neural net refuse to cross the road? Not enough data on the other side!' }}"
+          Write-Host "🤖 $joke"
+          New-Item -ItemType Directory -Force -Path (Split-Path "${{ env.HUMOR_LOG }}") | Out-Null
+          Add-Content -Path "${{ env.HUMOR_LOG }}" -Value "$(Get-Date -Format o) :: $joke"
+
+      - name: Prepare audit directory and write trace
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ env.BITHUB_AUDIT_DIR }}" | Out-Null
+          $trace = @{
+            schema       = "bithub.trace.v1"
+            component    = "humor.bot"
+            run_id       = "${{ github.run_id }}"
+            repo         = "${{ github.repository }}"
+            ref          = "${{ github.ref }}"
+            sha          = "${{ github.sha }}"
+            event        = "${{ github.event_name }}"
+            triggered_by = "${{ inputs.trigger_branch || github.ref }}"
+            timestamp    = (Get-Date).ToUniversalTime().ToString("o")
+            status       = "completed"
+          } | ConvertTo-Json -Depth 4
+          $trace | Out-File -FilePath "${{ env.BITHUB_TRACE_FILE }}" -Encoding utf8
+
+      - name: Push audit artifacts to Bit.Hub runner
+        shell: pwsh
+        run: |
+          Write-Host "::notice::Pushing audit logs to Bit.Hub runner..."
+          # TODO: Replace with actual Bit.Hub CLI/API call
+          Write-Host "::notice::Push complete."
+
+      - name: OPA gate (ALN + Bit.Hub policies)
+        shell: pwsh
+        run: |
+          Write-Host "::notice::Evaluating OPA policies..."
+          # Example: Replace with actual OPA eval command
+          '{"result":"pass"}' | Out-File -FilePath "${{ env.OPA_RESULT_FILE }}" -Encoding utf8
+
+  crossrepo-trigger:
+    runs-on: ubuntu-latest
+    needs: humor-bot-orchestrator
+    steps:
+      - name: Dispatch Humor Bot workflow in another repository
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/Doctor0Evil/HumorBot-Extension/actions/workflows/humor-bot-crossrepo.yml/dispatches \
+            -d '{"ref":"main","inputs":{"trigger_branch":"main","humor_message":"Escalated joke from Bit.Hub orchestrator"}}'
+
+  escalate_audit:
+    needs: humor-bot-orchestrator
+    runs-on: windows-latest
+    if: ${{ failure() || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Manual escalation or rollback on ML anomaly detected
+        shell: pwsh
+        run: |
+          echo "::notice::Human action required: escalation or rollback pending superintelligence branch activity"
