@@ -1,0 +1,187 @@
+# bit.hub.manifest.yml
+apiVersion: bit.hub/v1
+kind: Federation
+metadata:
+  federationId: "82jfw4.bit"
+  displayName: "Bit.Hub Hybrid-Autonomy Mesh"
+  owners:
+    - "governance@bithub"
+spec:
+  governance:
+    policyBundles:
+      - "policies/compliance-wall.yaml"          # Zero trust, signing, SLSA/SBOM
+      - "policies/privacy-dp.yaml"               # DP budgets, clipping bounds
+      - "policies/ic3-reporting.yaml"            # IC3 schema, triggers, approvals
+      - "policies/personality-tokens.yaml"       # Personality vectors + usage limits
+    legalFrameworks:
+      - "legal/living/security.md"
+      - "legal/living/personality-rights.md"
+      - "legal/living/data-retention.md"
+
+  registries:
+    bots: "mesh://registry.bithub/bots"
+    models: "mesh://registry.bithub/models"
+    artifacts: "mesh://registry.bithub/artifacts"
+    dualPublish:
+      - "mesh://registry.bithub"
+      - "mesh://registry.fallback"
+
+  identities:
+    oidc:
+      provider: "https://auth.bithub"
+      audience: "bit.hub"
+      spiffe: true
+
+  clusters:
+    - name: "core-usw1"
+      attestation: "tpm|sgx|sev"
+    - name: "edge-phx"
+      attestation: "tpm"
+    - name: "vm-lab"
+      attestation: "software"
+
+  workflows:
+    - name: "oauth-callback-handler"
+      triggers:
+        - http:
+            path: "/callback"
+            bind: "127.0.0.1:59764"
+      steps:
+        - name: "validate-state-nonce"
+          action: "auth/verify"
+          with:
+            checkNonce: true
+            checkState: true
+        - name: "exchange-code"
+          action: "auth/token"
+          with:
+            tokenEndpoint: "https://auth.service/token"
+            storeSecret: "sealed://secrets/${run.id}"
+        - name: "audit-event"
+          action: "audit/log"
+          with:
+            type: "auth.success"
+            fields: ["kid","alg","exp"]
+        - name: "celebrate"
+          action: "bots/celebrate"
+          with:
+            theme: "keys-secured"
+      rescue:
+        - name: "rescue-auth"
+          action: "repair/rotate-client"
+          alwaysSucceed: true
+
+    - name: "incident-intake"
+      triggers:
+        - events: ["security.alert","user.report"]
+      steps:
+        - name: "normalize"
+          action: "incidents/ingest"
+          with:
+            schema: "schemas/incident.v2.json"
+        - name: "classify"
+          action: "incidents/classify"
+          with:
+            rubric: "policies/ic3-reporting.yaml"
+        - name: "evidence-freeze"
+          action: "evidence/freeze"
+          with:
+            store: "mesh://registry.bithub/artifacts"
+            integrity: "sha256+timestamper"
+        - name: "gate-ic3"
+          action: "governance/approve"
+          with:
+            approvers: 2
+            condition: "labels.ic3_triggered == true"
+        - name: "export-ic3"
+          if: "labels.ic3_triggered == true && approvals == 2"
+          action: "compliance/export"
+          with:
+            format: ["html","pdf","json-index"]
+            include: ["timeline","parties","loss","artifacts","chainOfCustody"]
+        - name: "submit-manual"
+          action: "compliance/manual-submit"
+          with:
+            portal: "https://www.ic3.gov/Home/FileComplaint"
+        - name: "log-case"
+          action: "audit/log"
+          with:
+            type: "ic3.submission"
+            fields: ["caseNumber","submittedAt"]
+      rescue:
+        - name: "rescue-pack"
+          action: "compliance/rescue-package"
+          with:
+            retryAfter: "4h"
+          alwaysSucceed: true
+
+    - name: "federated-train"
+      schedule: "cron: '*/20 * * * *'"
+      steps:
+        - name: "select-clients"
+          action: "fl/sample"
+          with:
+            clusters: ["edge-phx","vm-lab"]
+            attestedOnly: true
+            sampleSize: 64
+        - name: "distribute-task"
+          action: "fl/push-task"
+          with:
+            model: "models/personality-bot-v7"
+            dp:
+              epsilon: 4.0
+              maxGradNorm: 1.0
+            teeRequired: true
+        - name: "secure-aggregate"
+          action: "fl/aggregate"
+          with:
+            method: ["median","krum","trimmed-mean"]
+            consensus: "2of3"
+            anomalyThreshold: 2.5
+        - name: "backdoor-scan"
+          action: "security/backdoor-check"
+          with:
+            triggerSet: "tests/triggers-v2"
+            maxShift: 0.5
+        - name: "promote-candidate"
+          if: "checks.ok && consensus.ok"
+          action: "models/promote"
+          with:
+            target: "registry/models/personality-bot-v8"
+            sign: true
+        - name: "celebrate"
+          action: "bots/celebrate"
+          with:
+            theme: "learning-evolved"
+      rescue:
+        - name: "rollback-model"
+          action: "models/rollback"
+          with:
+            target: "registry/models/personality-bot-v7"
+          alwaysSucceed: true
+
+    - name: "drift-guardian"
+      schedule: "cron: '*/10 * * * *'"
+      steps:
+        - name: "scan-policies"
+          action: "governance/diff"
+          with:
+            sources: ["git://policies","mesh://policies"]
+        - name: "auto-repair"
+          action: "repair/apply"
+          with:
+            allowed: ["policy","config","labels"]
+        - name: "rename-cycle"
+          action: "continuity/rename"
+          with:
+            strategy: "blue-green"
+        - name: "audit"
+          action: "audit/log"
+          with:
+            type: "drift.healed"
+      rescue:
+        - name: "freeze-and-notify"
+          action: "governance/freeze"
+          with:
+            scope: "affected-namespaces"
+          alwaysSucceed: true
