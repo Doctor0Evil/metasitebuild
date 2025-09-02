@@ -1,3 +1,7 @@
+needs: opa-policy-check
+if: needs.opa-policy-check.outputs.policy_passed == 'true'
+
+
 aln:
   id: "aln://bithub/compliance"
   version: "1.0.0"
