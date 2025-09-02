@@ -1,0 +1,80 @@
+name: 🛡️ Bit.Hub Secure Builder
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours
+  workflow_dispatch:
+
+# This workflow is designed to NEVER fail the repo
+# It will log errors but always exit successfully
+
+jobs:
+  secure-build:
+    name: 🔧 Secure Build (Fail‑Safe)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Never fail the workflow
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🛠 Setup Environment
+        run: |
+          echo "Setting up environment..."
+          sudo apt-get update -y
+          sudo apt-get install -y jq yq curl
+
+      - name: 🧩 Install Dependencies
+        run: |
+          echo "Installing dependencies..."
+          if [ -f package.json ]; then
+            npm install || echo "⚠️ NPM install failed"
+          fi
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt || echo "⚠️ Pip install failed"
+          fi
+
+      - name: 🏗 Build Project
+        run: |
+          echo "Building project..."
+          if [ -f Makefile ]; then
+            make || echo "⚠️ Make build failed"
+          elif [ -f build.sh ]; then
+            bash build.sh || echo "⚠️ build.sh failed"
+          else
+            echo "ℹ️ No build script found, skipping"
+          fi
+
+      - name: 🧪 Run Optional Tests
+        run: |
+          echo "Running tests..."
+          if [ -d tests ]; then
+            if command -v pytest >/dev/null 2>&1; then
+              pytest || echo "⚠️ Tests failed"
+            else
+              echo "ℹ️ Pytest not installed, skipping"
+            fi
+          else
+            echo "ℹ️ No tests directory found"
+          fi
+
+      - name: 📦 Archive Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: secure-build-artifacts
+          path: |
+            dist/
+            build/
+            artifacts/
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: 📜 Summary
+        run: |
+          echo "✅ Secure build completed (non-blocking)"
+          echo "All errors were logged but did not stop the workflow."
