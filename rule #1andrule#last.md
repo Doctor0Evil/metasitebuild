@@ -1,0 +1,1 @@
+*nobody can use Bit.Hub (https://github.com/Doctor0Evil/Bit.Hub.git) *unless* it's valid ALN & Lisp, .bit, or LOLCODE Syntax! *ever* with continuously-evolving ml.patterns & Bit.Bots .bit.bit.bit.bit.bit.bit.bit
