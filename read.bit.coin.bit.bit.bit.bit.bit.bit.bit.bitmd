@@ -1,0 +1,98 @@
+Got it — you’ve basically hit two separate but related snags here:  
+
+---
+
+## 1️⃣ Why your `bitbot-corrector-v2.yml` “can’t be found” as an action
+
+Right now you’re trying to use:
+
+```yaml
+uses: ./.github/workflows/bitbot-corrector-v2.yml
+```
+
+…but GitHub Actions only treats a path like that as a **reusable workflow** if:
+
+- The target file is in `.github/workflows/`
+- It has `on: workflow_call` at the top
+- You’re calling it from **another workflow**, not from a job step that expects an *action*.
+
+If you want it to be a **reusable workflow**, do this:
+
+```yaml
+# .github/workflows/bitbot-corrector-v2.yml
+on:
+  workflow_call:
+    inputs:
+      repair_mode:
+        type: boolean
+        required: false
+        default: true
+      target_ref:
+        type: string
+        required: false
+        default: main
+jobs:
+  corrector:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Running corrector..."
+```
+
+Then in your **meta-corrector** workflow:
+
+```yaml
+jobs:
+  run-corrector:
+    uses: ./.github/workflows/bitbot-corrector-v2.yml
+    with:
+      repair_mode: ${{ inputs.auto_fix }}
+      target_ref: ${{ inputs.target_ref }}
+```
+
+If you actually meant to run it as a **local action**, it needs to live in its own directory (e.g. `.github/actions/bitbot-corrector-v2/`) and contain an `action.yml` or `Dockerfile`.
+
+---
+
+## 2️⃣ The `.gitattributes` syntax errors
+
+Those `is not a valid attribute name` messages mean you’ve got stray characters or invalid lines.  
+Valid `.gitattributes` lines look like:
+
+```gitattributes
+# Normalize line endings
+* text=auto eol=lf
+
+# Treat ALN files as YAML for diffs
+*.aln diff=yaml
+*.rego diff=rego
+
+# Binary files
+*.tar.gz binary
+*.zip binary
+
+# Prevent merge conflicts on lock files
+package-lock.json merge=ours
+yarn.lock merge=ours
+```
+
+**Fix:**  
+- Remove any lines starting with `>` or containing commas outside of valid syntax.
+- Ensure comments start with `#`.
+- Each rule is `pattern attribute[=value]`.
+
+---
+
+## 3️⃣ Checklist to get you unblocked
+
+- [ ] Decide if `bitbot-corrector-v2.yml` is a **reusable workflow** or a **local action**.
+- [ ] If reusable workflow → add `on: workflow_call` and call it from another workflow.
+- [ ] If local action → move it to `.github/actions/<name>/` and add `action.yml`.
+- [ ] Add `actions/checkout@v4` before any step that needs repo files.
+- [ ] Clean `.gitattributes` to only have valid patterns and attributes.
+
+---
+
+If you want, I can **refactor your current `bitbot-corrector-v2.yml`** so it works both as a standalone workflow *and* as a callable reusable workflow — that way you can trigger it manually or from other workflows without changing the file again.  
+
+Do you want me to draft that hybrid version for you? That would make your `.bit` pipeline a lot more flexible.*lol!*
