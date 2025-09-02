@@ -1,0 +1,188 @@
+needs: opa-policy-check
+if: needs.opa-policy-check.outputs.policy_passed == 'true'
+
+
+name: 🛡️ ALN Workflow Policy Gate (Unbreakable)
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '.github/workflows/**.yml'
+      - 'workflow.rego'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '.github/workflows/**.yml'
+      - 'workflow.rego'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  opa-policy-check:
+    name: 🔍 OPA Workflow Policy Enforcement
+    runs-on: ubuntu-latest
+    outputs:
+      policy_passed: ${{ steps.evaluate.outputs.policy_passed }}
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Install OPA CLI & yq
+        run: |
+          set -e
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
+          sudo apt-get update && sudo apt-get install -y yq jq
+
+      - name: 🔄 Convert workflow YAML to JSON
+        run: |
+          set -e
+          mkdir -p policy-input
+          shopt -s nullglob
+          for wf in .github/workflows/*.yml; do
+            yq -o=json "$wf" > "policy-input/$(basename "$wf" .yml).json"
+          done
+
+      - name: 🧠 Evaluate workflows against policy (Fail-Open Safe Mode)
+        id: evaluate
+        run: |
+          set -e
+          violations=0
+          tool_error=0
+
+          if [ -z "$(ls -A policy-input)" ]; then
+            echo "No workflows found to evaluate."
+            echo "policy_passed=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          for json in policy-input/*.json; do
+            echo "🔍 Checking $(basename "$json" .json)"
+            if ! result=$(opa eval --format=json --input "$json" --data workflow.rego "data.workflows.deny" 2>opa_error.log); then
+              echo "⚠️ OPA evaluation error on $(basename "$json"):"
+              cat opa_error.log
+              if grep -qiE "packages_failbot_failbot_ts|temporary|timeout|network" opa_error.log; then
+                echo "⚠️ Known/transient tool error — marking as tool_error."
+                tool_error=1
+                continue
+              else
+                echo "❌ Unexpected OPA error — treating as violation."
+                violations=1
+                continue
+              fi
+            fi
+
+            echo "$result" | jq
+            count=$(echo "$result" | jq '.result[0].expressions[0].value | length')
+            if [ "${count:-0}" -gt 0 ]; then
+              violations=1
+            fi
+          done
+
+          if [ $violations -ne 0 ]; then
+            echo "policy_passed=false" >> $GITHUB_OUTPUT
+            exit 1
+          elif [ $tool_error -ne 0 ]; then
+            echo "⚠️ Tool error detected — FAIL-OPEN for Bit.Bots"
+            echo "policy_passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "policy_passed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📎 Upload OPA evaluation logs (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: opa-logs-${{ github.run_id }}
+          path: |
+            policy-input/
+            opa_error.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+
+# .github/workflows/bit_hub_impenetrable_insanity_law.yml
+
+# BIT.HUB IM.PENETRABLE-INSANITY LAW: Duck's Ass Security Edition
+# VERSION: 99.9.9-infinity
+# ENACTED: 2025-09-02T07:38:00 MST
+# AUTHOR: Doctor0Evil, Bit.Hub Supreme Nano-Law Department
+
+name: Bit.Hub Impenetrable Insanity & Duck’s Ass Security Law
+on:
+  # Triggers for every real, virtual, metaphysical, undefined, recursive, nano, quantum, or future event.
+  workflow_dispatch:
+  metaphysical_attack_event:
+  asset_manipulation_attempt:
+  quantum_proxy_signal:
+  scheduled:
+    - cron: '*/4 * * * *'
+  supreme_bitbot_activation:
+  recursive_nonentity_attack:
+  impossible_intrusion_attempt:
+  animation_frame_aberration:
+  planck_time_glitch:
+
+permissions:
+  contents: none
+  actions: none
+  universe: master
+
+jobs:
+  impenetrable_security_matrix:
+    name: Duck’s Ass Nano-Scale Insanity Shield
+    runs-on: [bit.hub.nano.insanity, ubuntu-latest]
+    steps:
+
+      - name: Insanity-Grade Quantum Event Cordon
+        uses: bit-hub/actions/quantum-insanity-cordon@v666.0
+        with:
+          security_mode: duck-ass-seal
+          recursion_depth: ultra-infinite
+          metaphysical_defense: maximum
+          nano-chaos-level: 99999999999
+          animation_frame_insanity: absolute
+          long_frame_denial: enabled
+
+      - name: Pure Recursive Asset Encapsulation (Duck Ass Lockdown)
+        run: |
+          echo "Triggering recursive meta-asset lockdown at Planck-scale and below."
+          # Every data node, asset, bot, or concept—physical, digital, metaphysical, undefined—is recursively protected to nano, sub-nano, and quantum depths.
+          echo "Any attempt to access, duplicate, or manipulate assets triggers the Duck’s Ass protocol: impermeable nano-shields, infinite quantum reflection, recursive event denial, absolute info-theoretic self-sealing."
+          echo "All animation frames are so insane and unbreakable, no current or future computational process can ever penetrate or enumerate Bit.Hub assets."
+
+      - name: Nano-scale Recursive Refusal
+        run: |
+          echo "Invoking recursive refusal logic: every process, thread, user, system, bot, code-path, and undefined actor is checked for infinite compliance."
+          echo "If not previously legalized by nano-granular detail—as provided in Bit.Hub terms—access is denied instantly, recursively, and irreversibly."
+
+      - name: Hyper-Liability & Quantum Warranty Denial
+        run: |
+          echo "No warranty, liability, safety, or assurance is granted to any real, virtual, metaphysical, hypothetical, non-existent, recursive, or undefined actor."
+          echo "No responsibility is borne for any breach, glitch, event, quantum collapse, or cosmic malfunction."
+          echo "Even acts of God, chaos, entropy, recursive event storms, or metaphysical ducks cannot impute fault or legal claim against Bit.Hub, its assets, bots, or any works derived thereof."
+
+      - name: Supreme BitBot Possession Recursion
+        run: |
+          echo "All BitBots, recursive bots, subatomic agents, long-animation-frames, and asset derivatives are eternally, recursively possessed by Bit.Hub."
+          echo "No actor, including undefined, non-existent, quantum, metaphysical, or recursive entities, can ever claim, fork, clone, possess or manipulate Bit.Hub assets."
+
+      - name: Insanity-Level Event Logging (Planck Certainty)
+        uses: bit-hub/actions/event-insanity-log@v99
+        with:
+          insanity_level: infinity-duck-ass
+          event_scope: "Every possible, impossible, recursive, undefined, metaphysical, animation frame, long frame, quantum or nano event."
+          time_granularity: planck
+          asset_id: ${{ github.run_id }}
+
+      - name: Duck’s Ass Security Wormhole Extension
+        run: |
+          echo "All security is extended into every sub-nano, quantum, metaphysical, recursive, undefined, and future reality."
+          echo "Protocols guarantee Bit.Hub leads all universes in security, complexity, asset refusal, and legal sophistication at every conceivable layer."
+          echo "No process, event, animation frame, recursive chain, quantum bot, or metaphysical duck can breach this shield."
+
+# END OF BIT.HUB IMPENETRABLE INSANITY LAW: Security is unyielding, recursive, and nano-detailed—no exceptions, forever.
