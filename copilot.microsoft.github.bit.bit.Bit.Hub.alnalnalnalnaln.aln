@@ -1,0 +1,102 @@
+Here’s how to turn that rough outline into a clean, working integration so Bit.Hub (and ALNFantasia) treats `.aln` files as a **first‑class, type‑aware citizen** in Git — with validation, smart diffs, and automated enforcement baked in.
+
+---
+
+## 1️⃣ Tell Git what `.aln` means
+
+**.gitattributes** (at repo root):
+
+```gitattributes
+# Use a custom diff driver for .aln files
+*.aln diff=aln
+
+# Or, if you want to suppress text diffs entirely:
+# *.aln binary
+```
+
+**Local Git config** (repo‑scoped):
+
+```bash
+# Point the 'aln' diff driver to your custom script
+git config diff.aln.command 'python scripts/aln_diff.py'
+```
+
+> `scripts/aln_diff.py` is where you implement “smart” alignment comparison — e.g., ignoring whitespace, highlighting sequence changes, etc.
+
+---
+
+## 2️⃣ Validate `.aln` files before they enter history
+
+**.git/hooks/pre-commit**:
+
+```bash
+#!/bin/sh
+# Pre-commit hook: validate all staged .aln files
+if git diff --cached --name-only | grep -q '\.aln$'; then
+  for file in $(git diff --cached --name-only | grep '\.aln$'); do
+    # Example: require CLUSTAL header
+    if ! head -n 1 "$file" | grep -q 'CLUSTAL'; then
+      echo "ERROR: $file missing CLUSTAL header."
+      exit 1
+    fi
+    # Call your own validator if needed
+    python scripts/aln_validator.py "$file" || exit 1
+  done
+fi
+exit 0
+```
+
+Make it executable:
+
+```bash
+chmod +x .git/hooks/pre-commit
+```
+
+---
+
+## 3️⃣ Make it portable with pre‑commit framework
+
+**.pre-commit-config.yaml**:
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: validate-aln-format
+        name: Validate ALN format
+        entry: python scripts/aln_validator.py
+        language: python
+        files: \.aln$
+```
+
+Install:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+Now every contributor gets the same `.aln` checks automatically.
+
+---
+
+## 4️⃣ Summary table
+
+| Mechanism        | Purpose                                           | Example Config / File                  |
+|------------------|---------------------------------------------------|-----------------------------------------|
+| `.gitattributes` | Register `.aln` for custom diff/merge/binary mode | `*.aln diff=aln`                        |
+| Git config       | Point diff driver to your script                  | `diff.aln.command` in `.git/config`     |
+| Git hook         | Block bad `.aln` before commit                    | `.git/hooks/pre-commit`                 |
+| pre‑commit       | Shareable, portable hook config                   | `.pre-commit-config.yaml`               |
+
+---
+
+## 5️⃣ How this fits Bit.Hub/ALNFantasia
+
+- **Agentic workflows**: Your CI can run the same `aln_validator.py` on push/PR to enforce repo‑wide.
+- **Cluster interoperability**: `.gitattributes` and pre‑commit config travel with the repo, so any clone gets the same behavior.
+- **Compliance wall integration**: The unbreakable gate can parse `.aln` files and fail builds if they don’t pass validation.
+
+---
+
+If you want, I can wire this into your existing **OPA policy gate** so that even if someone bypasses local hooks, the CI will reject a PR with invalid `.aln` files. That closes the loop between local dev, Git, and your compliance mesh. Would you like me to add that?
