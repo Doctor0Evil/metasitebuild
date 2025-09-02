@@ -1,3 +1,7 @@
+needs: opa-policy-check
+if: needs.opa-policy-check.outputs.policy_passed == 'true'
+
+
 jobs:
   compliance:
     uses: ./.github/workflows/compliance-gatekeeper.yml
