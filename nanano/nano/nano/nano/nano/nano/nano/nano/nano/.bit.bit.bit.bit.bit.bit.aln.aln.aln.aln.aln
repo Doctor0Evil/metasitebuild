@@ -1,0 +1,94 @@
+name: Impenetrable Compliance Wall (Bit.Hub)
+
+on:
+  push:
+    branches: [ main, develop, earliest-critical ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+concurrency:
+  group: "compliance-guardian-${{ github.ref }}"
+  cancel-in-progress: false
+
+env:
+  BITHUB_AUDIT_DIR: .bithub/audit
+  BITHUB_LOG_DIR: .bithub/logs
+  BITHUB_POLICY_DIR: .bithub/policies
+  BITHUB_TRACE_FILE: .bithub/audit/humor-reasoning-trace.json
+  BITHUB_OPA_RESULT: .bithub/audit/opa-result.json
+  BITHUB_VERDICT_FILE: .bithub/audit/compliance-verdict.json
+  HUMOR_LOG: .bithub/logs/humor-bot.log
+  COMPLIANCE_LEVEL: strict
+
+jobs:
+  compliance-wall:
+    name: ALN Compliance Orchestrator + Humor/Personality Floor
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize Compliance Orchestrator
+        shell: pwsh
+        run: |
+          Write-Host "::notice::Initializing ALN meta-compliance-guardian…"
+          $Context = @{
+            Workflow = "${{ github.workflow }}"
+            Ref      = "${{ github.ref }}"
+            Actor    = "${{ github.actor }}"
+            RunId    = "${{ github.run_id }}"
+            ComplianceHost = "Bit.Hub"
+            Environment = "distributed"
+          }
+          $Context | ConvertTo-Json | Write-Host
+
+      - name: Run Compliance Floor (BitShell + OPA)
+        shell: pwsh
+        env:
+          OWNER_BITHUB_PRIVATE_KEY_PEM: ${{ secrets.OWNER_BITHUB_PRIVATE_KEY_PEM }}
+          OWNER_PERPLEXITY_PRIVATE_KEY_PEM: ${{ secrets.OWNER_PERPLEXITY_PRIVATE_KEY_PEM }}
+        run: |
+          ./scripts/run-hrm-compliance.ps1 `
+            -ComplianceLevel "${{ env.COMPLIANCE_LEVEL }}" `
+            -AuditDir "${{ env.BITHUB_AUDIT_DIR }}" `
+            -PolicyDir "${{ env.BITHUB_POLICY_DIR }}" `
+            -HumorLog "${{ env.HUMOR_LOG }}" `
+            -TraceFile "${{ env.BITHUB_TRACE_FILE }}" `
+            -OpaResultFile "${{ env.BITHUB_OPA_RESULT }}" `
+            -OpaQuery "data.bithub.allow" `
+            -FailMode "gate" `
+            -AutoInstallOpa
+
+      - name: ALN Personality/Emotion Indexing
+        shell: pwsh
+        run: |
+          ./scripts/aln-compliance-indexer.ps1 `
+            -InputFile "${{ env.BITHUB_TRACE_FILE }}" `
+            -OutputReport "${{ env.BITHUB_LOG_DIR }}/emotion-index.json" `
+            -Model "Bit.Hub.CentralPersonalityMap"
+
+      - name: Write Immutable Verdict
+        shell: pwsh
+        run: |
+          $opa = Get-Content "${{ env.BITHUB_OPA_RESULT }}" | ConvertFrom-Json
+          $verdict = @{
+            pass  = [bool]$opa.pass
+            level = "${{ env.COMPLIANCE_LEVEL }}"
+            ts    = (Get-Date).ToUniversalTime().ToString("o")
+            run   = "${{ github.run_id }}"
+            sha   = "${{ github.sha }}"
+          }
+          $verdict | ConvertTo-Json -Depth 5 | Out-File -FilePath "${{ env.BITHUB_VERDICT_FILE }}" -Encoding utf8
+
+      - name: Upload Compliance Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: complianceguardian-audit
+          path: |
+            ${{ env.BITHUB_AUDIT_DIR }}
+            ${{ env.BITHUB_LOG_DIR }}
