@@ -1,0 +1,57 @@
+name: 🛡️ Workflow Policy Gate
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '.github/workflows/**.yml'
+      - 'workflow.rego'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '.github/workflows/**.yml'
+      - 'workflow.rego'
+  workflow_dispatch:
+
+jobs:
+  opa-policy-check:
+    name: 🔍 OPA Workflow Policy Enforcement
+    runs-on: ubuntu-latest
+    outputs:
+      policy_passed: ${{ steps.evaluate.outputs.policy_passed }}
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Install OPA CLI & yq
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
+          sudo apt-get update && sudo apt-get install -y yq jq
+
+      - name: 🔄 Convert workflow YAML to JSON
+        run: |
+          mkdir -p policy-input
+          for wf in .github/workflows/*.yml; do
+            yq -o=json "$wf" > "policy-input/$(basename "$wf" .yml).json"
+          done
+
+      - name: 🧠 Evaluate workflows against policy
+        id: evaluate
+        run: |
+          violations=0
+          for json in policy-input/*.json; do
+            echo "🔍 Checking $(basename "$json" .json)"
+            result=$(opa eval --format=json --input "$json" --data workflow.rego "data.workflows.deny")
+            echo "$result" | jq
+            if [ "$(echo "$result" | jq '.result[0].expressions[0].value | length')" -gt 0 ]; then
+              violations=1
+            fi
+          done
+          if [ $violations -ne 0 ]; then
+            echo "policy_passed=false" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "policy_passed=true" >> $GITHUB_OUTPUT
+          fi
