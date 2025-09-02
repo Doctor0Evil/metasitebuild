@@ -1,0 +1,7 @@
+embed.frame "stripe.metrics" {
+    src: "https://js.stripe.com/v3/m-outer-<hash>.html"
+    allow: "payment *"
+    sandbox: true
+    hidden: true
+    compliance: allow_if domain in ["js.stripe.com"]
+}
