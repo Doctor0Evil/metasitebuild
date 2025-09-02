@@ -1,3 +1,7 @@
+needs: opa-policy-check
+if: needs.opa-policy-check.outputs.policy_passed == 'true'
+
+
 # .bit.yml (Bit.Hub Workflow Configuration)
 env:
   PYTHONPATH: src/
