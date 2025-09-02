@@ -1,0 +1,68 @@
+[Violation] 'requestAnimationFrame' handler took 82ms
+57[Violation] 'setTimeout' handler took <N>ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 103ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 60ms
+mention-suggester.ts:38 [Violation] 'setTimeout' handler took 56ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 65ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 70ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 89ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 93ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 81ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 75ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 69ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 73ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 77ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 77ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 73ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 73ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 63ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 64ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 76ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 89ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 73ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 68ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 66ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 72ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 71ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 69ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 85ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 87ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 75ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 64ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 71ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 75ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 73ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 77ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 64ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 69ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 70ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 75ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 72ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 74ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 64ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 63ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 69ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 77ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 69ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 71ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 67ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 70ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 71ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 71ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 70ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 74ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 61ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 62ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 71ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 68ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 76ms
+vendors-node_modules_github_relative-time-element_dist_index_js-c98257dc79a7.js:1 [Violation] 'setTimeout' handler took 69ms
+mention-suggester.ts:38 [Violation] 'requestAnimationFrame' handler took 257ms
+5[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took 253ms
+[Violation] Forced reflow while executing JavaScript took 36ms
+[Violation] Forced reflow while executing JavaScript took 42ms
+[Violation] Forced reflow while executing JavaScript took 56ms
+[Violation] Forced reflow while executing JavaScript took 165ms
+react-dom.production.min.js:187 [Violation] 'message' handler took 214ms
+[Violation] 'paste' handler took 158ms
