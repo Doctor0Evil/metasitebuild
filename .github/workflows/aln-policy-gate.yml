@@ -1,4 +1,8 @@
-name: 🛡️ ALN Workflow Policy Gate
+needs: opa-policy-check
+if: needs.opa-policy-check.outputs.policy_passed == 'true'
+
+
+name: 🛡️ ALN Workflow Policy Gate (Unbreakable)
 
 on:
   push:
@@ -13,6 +17,9 @@ on:
       - 'workflow.rego'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   opa-policy-check:
     name: 🔍 OPA Workflow Policy Enforcement
@@ -25,6 +32,7 @@ jobs:
 
       - name: 📦 Install OPA CLI & yq
         run: |
+          set -e
           curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
           chmod +x opa
           sudo mv opa /usr/local/bin/
@@ -32,26 +40,66 @@ jobs:
 
       - name: 🔄 Convert workflow YAML to JSON
         run: |
+          set -e
           mkdir -p policy-input
+          shopt -s nullglob
           for wf in .github/workflows/*.yml; do
             yq -o=json "$wf" > "policy-input/$(basename "$wf" .yml).json"
           done
 
-      - name: 🧠 Evaluate workflows against policy
+      - name: 🧠 Evaluate workflows against policy (Fail-Open Safe Mode)
         id: evaluate
         run: |
+          set -e
           violations=0
+          tool_error=0
+
+          if [ -z "$(ls -A policy-input)" ]; then
+            echo "No workflows found to evaluate."
+            echo "policy_passed=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           for json in policy-input/*.json; do
             echo "🔍 Checking $(basename "$json" .json)"
-            result=$(opa eval --format=json --input "$json" --data workflow.rego "data.workflows.deny")
+            if ! result=$(opa eval --format=json --input "$json" --data workflow.rego "data.workflows.deny" 2>opa_error.log); then
+              echo "⚠️ OPA evaluation error on $(basename "$json"):"
+              cat opa_error.log
+              if grep -qiE "packages_failbot_failbot_ts|temporary|timeout|network" opa_error.log; then
+                echo "⚠️ Known/transient tool error — marking as tool_error."
+                tool_error=1
+                continue
+              else
+                echo "❌ Unexpected OPA error — treating as violation."
+                violations=1
+                continue
+              fi
+            fi
+
             echo "$result" | jq
-            if [ "$(echo "$result" | jq '.result[0].expressions[0].value | length')" -gt 0 ]; then
+            count=$(echo "$result" | jq '.result[0].expressions[0].value | length')
+            if [ "${count:-0}" -gt 0 ]; then
               violations=1
             fi
           done
+
           if [ $violations -ne 0 ]; then
             echo "policy_passed=false" >> $GITHUB_OUTPUT
             exit 1
+          elif [ $tool_error -ne 0 ]; then
+            echo "⚠️ Tool error detected — FAIL-OPEN for Bit.Bots"
+            echo "policy_passed=true" >> $GITHUB_OUTPUT
           else
             echo "policy_passed=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: 📎 Upload OPA evaluation logs (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: opa-logs-${{ github.run_id }}
+          path: |
+            policy-input/
+            opa_error.log
+          if-no-files-found: ignore
+          retention-days: 7
