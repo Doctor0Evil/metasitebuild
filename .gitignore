@@ -24,3 +24,65 @@
 !.gitenforcement
 !.bit/config.bit.create
 .bit/runtime/
+
+# Ignore OS/system junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.log
+*.tmp
+
+# Ignore build/output
+bin/
+obj/
+out/
+dist/
+build/
+target/
+coverage/
+*.dll
+*.exe
+*.so
+*.dylib
+*.pdb
+
+# Ignore dependency caches
+node_modules/
+packages/
+*.lock
+*.cache
+*.tgz
+
+# Ignore secret files
+*.pem
+*.key
+*.crt
+*.pfx
+*.env
+.env.*
+
+# Ignore GitHub web-ui injected chunks
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.map
+*.css
+*.js
+*chunk-*.js
+*vendors-*.js
+
+# Ignore test data
+*.db
+*.sqlite
+*.jsonl
+*.trace
+*.audit
