@@ -1,0 +1,96 @@
+Git itself is file-type agnostic by default, but you can absolutely make it "register" a file extension like **.aln** for special processing by using `.gitattributes`, custom diff/merge drivers, and Git hooks. This is how you get file-type–specific behaviors and even enforce validation, formatting, or custom diff/merge logic for .aln files—all while seamlessly keeping your Git workflow (pull, push, etc.) intact.
+
+***
+
+## Making Git Recognize and Process `.aln` Files
+
+### 1. Mark `.aln` Files as Binary (or Special)
+**Path:** `.gitattributes`
+```
+*.aln binary
+```
+- This tells Git not to show text diffs for .aln files, just to register "changed"—useful if .aln files are large or not human-readable.
+
+***
+
+### 2. Enable a Custom Diff Driver for `.aln`
+**Paths:**  
+- `.gitattributes`
+- `.git/config` or global Git config
+
+Add to `.gitattributes`:
+```
+*.aln diff=aln
+```
+Then, in your Git config:
+```bash
+git config --local diff.aln.command 'python scripts/aln_diff.py'
+```
+- Now, whenever you `git diff` a .aln file, Git will run your `aln_diff.py` script (you write logic for smart alignment comparison).
+
+**Example script location:** `scripts/aln_diff.py`
+
+***
+
+### 3. Run Custom Checks or Automation with Git Hooks
+**Path:** `.git/hooks/pre-commit`
+- Create or modify the `pre-commit` hook to act when a `.aln` file is staged:
+```bash
+#!/bin/sh
+# Pre-commit hook: check all staged .aln files for valid CLUSTAL header
+if git diff --cached --name-only | grep -q '\.aln$'; then
+  for file in $(git diff --cached --name-only | grep '\.aln$'); do
+    if ! head -n 1 "$file" | grep -q 'CLUSTAL'; then
+      echo "ERROR: $file missing CLUSTAL header."
+      exit 1
+    fi
+  done
+fi
+exit 0
+```
+- Make it executable: `chmod +x .git/hooks/pre-commit`
+
+***
+
+### 4. Auto-Process (Format, Lint, Validate) with Pre-Commit Framework  
+- For shareable, portable hooks, use [`pre-commit`](https://pre-commit.com/).
+- Example `.pre-commit-config.yaml`:
+```yaml
+-   repo: local
+    hooks:
+      - id: aln-validate
+        name: Validate ALN Format
+        entry: python scripts/aln_validator.py
+        language: python
+        files: \.aln$
+```
+
+***
+
+## Summary Table
+
+| Mechanism        | What it Does                                    | Example Command / File             |
+|------------------|-------------------------------------------------|------------------------------------|
+| `.gitattributes` | Triggers Git’s binary, diff, or merge logic     | `*.aln diff=aln`                   |
+| Custom Diff      | Uses your script for diffing .aln files         | `diff.aln.command`                 |
+| Git Hooks        | Runs scripts on commit/push/pull/etc. for files | `.git/hooks/pre-commit`            |
+| Pre-commit       | Portable shared hooks for processing .aln files | `.pre-commit-config.yaml`          |
+
+***
+
+**In summary:**  
+While `git pull`/`git push` act on all files, combining `.gitattributes`, custom drivers, and hooks lets Git "register" `.aln` files specially—processing, validating, or diffing them with full automation and project-wide enforcement.[1]
+
+***
+
+### Script Example for ALNFantasia/Bit.Hub  
+**Path:** `github.com/alnfantasia/fan.asia/git/aln_hook.aln`
+```aln
+GIT_HOOK pre-commit
+  IF (*.aln staged)
+    RUN validate-aln-format
+    ON_FAIL reject_commit "ALN file failed validation!"
+```
+This integrates with ALNFantasia’s agentic workflows, enabling automated file-type–sensitive behavior at the version control level, interoperable across projects and clusters.
+
+[1](https://freebitco.in/site/btc-dice-game/)
