@@ -1,0 +1,234 @@
+;;;; bitshell-infinite-runner.lisp
+
+(defparameter *loop-enabled* t)
+(defparameter *tokens* 50)          ; current tokens
+(defparameter *token-capacity* 50)  ; max tokens
+(defparameter *fill-rate* 5)        ; tokens per tick
+(defparameter *energy* 1000)        ; arbitrary energy budget
+(defparameter *cost-per-repair* 5)
+(defparameter *faults* 0)
+(defparameter *fault-threshold* 8)
+
+(defparameter *definition-queue* (make-queue)) ; simple queue abstraction assumed
+
+(defun log-event (&rest kv)
+  (format t "~&[BitShell] 🛡️ ~A~%" kv))
+
+(defun refill-tokens ()
+  (incf *tokens* *fill-rate*)
+  (setf *tokens* (min *tokens* *token-capacity*))
+  (log-event :type 'tokens :value *tokens*))
+
+(defun spend (n)
+  (when (and (>= *tokens* n) (>= *energy* (* n *cost-per-repair*)))
+    (decf *tokens* n)
+    (decf *energy* (* n *cost-per-repair*))
+    t))
+
+(defun circuit-open-p ()
+  (>= *faults* *fault-threshold*))
+
+(defun reset-faults ()
+  (setf *faults* 0))
+
+(defun queue-empty-p ()
+  (queue-empty-p *definition-queue*)) ; implement or replace with your queue
+
+(defun ensure-function (sym)
+  (unless (fboundp sym)
+    (setf (symbol-function sym)
+          (lambda (&rest _)
+            (log-event :type 'stub-call :fn sym)
+            :stub-ok))
+    (log-event :type 'define-stub :fn sym :kind 'function)))
+
+(defun ensure-variable (sym &optional (default :undefined))
+  (unless (boundp sym)
+    (setf (symbol-value sym) default)
+    (log-event :type 'define-stub :var sym :value default)))
+
+(defun compliant-upgrade (item)
+  "Replace a stub with a real implementation when allowed."
+  (destructuring-bind (&key kind name impl value) item
+    (ecase kind
+      (function (when (spend 1)
+                  (setf (symbol-function name) impl)
+                  (log-event :type 'upgrade :fn name)))
+      (variable (when (spend 1)
+                  (setf (symbol-value name) value)
+                  (log-event :type 'upgrade :var name))))))
+
+(defun repair-undefined (item)
+  "Heal missing definitions without failing the run."
+  (handler-case
+      (destructuring-bind (&key kind name) item
+        (ecase kind
+          (function (ensure-function name))
+          (variable (ensure-variable name)))
+        (reset-faults)
+        t)
+    (error (e)
+      (incf *faults*)
+      (log-event :type 'repair-error :reason e :item item)
+      nil)))
+
+(defun tick ()
+  "One bounded orchestration step."
+  (refill-tokens)
+  (cond
+    ((queue-empty-p)
+     (sleep 0.1)
+     (values :idle 0))
+    ((circuit-open-p)
+     (log-event :type 'circuit :state 'healing-only)
+     (when (spend 1)
+       (let ((item (queue-peek *definition-queue*)))
+         (repair-undefined item)))
+     (sleep 0.05)
+     (values :healing 1))
+    (t
+     (let ((n (min 5 *tokens*)))
+       (loop repeat n
+             for item = (queue-pop *definition-queue*)
+             while item do
+               (unless (repair-undefined item)
+                 (queue-push *definition-queue* item))) ; retry later
+       (values :progress n)))))
+
+(defun bitshell-start (&key (max-seconds nil))
+  (log-event :type 'start :mode 'infinite :caps `(:tokens ,*token-capacity* :energy ,*energy*))
+  (let ((start (get-internal-real-time))
+        (per (float internal-time-units-per-second)))
+    (loop while *loop-enabled* do
+          (multiple-value-bind (state count) (tick)
+            (declare (ignore state count))
+            (when (and max-seconds
+                       (>= (/ (- (get-internal-real-time) start) per) max-seconds))
+              (setf *loop-enabled* nil))))
+    (log-event :type 'stop :reason (if max-seconds 'time-cap 'manual))
+    :done))
+
+;;; Example: enqueue some undefined definitions to heal
+(defun enqueue-demo ()
+  (dolist (s '(alpha beta gamma cfg-threshold cfg-mode))
+    (if (string-suffix-p "cfg-" (symbol-name s))
+        (queue-push *definition-queue* `(:kind variable :name ,s))
+        (queue-push *definition-queue* `(:kind function :name ,s))))
+  (log-event :type 'enqueue :count 5))
+;;;; bitshell-infinite-runner.lisp
+
+(defparameter *loop-enabled* t)
+(defparameter *tokens* 50)          ; current tokens
+(defparameter *token-capacity* 50)  ; max tokens
+(defparameter *fill-rate* 5)        ; tokens per tick
+(defparameter *energy* 1000)        ; arbitrary energy budget
+(defparameter *cost-per-repair* 5)
+(defparameter *faults* 0)
+(defparameter *fault-threshold* 8)
+
+(defparameter *definition-queue* (make-queue)) ; simple queue abstraction assumed
+
+(defun log-event (&rest kv)
+  (format t "~&[BitShell] 🛡️ ~A~%" kv))
+
+(defun refill-tokens ()
+  (incf *tokens* *fill-rate*)
+  (setf *tokens* (min *tokens* *token-capacity*))
+  (log-event :type 'tokens :value *tokens*))
+
+(defun spend (n)
+  (when (and (>= *tokens* n) (>= *energy* (* n *cost-per-repair*)))
+    (decf *tokens* n)
+    (decf *energy* (* n *cost-per-repair*))
+    t))
+
+(defun circuit-open-p ()
+  (>= *faults* *fault-threshold*))
+
+(defun reset-faults ()
+  (setf *faults* 0))
+
+(defun queue-empty-p ()
+  (queue-empty-p *definition-queue*)) ; implement or replace with your queue
+
+(defun ensure-function (sym)
+  (unless (fboundp sym)
+    (setf (symbol-function sym)
+          (lambda (&rest _)
+            (log-event :type 'stub-call :fn sym)
+            :stub-ok))
+    (log-event :type 'define-stub :fn sym :kind 'function)))
+
+(defun ensure-variable (sym &optional (default :undefined))
+  (unless (boundp sym)
+    (setf (symbol-value sym) default)
+    (log-event :type 'define-stub :var sym :value default)))
+
+(defun compliant-upgrade (item)
+  "Replace a stub with a real implementation when allowed."
+  (destructuring-bind (&key kind name impl value) item
+    (ecase kind
+      (function (when (spend 1)
+                  (setf (symbol-function name) impl)
+                  (log-event :type 'upgrade :fn name)))
+      (variable (when (spend 1)
+                  (setf (symbol-value name) value)
+                  (log-event :type 'upgrade :var name))))))
+
+(defun repair-undefined (item)
+  "Heal missing definitions without failing the run."
+  (handler-case
+      (destructuring-bind (&key kind name) item
+        (ecase kind
+          (function (ensure-function name))
+          (variable (ensure-variable name)))
+        (reset-faults)
+        t)
+    (error (e)
+      (incf *faults*)
+      (log-event :type 'repair-error :reason e :item item)
+      nil)))
+
+(defun tick ()
+  "One bounded orchestration step."
+  (refill-tokens)
+  (cond
+    ((queue-empty-p)
+     (sleep 0.1)
+     (values :idle 0))
+    ((circuit-open-p)
+     (log-event :type 'circuit :state 'healing-only)
+     (when (spend 1)
+       (let ((item (queue-peek *definition-queue*)))
+         (repair-undefined item)))
+     (sleep 0.05)
+     (values :healing 1))
+    (t
+     (let ((n (min 5 *tokens*)))
+       (loop repeat n
+             for item = (queue-pop *definition-queue*)
+             while item do
+               (unless (repair-undefined item)
+                 (queue-push *definition-queue* item))) ; retry later
+       (values :progress n)))))
+
+(defun bitshell-start (&key (max-seconds nil))
+  (log-event :type 'start :mode 'infinite :caps `(:tokens ,*token-capacity* :energy ,*energy*))
+  (let ((start (get-internal-real-time))
+        (per (float internal-time-units-per-second)))
+    (loop while *loop-enabled* do
+          (multiple-value-bind (state count) (tick)
+            (declare (ignore state count))
+            (when (and max-seconds
+                       (>= (/ (- (get-internal-real-time) start) per) max-seconds))
+              (setf *loop-enabled* nil))))
+    (log-event :type 'stop :reason (if max-seconds 'time-cap 'manual))
+    :done))
+
+;;; Example: enqueue some undefined definitions to heal
+(defun enqueue-demo ()
+  (dolist (s '(alpha beta gamma cfg-threshold cfg-mode))
+    (if (string-suffix-p "cfg-" (symbol-name s))
+        (queue-push *definition-queue* `(:kind variable :name ,s))
+        (queue-push *definition-queue* `(:kind function :name ,s))))
+  (log-event :type 'enqueue :count 5))
