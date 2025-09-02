@@ -1,3 +1,7 @@
+needs: opa-policy-check
+if: needs.opa-policy-check.outputs.policy_passed == 'true'
+
+
 #!/usr/bin/env bash
 set -euo pipefail
 
