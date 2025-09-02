@@ -1,3 +1,7 @@
+needs: opa-policy-check
+if: needs.opa-policy-check.outputs.policy_passed == 'true'
+
+
 # Fixed/compatible workflow file for Genius Workflow All-Fixer
 # Powershell-compliant YAML content with corrected indentation, steps, and shell usage for all Bit.Hub bots/policies
 
