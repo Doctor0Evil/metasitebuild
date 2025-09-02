@@ -1,0 +1,64 @@
+name: 🛟 Bit.Hub Autonomous Repair & Rescue
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # Every 30 minutes
+  workflow_run:
+    workflows:
+      - "🚀 ALN Programming Language - Governed CI/CD"
+      - "🛡️ ALN Workflow Policy Gate (Unbreakable)"
+    types: [completed]
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/**'
+
+concurrency:
+  group: auto-repair-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    name: 🔧 Auto-Repair
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🛠 Tooling
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq yq curl
+
+      - name: 🚑 Run auto-repair
+        env:
+          GIT_AUTHOR_NAME: Bit.Hub Auto-Repair
+          GIT_AUTHOR_EMAIL: actions@github.com
+          GIT_COMMITTER_NAME: Bit.Hub Auto-Repair
+          GIT_COMMITTER_EMAIL: actions@github.com
+        run: |
+          bash scripts/auto-repair.sh || true
+
+      - name: 🧾 Commit & safe push (with retries)
+        run: |
+          set -e
+          git add -A
+          if git diff --cached --quiet; then echo "No repairs needed."; exit 0; fi
+          git commit -m "chore(auto-repair): autonomous fixes and normalizations"
+          attempt_push() {
+            git pull --rebase origin "${GITHUB_REF_NAME}" || return 1
+            git push origin "${GITHUB_REF_NAME}" || return 1
+          }
+          for i in 1 2 3; do if attempt_push; then exit 0; fi; sleep $((i*5)); done
+          echo "Final attempt: pushing with lease"
+          git push --no-verify --force-with-lease origin "${GITHUB_REF_NAME}" || exit 1
+
+      - name: 🧩 Upload repair logs
+        if: always()
+        uses:
