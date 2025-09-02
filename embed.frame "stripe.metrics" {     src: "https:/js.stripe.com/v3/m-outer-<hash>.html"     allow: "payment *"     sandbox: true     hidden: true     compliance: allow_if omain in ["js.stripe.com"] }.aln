@@ -5,3 +5,32 @@ embed.frame "stripe.metrics" {
     hidden: true
     compliance: allow_if domain in ["js.stripe.com"]
 }
+embed.frame "stripe.metrics" {
+    description: "Stripe metrics controller iframe for payment telemetry"
+    src: pattern "https://js.stripe.com/v3/m-outer-[a-f0-9]{32}.html"
+    protocol: "https"
+    allow: ["payment *"]
+    sandbox: true
+    hidden: true
+    attributes: {
+        frameborder: "0"
+        allowtransparency: true
+        scrolling: "no"
+        role: "presentation"
+        aria-hidden: "true"
+        tabindex: "-1"
+    }
+    compliance: allow_if {
+        domain in ["js.stripe.com"]
+        protocol == "https"
+        hash_length == 32
+    }
+    audit: {
+        on.load: emit telemetry.event "iframe_loaded" { src, timestamp }
+        on.error: emit telemetry.event "iframe_error" { src, error_code, timestamp }
+    }
+    fail_safe: {
+        on.error: hide.frame
+        continue.page.render: true
+    }
+}
