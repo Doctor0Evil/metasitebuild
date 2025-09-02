@@ -1,0 +1,110 @@
+
+needs: opa-policy-check
+if: needs.opa-policy-check.outputs.policy_passed == 'true'
+
+# .github/workflows/impenetrable_wall.yml
+name: IMPENETRABLE_WALL_OF_COMPLIANCE
+
+on:
+  push:
+    branches: [ main, develop, earliest-critical ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+concurrency:
+  group: "compliance-wall-${{ github.ref }}"
+  cancel-in-progress: false
+
+env:
+  BITHUB_AUDIT_DIR: .bithub/audit
+  BITHUB_LOG_DIR: .bithub/logs
+  BITHUB_POLICY_DIR: .bithub/policies
+  BITHUB_TRACE_FILE: .bithub/audit/trace.json
+  BITHUB_OPA_RESULT: .bithub/audit/opa-result.json
+  BITHUB_VERDICT_FILE: .bithub/audit/compliance-verdict.json
+  COMPLIANCE_LEVEL: strict
+
+jobs:
+  impenetrable-wall:
+    name: ALN+OPA Dual Compliance Floor
+    runs-on: windows-latest
+    continue-on-error: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize Compliance Context
+        shell: pwsh
+        run: |
+          Write-Host "::notice::ALN + OPA Compliance Init"
+          $Context = @{
+            Workflow   = "${{ github.workflow }}"
+            Ref        = "${{ github.ref }}"
+            Actor      = "${{ github.actor }}"
+            RunId      = "${{ github.run_id }}"
+            Repository = "${{ github.repository }}"
+            Compliance = "Impenetrable-Wall"
+          }
+          $Context | ConvertTo-Json -Depth 5 | Write-Host
+
+      - name: Run ALN Compliance Floor
+        shell: pwsh
+        env:
+          OWNER_BITHUB_PRIVATE_KEY_PEM: ${{ secrets.OWNER_BITHUB_PRIVATE_KEY_PEM }}
+          OWNER_PERPLEXITY_PRIVATE_KEY_PEM: ${{ secrets.OWNER_PERPLEXITY_PRIVATE_KEY_PEM }}
+        run: |
+          ./scripts/run-hrm-compliance.ps1 `
+            -ComplianceLevel "strict" `
+            -AuditDir "${{ env.BITHUB_AUDIT_DIR }}" `
+            -PolicyDir "${{ env.BITHUB_POLICY_DIR }}" `
+            -TraceFile "${{ env.BITHUB_TRACE_FILE }}" `
+            -OpaResultFile "${{ env.BITHUB_OPA_RESULT }}" `
+            -OpaQuery "data.bithub.allow" `
+            -FailMode "gate" `
+            -AutoInstallOpa
+
+      - name: Enforce Quarantine on Failure
+        shell: pwsh
+        run: |
+          $opa = Get-Content "${{ env.BITHUB_OPA_RESULT }}" | ConvertFrom-Json
+          if (-not $opa.pass) {
+            Write-Error "🚫 IMPENETRABLE WALL BLOCKED EXECUTION — Non-compliant input detected."
+            exit 1
+          } else {
+            Write-Host "✅ Compliance wall passed. Proceeding safely."
+          }
+
+      - name: Immutable Audit Log
+        shell: pwsh
+        run: |
+          $traceSha = Get-FileHash "${{ env.BITHUB_TRACE_FILE }}" -Algorithm SHA256
+          $opaSha   = Get-FileHash "${{ env.BITHUB_OPA_RESULT }}" -Algorithm SHA256
+          $entry = [PSCustomObject]@{
+            schema    = "bithub.audit.v1"
+            ts        = (Get-Date).ToUniversalTime().ToString("o")
+            run_id    = "${{ github.run_id }}"
+            repo      = "${{ github.repository }}"
+            actor     = "${{ github.actor }}"
+            compliance = @{ level="${{ env.COMPLIANCE_LEVEL }}"; pass=$true }
+            artefacts = @{
+              trace = @{ file = "${{ env.BITHUB_TRACE_FILE }}"; sha256 = $traceSha.Hash }
+              opa   = @{ file = "${{ env.BITHUB_OPA_RESULT }}"; sha256 = $opaSha.Hash }
+            }
+          }
+          $logFile = "${{ env.BITHUB_AUDIT_DIR }}/immutable-log.jsonl"
+          $entry | ConvertTo-Json -Depth 10 | Add-Content -Path $logFile -Encoding utf8
+          Write-Host "::notice::Immutable log updated."
+
+      - name: Upload Compliance Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: impenetrable-wall-audit
+          path: |
+            ${{ env.BITHUB_AUDIT_DIR }}
+            ${{ env.BITHUB_LOG_DIR }}
