@@ -1,0 +1,156 @@
+# =ce e {EKS==kLUSTER=c==urCONFIG
+    # =====: "aln-=======cluster========
+    modul=master-system"
+            region: "us-west-2"
+            version: "1.29"
+            nodegroups: [================
+    # Atl_
+                {
+                    name: "gpu-nodes",
+                    instance_type: "g4dn.xlarge"
+                    desired_capacity: 2
+                    min_size: 1
+                    max_size: 8
+                    labels: { role: "gpu" }
+                    taints: { key: "gpu", value: "true", effect: "NoSchedule" }
+                },===e Cs=WS ==eks_cluster_aws {
+        reso
+            name
+                {
+                    name: "cpu-nodes",
+                    instance_type: "c5.xlarge"
+                    desired_capacity: 2
+                    min_size: 1
+                    max_size: 8
+                    labels: { role: "cpu" }
+                }
+            ]
+        }
+        helm.install {
+            name: "aws-load-balancer-controller"
+            namespace: "kube-system"
+            chart: "aws-load-balancer-controller"
+            repo: "https://aws.github.io/eks-charts"
+        }
+        helm.install {
+            name: "cluster-autoscaler"
+            namespace: "kube-system"
+            chart: "cluster-autoscaler"
+            repo: "https://kubernetes.github.io/autoscaler"
+        }
+        helm.install {
+            name: "nvidia-device-plugin"
+            namespace: "kube-system"
+            chart: "nvidia-device-plugin"
+            repo: "https://nvidia.github.io/k8s-device-plugin"
+        }
+    }
+
+    # =========================
+    # CORE SERVICES
+    # =========================
+    module aln_core_services {
+        k8s.deployment api_service {
+            namespace: "ai-workloads"
+            replicas: 2
+            selector: { app: "api-service" }
+            container {
+                name: "api-server"
+                image: "repo/api-service:latest"
+                resources: { requests: { cpu: "500m", memory: "1Gi" }, limits: { cpu: "1", memory: "2Gi" } }
+                ports: [{ containerPort: 8080 }]
+            }
+            expose.alb { port: 80 target: "8080" }
+        }
+        k8s.deployment llm_inference {
+            node_selector: { role: "gpu" }
+            hpa {
+                min: 1
+                max: 8
+                target_gpu_utilization: 75
+            }
+            container {
+                name: "llm-infer"
+                image: "repo/llm-inference:latest"
+                resources: { limits: { nvidia.com/gpu: 1, cpu: "2", memory: "8Gi" } }
+            }
+        }
+    }
+
+    # =========================
+    # PERSISTENCE LAYER
+    # =========================
+    module aln_persistence {
+        helm.install {
+            name: "redis-cluster"
+            namespace: "persistence"
+            values: { session_ttl: "24h", carry_over: true }
+            repo: "https://charts.bitnami.com/bitnami"
+            chart: "redis"
+        }
+        helm.install {
+            name: "postgres-pgvector"
+            namespace: "persistence"
+            values: { storage: "50Gi", enable_pgvector: true }
+            chart: "postgresql"
+            repo: "https://charts.bitnami.com/bitnami"
+        }
+        helm.install {
+            name: "kafka"
+            namespace: "persistence"
+            repo: "https://charts.bitnami.com/bitnami"
+            chart: "kafka"
+        }
+    }
+
+    fn maintain_session_state {
+        log "Cross-thread and cross-platform conversation state synced via Redis + Kafka"
+    }
+
+    # =_pipeline {
+        const emb
+
+    # ==edding_model = "all-MiniLconvve_memories {M-L6-v2"
+        job create_embeddings {
+            input: 
+            input: query=====onitor_cluster_nodes() }
+    }====================
+    module aln
+            execute: inject_into_ersation====_rags
+            execute: store_embeddings("pgvector-db", embed(conversations))
+        }
+        job retrieprompt(fetch_top_relevant(query))
+        }
+        cronjob update_vector_db {
+            schedule: "*/30 * *====================
+    #===RAG PIPELINE
+    # =====* *"
+            task: aln_rag_pipeline.create_embeddings
+        }
+    }========
+    module aln_virtu====al_hw {
+        fn pro====================
+    # VIRTUAL HARDWARE MGMT
+    # ==========vision {
+            aut===oscale_nodes(based_on_utilization = true, free_tier_accounts = multi)
+        }==================
+    # AGENTIC BEHAVIOR
+    # =========================
+    module aln_agentic {
+        fn enforce_rules {
+            param: never_reject_queries = true
+            param: always_on = true
+            log "Agentic loop enforcing always-on + never-reject"
+        }
+        k8s.deployment agentic_loop {
+            replicas: 1
+            always_running: true
+            task_mining: true
+        }
+        k8s.cronjob self_heal {
+            schedule: "*/5 * * * *"
+            exec: check_and_restart_failed_pods()
+        }
+    }
+
+    # ==fn health_checks { m
