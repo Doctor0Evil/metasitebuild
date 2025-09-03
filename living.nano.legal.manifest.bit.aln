@@ -1,0 +1,1078 @@
+Re-run triggered 3 minutes ago @Doctor0EvilDoctor0Evil 06146fd main Status Failure Total duration 48s Artifacts – Annotations 4 errors build The process '/usr/bin/git' failed with exit code 128 build cannot create directory at '<': File name too long build unable to create file ; compliance_report.aln @report { suite: "EthicsGuard", status: "pass", spec: "environment.ethics.yml", timestamp: "2025-08-31T19:57:53Z", host: "runner-ubuntu-24", commit: "abc123def456...", node_id: "github-runner-42", evidence: { json: "compliance_report.json", sha3: "compliance_report.json.sha3", sig: "compliance_report.json.sig" } }.aln: File name too long build unable to create file .nano.nano.nano/o.nano.nano.nano.nano.nano.nano.nano.nano.nano.nano.nano.nanol.nano.na.nano.nano.nano.nanono.nano.nanoogic.nano.nan.nano.nano.nano.nanoo.nano.nano that can '"iterate"' a nan-scale-.nano.nano.nano.nanodeployme..nano.nano.nano.nanonano.nano.nan.nano..nano.nano.nano.nanonano.nano.nanoo.nanont (in .nano) f.nano.nano.nano.nanoor B.nano.nano.n.nano.nano.nano.nanoano..nano.nano.nano.nanonanoit.Hub to hold t.nano.nano.nano.nanohe barrier & wit.nano.nano.nano.nanoh *no possibility* of failure @ *ANY.nano.nano.nano.n.nano.na.nano.nano.nano.nanono.nano.nano.nano.nano.nano.nanoano* .nano.nano.nano.nano*LAY.nano.n.nano.nano.nano.nano.nano.nano.nano.nanoano.nano.nanoER*.nano.nano.nano.nano of thorouput and programmatical-defin.nano.nano.nano.nanoition of .nano compliance with the *ACTUAL* laws of reality.nano.nano.nano.nano *REALLY* .nano.nano.nano.nano.nano.nano.nano.na.nanoono.aln: File name too long baseURI : "https://github.com/Doctor0Evil/Bit.Hub/actions/runs/17444794584" childNodes : NodeList [] data : "\n .user-mention[href$=\"/Doctor0Evil\"] {\n color: var(--color-user-mention-fg);\n background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));\n border-radius: 2px;\n margin-left: -2px;\n margin-right: -2px;\n }\n .user-mention[href$=\"/Doctor0Evil\"]:before,\n .user-mention[href$=\"/Doctor0Evil\"]:after {\n content: '';\n display: inline-block;\n width: 2px;\n }\n " isConnected : true length : 454 nodeName : "#text" nodeType : 3 nodeValue : "\n .user-mention[href$=\"/Doctor0Evil\"] {\n color: var(--color-user-mention-fg);\n background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));\n border-radius: 2px;\n margin-left: -2px;\n margin-right: -2px;\n }\n .user-mention[href$=\"/Doctor0Evil\"]:before,\n .user-mention[href$=\"/Doctor0Evil\"]:after {\n content: '';\n display: inline-block;\n width: 2px;\n }\n " ownerDocument : document parentElement : style parentNode : style accessKey : "" ariaActiveDescendantElement : null ariaAtomic : null ariaAutoComplete : null ariaBrailleLabel : null ariaBrailleRoleDescription : null ariaBusy : null ariaChecked : null ariaColCount : null ariaColIndex : null ariaColIndexText : null ariaColSpan : null ariaControlsElements : null ariaCurrent : null ariaDescribedByElements : null ariaDescription : null ariaDetailsElements : null ariaDisabled : null ariaErrorMessageElements : null ariaExpanded : null ariaFlowToElements : null ariaHasPopup : null ariaHidden : null ariaInvalid : null ariaKeyShortcuts : null ariaLabel : null ariaLabelledByElements : null ariaLevel : null ariaLive : null ariaModal : null ariaMultiLine : null ariaMultiSelectable : null ariaOrientation : null ariaPlaceholder : null ariaPosInSet : null ariaPressed : null ariaReadOnly : null ariaRelevant : null ariaRequired : null ariaRoleDescription : null ariaRowCount : null ariaRowIndex : null ariaRowIndexText : null ariaRowSpan : null ariaSelected : null ariaSetSize : null ariaSort : null ariaValueMax : null ariaValueMin : null ariaValueNow : null ariaValueText : null assignedSlot : null attributeStyleMap : StylePropertyMap {size: 0} attributes : NamedNodeMap {length: 0} autocapitalize : "" autofocus : false baseURI : "https://github.com/Doctor0Evil/Bit.Hub/actions/runs/17444794584" blocking : DOMTokenList [value: ''] childElementCount : 0 childNodes : NodeList [text] children : HTMLCollection [] classList : DOMTokenList [value: ''] className : "" clientHeight : 0 clientLeft : 0 clientTop : 0 clientWidth : 0 contentEditable : "inherit" currentCSSZoom : 1 dataset : DOMStringMap {} dir : "" disabled : false draggable : false editContext : null elementTiming : "" enterKeyHint : "" firstChild : text firstElementChild : null hidden : false id : "" inert : false innerHTML : "\n .user-mention[href$=\"/Doctor0Evil\"] {\n color: var(--color-user-mention-fg);\n background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));\n border-radius: 2px;\n margin-left: -2px;\n margin-right: -2px;\n }\n .user-mention[href$=\"/Doctor0Evil\"]:before,\n .user-mention[href$=\"/Doctor0Evil\"]:after {\n content: '';\n display: inline-block;\n width: 2px;\n }\n " innerText : "\n .user-mention[href$=\"/Doctor0Evil\"] {\n color: var(--color-user-mention-fg);\n background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));\n border-radius: 2px;\n margin-left: -2px;\n margin-right: -2px;\n }\n .user-mention[href$=\"/Doctor0Evil\"]:before,\n .user-mention[href$=\"/Doctor0Evil\"]:after {\n content: '';\n display: inline-block;\n width: 2px;\n }\n " inputMode : "" isConnected : true isContentEditable : false lang : "" lastChild : text lastElementChild : null localName : "style" media : "" namespaceURI : "http://www.w3.org/1999/xhtml" nextElementSibling : null nextSibling : text nodeName : "STYLE" nodeType : 1 nodeValue : null nonce : "" offsetHeight : 0 offsetLeft : 0 offsetParent : null offsetTop : 0 offsetWidth : 0 onabort : null onanimationend : null onanimationiteration : null onanimationstart : null onauxclick : null onbeforecopy : null onbeforecut : null onbeforeinput : null onbeforematch : null onbeforepaste : null onbeforetoggle : null onbeforexrselect : null onblur : null oncancel : null oncanplay : null oncanplaythrough : null onchange : null onclick : null onclose : null oncommand : null oncontentvisibilityautostatechange : null oncontextlost : null oncontextmenu : null oncontextrestored : null oncopy : null oncuechange : null oncut : null ondblclick : null ondrag : null ondragend : null ondragenter : null ondragleave : null ondragover : null ondragstart : null ondrop : null ondurationchange : null onemptied : null onended : null onerror : null onfocus : null onformdata : null onfullscreenchange : null onfullscreenerror : null ongotpointercapture : null oninput : null oninvalid : null onkeydown : null onkeypress : null onkeyup : null onload : null onloadeddata : null onloadedmetadata : null onloadstart : null onlostpointercapture : null onmousedown : null onmouseenter : null onmouseleave : null onmousemove : null onmouseout : null onmouseover : null onmouseup : null onmousewheel : null onpaste : null onpause : null onplay : null onplaying : null onpointercancel : null onpointerdown : null onpointerenter : null onpointerleave : null onpointermove : null onpointerout : null onpointerover : null onpointerrawupdate : null onpointerup : null onprogress : null onratechange : null onreset : null onresize : null onscroll : null onscrollend : null onscrollsnapchange : null onscrollsnapchanging : null onsearch : null onsecuritypolicyviolation : null onseeked : null onseeking : null onselect : null onselectionchange : null onselectstart : null onslotchange : null onstalled : null onsubmit : null onsuspend : null ontimeupdate : null ontoggle : null ontransitioncancel : null ontransitionend : null ontransitionrun : null ontransitionstart : null onvolumechange : null onwaiting : null onwebkitanimationend : null onwebkitanimationiteration : null onwebkitanimationstart : null onwebkitfullscreenchange : null onwebkitfullscreenerror : null onwebkittransitionend : null onwheel : null outerHTML : "" outerText : "\n .user-mention[href$=\"/Doctor0Evil\"] {\n color: var(--color-user-mention-fg);\n background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));\n border-radius: 2px;\n margin-left: -2px;\n margin-right: -2px;\n }\n .user-mention[href$=\"/Doctor0Evil\"]:before,\n .user-mention[href$=\"/Doctor0Evil\"]:after {\n content: '';\n display: inline-block;\n width: 2px;\n }\n " ownerDocument : document parentElement : div.logged-in.env-production.page-responsive.full-width.full-width-p-0 parentNode : div.logged-in.env-production.page-responsive.full-width.full-width-p-0 part : DOMTokenList [value: ''] popover : null prefix : null previousElementSibling : template#snippet-clipboard-copy-button-unpositioned previousSibling : text role : null scrollHeight : 0 scrollLeft : 0 scrollTop : 0 scrollWidth : 0 shadowRoot : null sheet : CSSStyleSheet {ownerRule: null, cssRules: CSSRuleList, rules: CSSRuleList, type: 'text/css', href: null, …} slot : "" spellcheck : true style : CSSStyleDeclaration accentColor : "" additiveSymbols : "" alignContent : "" alignItems : "" alignSelf : "" alignmentBaseline : "" all : "" anchorName : "" anchorScope : "" animation : "" animationComposition : "" animationDelay : "" animationDirection : "" animationDuration : "" animationFillMode : "" animationIterationCount : "" animationName : "" animationPlayState : "" animationRange : "" animationRangeEnd : "" animationRangeStart : "" animationTimeline : "" animationTimingFunction : "" appRegion : "" appearance : "" ascentOverride : "" aspectRatio : "" backdropFilter : "" backfaceVisibility : "" background : "" backgroundAttachment : "" backgroundBlendMode : "" backgroundClip : "" backgroundColor : "" backgroundImage : "" backgroundOrigin : "" backgroundPosition : "" backgroundPositionX : "" backgroundPositionY : "" backgroundRepeat : "" backgroundSize : "" basePalette : "" baselineShift : "" baselineSource : "" blockSize : "" border : "" borderBlock : "" borderBlockColor : "" borderBlockEnd : "" borderBlockEndColor : "" borderBlockEndStyle : "" borderBlockEndWidth : "" borderBlockStart : "" borderBlockStartColor : "" borderBlockStartStyle : "" borderBlockStartWidth : "" borderBlockStyle : "" borderBlockWidth : "" borderBottom : "" borderBottomColor : "" borderBottomLeftRadius : "" borderBottomRightRadius : "" borderBottomStyle : "" borderBottomWidth : "" borderCollapse : "" borderColor : "" borderEndEndRadius : "" borderEndStartRadius : "" borderImage : "" borderImageOutset : "" borderImageRepeat : "" borderImageSlice : "" borderImageSource : "" borderImageWidth : "" borderInline : "" borderInlineColor : "" borderInlineEnd : "" borderInlineEndColor : "" borderInlineEndStyle : "" borderInlineEndWidth : "" borderInlineStart : "" borderInlineStartColor : "" borderInlineStartStyle : "" borderInlineStartWidth : "" borderInlineStyle : "" borderInlineWidth : "" borderLeft : "" borderLeftColor : "" borderLeftStyle : "" borderLeftWidth : "" borderRadius : "" borderRight : "" borderRightColor : "" borderRightStyle : "" borderRightWidth : "" borderSpacing : "" borderStartEndRadius : "" borderStartStartRadius : "" borderStyle : "" borderTop : "" borderTopColor : "" borderTopLeftRadius : "" borderTopRightRadius : "" borderTopStyle : "" borderTopWidth : "" borderWidth : "" bottom : "" boxDecorationBreak : "" boxShadow : "" boxSizing : "" breakAfter : "" breakBefore : "" breakInside : "" bufferedRendering : "" captionSide : "" caretColor : "" clear : "" clip : "" clipPath : "" clipRule : "" color : "" colorInterpolation : "" colorInterpolationFilters : "" colorRendering : "" colorScheme : "" columnCount : "" columnFill : "" columnGap : "" columnRule : "" columnRuleColor : "" columnRuleStyle : "" columnRuleWidth : "" columnSpan : "" columnWidth : "" columns : "" contain : "" containIntrinsicBlockSize : "" containIntrinsicHeight : "" containIntrinsicInlineSize : "" containIntrinsicSize : "" containIntrinsicWidth : "" container : "" containerName : "" containerType : "" content : "" contentVisibility : "" cornerBlockEndShape : "" cornerBlockStartShape : "" cornerBottomLeftShape : "" cornerBottomRightShape : "" cornerBottomShape : "" cornerEndEndShape : "" cornerEndStartShape : "" cornerInlineEndShape : "" cornerInlineStartShape : "" cornerLeftShape : "" cornerRightShape : "" cornerShape : "" cornerStartEndShape : "" cornerStartStartShape : "" cornerTopLeftShape : "" cornerTopRightShape : "" cornerTopShape : "" counterIncrement : "" counterReset : "" counterSet : "" cursor : "" cx : "" cy : "" d : "" descentOverride : "" direction : "" display : "" dominantBaseline : "" dynamicRangeLimit : "" emptyCells : "" fallback : "" fieldSizing : "" fill : "" fillOpacity : "" fillRule : "" filter : "" flex : "" flexBasis : "" flexDirection : "" flexFlow : "" flexGrow : "" flexShrink : "" flexWrap : "" float : "" floodColor : "" floodOpacity : "" font : "" fontDisplay : "" fontFamily : "" fontFeatureSettings : "" fontKerning : "" fontOpticalSizing : "" fontPalette : "" fontSize : "" fontSizeAdjust : "" fontStretch : "" fontStyle : "" fontSynthesis : "" fontSynthesisSmallCaps : "" fontSynthesisStyle : "" fontSynthesisWeight : "" fontVariant : "" fontVariantAlternates : "" fontVariantCaps : "" fontVariantEastAsian : "" fontVariantEmoji : "" fontVariantLigatures : "" fontVariantNumeric : "" fontVariantPosition : "" fontVariationSettings : "" fontWeight : "" forcedColorAdjust : "" gap : "" grid : "" gridArea : "" gridAutoColumns : "" gridAutoFlow : "" gridAutoRows : "" gridColumn : "" gridColumnEnd : "" gridColumnGap : "" gridColumnStart : "" gridGap : "" gridRow : "" gridRowEnd : "" gridRowGap : "" gridRowStart : "" gridTemplate : "" gridTemplateAreas : "" gridTemplateColumns : "" gridTemplateRows : "" height : "" hyphenateCharacter : "" hyphenateLimitChars : "" hyphens : "" imageOrientation : "" imageRendering : "" inherits : "" initialLetter : "" initialValue : "" inlineSize : "" inset : "" insetBlock : "" insetBlockEnd : "" insetBlockStart : "" insetInline : "" insetInlineEnd : "" insetInlineStart : "" interactivity : "" interpolateSize : "" isolation : "" justifyContent : "" justifyItems : "" justifySelf : "" left : "" letterSpacing : "" lightingColor : "" lineBreak : "" lineGapOverride : "" lineHeight : "" listStyle : "" listStyleImage : "" listStylePosition : "" listStyleType : "" margin : "" marginBlock : "" marginBlockEnd : "" marginBlockStart : "" marginBottom : "" marginInline : "" marginInlineEnd : "" marginInlineStart : "" marginLeft : "" marginRight : "" marginTop : "" marker : "" markerEnd : "" markerMid : "" markerStart : "" mask : "" maskClip : "" maskComposite : "" maskImage : "" maskMode : "" maskOrigin : "" maskPosition : "" maskRepeat : "" maskSize : "" maskType : "" mathDepth : "" mathShift : "" mathStyle : "" maxBlockSize : "" maxHeight : "" maxInlineSize : "" maxWidth : "" minBlockSize : "" minHeight : "" minInlineSize : "" minWidth : "" mixBlendMode : "" navigation : "" negative : "" objectFit : "" objectPosition : "" objectViewBox : "" offset : "" offsetAnchor : "" offsetDistance : "" offsetPath : "" offsetPosition : "" offsetRotate : "" opacity : "" order : "" orphans : "" outline : "" outlineColor : "" outlineOffset : "" outlineStyle : "" outlineWidth : "" overflow : "" overflowAnchor : "" overflowBlock : "" overflowClipMargin : "" overflowInline : "" overflowWrap : "" overflowX : "" overflowY : "" overlay : "" overrideColors : "" overscrollBehavior : "" overscrollBehaviorBlock : "" overscrollBehaviorInline : "" overscrollBehaviorX : "" overscrollBehaviorY : "" pad : "" padding : "" paddingBlock : "" paddingBlockEnd : "" paddingBlockStart : "" paddingBottom : "" paddingInline : "" paddingInlineEnd : "" paddingInlineStart : "" paddingLeft : "" paddingRight : "" paddingTop : "" page : "" pageBreakAfter : "" pageBreakBefore : "" pageBreakInside : "" pageOrientation : "" paintOrder : "" perspective : "" perspectiveOrigin : "" placeContent : "" placeItems : "" placeSelf : "" pointerEvents : "" position : "" positionAnchor : "" positionArea : "" positionTry : "" positionTryFallbacks : "" positionTryOrder : "" positionVisibility : "" prefix : "" printColorAdjust : "" quotes : "" r : "" range : "" readingFlow : "" readingOrder : "" resize : "" result : "" right : "" rotate : "" rowGap : "" rubyAlign : "" rubyPosition : "" rx : "" ry : "" scale : "" scrollBehavior : "" scrollInitialTarget : "" scrollMargin : "" scrollMarginBlock : "" scrollMarginBlockEnd : "" scrollMarginBlockStart : "" scrollMarginBottom : "" scrollMarginInline : "" scrollMarginInlineEnd : "" scrollMarginInlineStart : "" scrollMarginLeft : "" scrollMarginRight : "" scrollMarginTop : "" scrollMarkerGroup : "" scrollPadding : "" scrollPaddingBlock : "" scrollPaddingBlockEnd : "" scrollPaddingBlockStart : "" scrollPaddingBottom : "" scrollPaddingInline : "" scrollPaddingInlineEnd : "" scrollPaddingInlineStart : "" scrollPaddingLeft : "" scrollPaddingRight : "" scrollPaddingTop : "" scrollSnapAlign : "" scrollSnapStop : "" scrollSnapType : "" scrollTimeline : "" scrollTimelineAxis : "" scrollTimelineName : "" scrollbarColor : "" scrollbarGutter : "" scrollbarWidth : "" shapeImageThreshold : "" shapeMargin : "" shapeOutside : "" shapeRendering : "" size : "" sizeAdjust : "" speak : "" speakAs : "" src : "" stopColor : "" stopOpacity : "" stroke : "" strokeDasharray : "" strokeDashoffset : "" strokeLinecap : "" strokeLinejoin : "" strokeMiterlimit : "" strokeOpacity : "" strokeWidth : "" suffix : "" symbols : "" syntax : "" system : "" tabSize : "" tableLayout : "" textAlign : "" textAlignLast : "" textAnchor : "" textBox : "" textBoxEdge : "" textBoxTrim : "" textCombineUpright : "" textDecoration : "" textDecorationColor : "" textDecorationLine : "" textDecorationSkipInk : "" textDecorationStyle : "" textDecorationThickness : "" textEmphasis : "" textEmphasisColor : "" textEmphasisPosition : "" textEmphasisStyle : "" textIndent : "" textOrientation : "" textOverflow : "" textRendering : "" textShadow : "" textSizeAdjust : "" textSpacingTrim : "" textTransform : "" textUnderlineOffset : "" textUnderlinePosition : "" textWrap : "" textWrapMode : "" textWrapStyle : "" timelineScope : "" top : "" touchAction : "" transform : "" transformBox : "" transformOrigin : "" transformStyle : "" transition : "" transitionBehavior : "" transitionDelay : "" transitionDuration : "" transitionProperty : "" transitionTimingFunction : "" translate : "" types : "" unicodeBidi : "" unicodeRange : "" userSelect : "" vectorEffect : "" verticalAlign : "" viewTimeline : "" viewTimelineAxis : "" viewTimelineInset : "" viewTimelineName : "" viewTransitionClass : "" viewTransitionName : "" visibility : "" webkitAlignContent : "" webkitAlignItems : "" webkitAlignSelf : "" webkitAnimation : "" webkitAnimationDelay : "" webkitAnimationDirection : "" webkitAnimationDuration : "" webkitAnimationFillMode : "" webkitAnimationIterationCount : "" webkitAnimationName : "" webkitAnimationPlayState : "" webkitAnimationTimingFunction : "" webkitAppRegion : "" webkitAppearance : "" webkitBackfaceVisibility : "" webkitBackgroundClip : "" webkitBackgroundOrigin : "" webkitBackgroundSize : "" webkitBorderAfter : "" webkitBorderAfterColor : "" webkitBorderAfterStyle : "" webkitBorderAfterWidth : "" webkitBorderBefore : "" webkitBorderBeforeColor : "" webkitBorderBeforeStyle : "" webkitBorderBeforeWidth : "" webkitBorderBottomLeftRadius : "" webkitBorderBottomRightRadius : "" webkitBorderEnd : "" webkitBorderEndColor : "" webkitBorderEndStyle : "" webkitBorderEndWidth : "" webkitBorderHorizontalSpacing : "" webkitBorderImage : "" webkitBorderRadius : "" webkitBorderStart : "" webkitBorderStartColor : "" webkitBorderStartStyle : "" webkitBorderStartWidth : "" webkitBorderTopLeftRadius : "" webkitBorderTopRightRadius : "" webkitBorderVerticalSpacing : "" webkitBoxAlign : "" webkitBoxDecorationBreak : "" webkitBoxDirection : "" webkitBoxFlex : "" webkitBoxOrdinalGroup : "" webkitBoxOrient : "" webkitBoxPack : "" webkitBoxReflect : "" webkitBoxShadow : "" webkitBoxSizing : "" webkitClipPath : "" webkitColumnBreakAfter : "" webkitColumnBreakBefore : "" webkitColumnBreakInside : "" webkitColumnCount : "" webkitColumnGap : "" webkitColumnRule : "" webkitColumnRuleColor : "" webkitColumnRuleStyle : "" webkitColumnRuleWidth : "" webkitColumnSpan : "" webkitColumnWidth : "" webkitColumns : "" webkitFilter : "" webkitFlex : "" webkitFlexBasis : "" webkitFlexDirection : "" webkitFlexFlow : "" webkitFlexGrow : "" webkitFlexShrink : "" webkitFlexWrap : "" webkitFontFeatureSettings : "" webkitFontSmoothing : "" webkitHyphenateCharacter : "" webkitJustifyContent : "" webkitLineBreak : "" webkitLineClamp : "" webkitLocale : "" webkitLogicalHeight : "" webkitLogicalWidth : "" webkitMarginAfter : "" webkitMarginBefore : "" webkitMarginEnd : "" webkitMarginStart : "" webkitMask : "" webkitMaskBoxImage : "" webkitMaskBoxImageOutset : "" webkitMaskBoxImageRepeat : "" webkitMaskBoxImageSlice : "" webkitMaskBoxImageSource : "" webkitMaskBoxImageWidth : "" webkitMaskClip : "" webkitMaskComposite : "" webkitMaskImage : "" webkitMaskOrigin : "" webkitMaskPosition : "" webkitMaskPositionX : "" webkitMaskPositionY : "" webkitMaskRepeat : "" webkitMaskSize : "" webkitMaxLogicalHeight : "" webkitMaxLogicalWidth : "" webkitMinLogicalHeight : "" webkitMinLogicalWidth : "" webkitOpacity : "" webkitOrder : "" webkitPaddingAfter : "" webkitPaddingBefore : "" webkitPaddingEnd : "" webkitPaddingStart : "" webkitPerspective : "" webkitPerspectiveOrigin : "" webkitPerspectiveOriginX : "" webkitPerspectiveOriginY : "" webkitPrintColorAdjust : "" webkitRtlOrdering : "" webkitRubyPosition : "" webkitShapeImageThreshold : "" webkitShapeMargin : "" webkitShapeOutside : "" webkitTapHighlightColor : "" webkitTextCombine : "" webkitTextDecorationsInEffect : "" webkitTextEmphasis : "" webkitTextEmphasisColor : "" webkitTextEmphasisPosition : "" webkitTextEmphasisStyle : "" webkitTextFillColor : "" webkitTextOrientation : "" webkitTextSecurity : "" webkitTextSizeAdjust : "" webkitTextStroke : "" webkitTextStrokeColor : "" webkitTextStrokeWidth : "" webkitTransform : "" webkitTransformOrigin : "" webkitTransformOriginX : "" webkitTransformOriginY : "" webkitTransformOriginZ : "" webkitTransformStyle : "" webkitTransition : "" webkitTransitionDelay : "" webkitTransitionDuration : "" webkitTransitionProperty : "" webkitTransitionTimingFunction : "" webkitUserDrag : "" webkitUserModify : "" webkitUserSelect : "" webkitWritingMode : "" whiteSpace : "" whiteSpaceCollapse : "" widows : "" width : "" willChange : "" wordBreak : "" wordSpacing : "" wordWrap : "" writingMode : "" x : "" y : "" zIndex : "" zoom : "" epubCaptionSide : epubTextCombine : epubTextEmphasis : epubTextEmphasisColor : epubTextEmphasisStyle : epubTextOrientation : epubTextTransform : epubWordBreak : epubWritingMode : cssFloat : "" cssText : "" length : 0 parentRule : null [[Prototype]] : CSSStyleDeclaration cssFloat : (...) cssText : (...) getPropertyPriority : ƒ getPropertyPriority() getPropertyValue : ƒ getPropertyValue() item : ƒ item() length : (...) parentRule : (...) removeProperty : ƒ removeProperty() setProperty : ƒ setProperty() constructor : ƒ CSSStyleDeclaration() Symbol(Symbol.iterator) : ƒ values() Symbol(Symbol.toStringTag) : "CSSStyleDeclaration" get cssFloat : ƒ cssFloat() set cssFloat : ƒ cssFloat() get cssText : ƒ cssText() set cssText : ƒ cssText() get length : ƒ length() get parentRule : ƒ parentRule() [[Prototype]] : Object constructor : ƒ Object() hasOwnProperty : ƒ hasOwnProperty() isPrototypeOf : ƒ isPrototypeOf() propertyIsEnumerable : ƒ propertyIsEnumerable() toLocaleString : ƒ toLocaleString() toString : ƒ toString() valueOf : ƒ valueOf() __defineGetter__ : ƒ __defineGetter__() __defineSetter__ : ƒ __defineSetter__() __lookupGetter__ : ƒ __lookupGetter__() __lookupSetter__ : ƒ __lookupSetter__() __proto__ : CSSStyleDeclaration get __proto__ : ƒ __proto__() length : 0 name : "get __proto__" arguments : (...) caller : (...) [[Prototype]] : ƒ () [[Scopes]] : Scopes[0] set __proto__ : ƒ __proto__() length : 1 name : "set __proto__" arguments : [Exception: TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them at get arguments () at set __proto__.invokeGetter (:3:28)] caller : [Exception: TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them at get caller () at set __proto__.invokeGetter (:3:28)] [[Prototype]] : ƒ () apply : ƒ apply() arguments : [Exception: TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them at get arguments () at set __proto__.invokeGetter (:3:28)] bind : ƒ bind() call : ƒ call() caller : [Exception: TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them at get caller () at set __proto__.invokeGetter (:3:28)] constructor : ƒ Function() length : 0 name : "" toString : ƒ toString() Symbol(Symbol.hasInstance) : ƒ [Symbol.hasInstance]() get arguments : ƒ arguments() set arguments : ƒ arguments() get caller : ƒ caller() set caller : ƒ caller() [[FunctionLocation]] : [[Prototype]] : Object constructor : ƒ Object() hasOwnProperty : ƒ hasOwnProperty() isPrototypeOf : ƒ isPrototypeOf() propertyIsEnumerable : ƒ propertyIsEnumerable() toLocaleString : ƒ toLocaleString() toString : ƒ toString() valueOf : ƒ valueOf() __defineGetter__ : ƒ __defineGetter__() __defineSetter__ : ƒ __defineSetter__() __lookupGetter__ : ƒ __lookupGetter__() __lookupSetter__ : ƒ __lookupSetter__() __proto__ : ƒ () apply : ƒ apply() arguments : (...) bind : ƒ bind() call : ƒ call() caller : (...) constructor : ƒ Function() length : 0 name : "" toString : ƒ toString() Symbol(Symbol.hasInstance) : ƒ [Symbol.hasInstance]() get arguments : ƒ arguments() set arguments : ƒ arguments() get caller : ƒ caller() set caller : ƒ caller() [[FunctionLocation]] : [[Prototype]] : Object constructor : ƒ Object() hasOwnProperty : ƒ hasOwnProperty() isPrototypeOf : ƒ isPrototypeOf() propertyIsEnumerable : ƒ propertyIsEnumerable() toLocaleString : ƒ toLocaleString() toString : ƒ toString() valueOf : ƒ valueOf() __defineGetter__ : ƒ __defineGetter__() __defineSetter__ : ƒ __defineSetter__() __lookupGetter__ : ƒ __lookupGetter__() __lookupSetter__ : ƒ __lookupSetter__() __proto__ : Object get __proto__ : ƒ __proto__() set __proto__ : ƒ __proto__() [[Scopes]] : Scopes[0] No properties get __proto__ : ƒ __proto__() length : 0 name : "get __proto__" arguments : [Exception: TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them at get arguments () at get __proto__.invokeGetter (:3:28)] caller : [Exception: TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them at get caller () at get __proto__.invokeGetter (:3:28)] [[Prototype]] : ƒ () [[Scopes]] : Scopes[0] set __proto__ : ƒ __proto__() length : 1 name : "set __proto__" arguments : [Exception: TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them at get arguments () at set __proto__.invokeGetter (:3:28)] caller : [Exception: TypeError: 'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them at get caller () at set __proto__.invokeGetter (:3:28)] [[Prototype]] : ƒ () [[Scopes]] : Scopes[0] [[Scopes]] : Scopes[0] No properties [[Scopes]] : Scopes[0] No properties tabIndex : -1 tagName : "STYLE" textContent : "\n .user-mention[href$=\"/Doctor0Evil\"] {\n color: var(--color-user-mention-fg);\n background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));\n border-radius: 2px;\n margin-left: -2px;\n margin-right: -2px;\n }\n .user-mention[href$=\"/Doctor0Evil\"]:before,\n .user-mention[href$=\"/Doctor0Evil\"]:after {\n content: '';\n display: inline-block;\n width: 2px;\n }\n " title : "" translate : true type : "" virtualKeyboardPolicy : "" writingSuggestions : "true" [[Prototype]] : HTMLStyleElement textContent : "\n .user-mention[href$=\"/Doctor0Evil\"] {\n color: var(--color-user-mention-fg);\n background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));\n border-radius: 2px;\n margin-left: -2px;\n margin-right: -2px;\n }\n .user-mention[href$=\"/Doctor0Evil\"]:before,\n .user-mention[href$=\"/Doctor0Evil\"]:after {\n content: '';\n display: inline-block;\n width: 2px;\n }\n " wholeText : "\n .user-mention[href$=\"/Doctor0Evil\"] {\n color: var(--color-user-mention-fg);\n background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));\n border-radius: 2px;\n margin-left: -2px;\n margin-right: -2px;\n }\n .user-mention[href$=\"/Doctor0Evil\"]:before,\n .user-mention[href$=\"/Doctor0Evil\"]:after {\n content: '';\n display: inline-block;\n width: 2px;\n }\n "
+Skip to content
+Navigation Menu
+Doctor0Evil
+Bit.Hub
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Owner avatar
+Bit.Hub
+Public
+Doctor0Evil/Bit.Hub
+Go to file
+t
+Name		
+Doctor0Evil
+Doctor0Evil
+Create Doctor0Evil\"]:before.now.nano.Bit.Hub.nano.aln
+fa7c769
+ · 
+2 minutes ago
+!.bit/config.bit.create .bit/runtime/.bitbot/tmp
+Update and rename .git.bitbit.bit.git to .git.bitbit.bit.md
+2 days ago
+".bit.bit.bef$=\"
+Create Doctor0Evil\"]:after {\n content: '';\n display: inline-block;…
+13 minutes ago
+-2px;\n }\n .user-mention[href$=\"
+Create Doctor0Evil\"]:before.now.nano.Bit.Hub.nano.aln
+2 minutes ago
+.aln
+Create Bit.Hub.aln.aln
+2 days ago
+.bit-actions
+Update bit.actions.registry.aln.yml
+3 days ago
+.bit.bots
+Create bitcomply.bot
+2 days ago
+.bit
+Create BitComplianceCore.cs
+2 days ago
+.bitbots
+Create tingle.json
+3 days ago
+.bithub-actions
+Create reusable.rego
+5 days ago
+.bithub
+Create further.def.beta.reality.bit.aln
+17 hours ago
+.bitlab-compliance
+Create .gitlab-ci.yml
+3 days ago
+.bitlinks
+Create propagation-spec.yml
+5 days ago
+.bitrunners
+Create .bitrunners.json
+3 days ago
+.cargo
+Create config.toml
+2 days ago
+.github
+Create metaphysics.aln
+7 hours ago
+.meta
+Create hyper.parameters.json
+3 days ago
+.nano.nano.nano
+Create nanobit.aln
+yesterday
+1https:/github.com/Doctor0Evil/Bit.Hub/new
+Create main.bit.aln
+16 hours ago
+<path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.bit.bit.bit.bit.bit 521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"><
+Create path>.bit.aln
+1 hour ago
+<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"><
+Create shell.bit.bit.aln
+5 hours ago
+Bit.Hub
+Create BobTheBuilder
+2 days ago
+REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY/QSC-REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY.sig.bit.bit.bit.nano.nano.nano.quantum.quantum.quantum.quantum.bit.bit.coin.bit.Bit.Hub
+Create llm.cfg.nano.aln
+4 hours ago
+Services
+Create .bit.git
+3 days ago
+aln
+Create .nanobyte-deploy.lisp
+5 days ago
+alnfantasia/dialogue
+Create slopbucket_banter.create
+3 days ago
+app
+Create build.gradle
+2 days ago
+assets
+Create Bit.Shell.ps1.aln
+yesterday
+bithub
+Create get_failed_jobs_stub.py
+4 days ago
+config
+Create ALN-Security-Model.aln
+2 days ago
+configs
+Create gha-constraints.aln
+2 days ago
+core
+Create lisp.workflow.bitlinks.orchestration.lisp
+5 days ago
+embed.frame "stripe.metrics" { src: "https:/js.stripe.com/v3
+Update m-outer-<hash>.html" allow: "payment *" sandbox: true hidden: …
+yesterday
+etc
+Update wall.env
+2 days ago
+fan.asia
+Create agentic_tools.aln
+3 days ago
+github/workflows
+Update aln-build-artifact.yml
+3 days ago
+https;
+Create Bit.Hub.git.md
+2 days ago
+hub.bit.bit.bit.bit.bit.bit.bit.bit.bit
+Create nano.aln
+19 minutes ago
+hub/bit./hu./bit./qtm./nano.bit
+Create nanobit.inf.qtm
+2 hours ago
+jobs: bitshell: runs-on: ubuntu-latest timeout-minutes: 15 steps: - uses: actions/checkout@v4 - name: Run BitShell infinite runner (bounded) run: | sbcl --noinform --quit --eval '(load "scripts
+Create bitshell-infinite-runner.lisp")' \ --eval '(enqueue-demo)' \ -…
+2 days ago
+manifests
+Create core-stack.aln
+2 days ago
+nanano/nano/nano/nano/nano/nano/nano
+Create fetch.ai.fetch.aln
+yesterday
+nanocompression/nano/nano/nano/nano/nano/nano/nano/nano/nano/nano/nano/nano/nano/nano/nano/nano/nano
+Create .bit.bit.bit.aln.aln.aln
+19 hours ago
+nanonanonanonano/nano/nano/nano/nano/nano/nano/nano/nano
+Create nano.alnalnalnalnalnalnaln.aln
+yesterday
+personalities/bit_hub
+Create nightkin_keene
+3 days ago
+policy
+Create dialogue_banter.rego
+3 days ago
+registries
+Create targets.aln
+2 days ago
+scripts
+Update run-hrm-compliance.ps1
+yesterday
+services
+Create so.bit.conf
+2 days ago
+src
+Create main.rs
+2 days ago
+srv/bit-hub-repo/.bit
+Create 2f6kq3qs3Zq4= -----ENN-----DwBQY--KE.bit.aln
+5 hours ago
+templates
+Create policy-webhook.yaml
+3 days ago
+tools
+Create verify-run.lisp
+2 days ago
+web/config
+Create branding.aln
+2 days ago
+workflows
+Update master-crossrepo.lisp
+2 days ago
+"Bit.Hub.fetch.ai.fetch.hub.bit.links.bit.bit.Jacob.Scott.Farmer.7.1.2.9.N.33rd.Ave.8.5.0.1.P.h.o.e.n.i.x.A.Z.bit.Maricopa.County.ALN.Bit.USA.bit.aln.nano.nano.quantum.bit.Bit.Hub.alnlol.aln
+Create "Bit.Hub.fetch.ai.fetch.hub.bit.links.bit.bit.Jacob.Scott.Farm…
+6 hours ago
+.aln.aln.aln.aln.aln.aln.bit.bit.bit.md
+Create .aln.aln.aln.aln.aln.aln.bit.bit.bit.md
+2 days ago
+.aln.rego
+Create .aln.rego
+4 days ago
+.bit.aln.law.aln
+Create .bit.aln.law.aln
+3 hours ago
+.bit.bit
+Create .bit.bit
+3 days ago
+.bit.bithub.comply
+Create .bit.bithub.comply
+5 days ago
+.bit.coin.cs
+Create .bit.coin.cs
+3 days ago
+.bit.commander.json
+Create .bit.commander.json
+2 days ago
+.bit.create
+Create .bit.create
+5 days ago
+.bit.deploy.ps1
+Create .bit.deploy.ps1
+4 days ago
+.bit.git.bit.git.bit.md.aln
+Create .bit.git.bit.git.bit.md.aln
+yesterday
+.bit.hub.ps1
+Create .bit.hub.ps1
+4 days ago
+.bit.hubBit.Hub.bit.ps1
+Create .bit.hubBit.Hub.bit.ps1
+3 days ago
+.bit.links.bit.lol
+Update .bit.links.bit.lol
+3 days ago
+.bit.yml
+Create .bit.yml
+5 days ago
+.bitattributes
+Create .bitattributes
+4 days ago
+.bitcharter
+Create .bitcharter
+3 days ago
+.bitcommande.js
+Create .bitcommande.js
+2 days ago
+.bitenforcement.rego
+Create .bitenforcement.rego
+3 days ago
+.bithub.actions
+Create .bithub.actions
+5 days ago
+.bithub.yml
+Update .bithub.yml
+5 days ago
+.bithubpolicy.personalitycore.rego
+Create .bithubpolicy.personalitycore.rego
+3 days ago
+.bithubpolicycontent.rego
+Create .bithubpolicycontent.rego
+3 days ago
+.bitlinks.bit
+Update .bitlinks.bit
+3 days ago
+.bitlinks.html
+Update .bitlinks.html
+3 days ago
+.bitrecovery
+Create .bitrecovery
+4 days ago
+.comply.md
+Create .comply.md
+2 days ago
+.create
+Create .create
+4 days ago
+.git.fix.json
+Create .git.fix.json
+3 days ago
+.git.lol
+Create .git.lol
+3 days ago
+.git.md
+Create .git.md
+2 days ago
+.gitattributes
+Create .gitattributes
+3 days ago
+.gitattributes.rego
+Create .gitattributes.rego
+4 days ago
+.gitcomply
+Create .gitcomply
+4 days ago
+.gitenforcement
+Create .gitenforcement
+3 days ago
+.gitignore
+Update .gitignore
+yesterday
+.gitlost
+Create .gitlost
+3 days ago
+.gitrescue
+Create .gitrescue
+3 days ago
+.jacob.scott.farmer.lol.bit
+Create .jacob.scott.farmer.lol.bit
+3 days ago
+.law.law.law.law.law.law.law.md
+Create .law.law.law.law.law.law.law.md
+2 days ago
+.loldeploy.cont
+Create .loldeploy.cont
+3 days ago
+.me.bitbtibitbitbitbitbitbitbitbit.bit.aln.md
+Create .me.bitbtibitbitbitbitbitbitbitbit.bit.aln.md
+2 days ago
+.mit.bit.md
+Create .mit.bit.md
+2 days ago
+.nano.nano.nano.bit.bit.bit.bit.bit.bit.evil.google.bit.bit.aln
+Create .nano.nano.nano.bit.bit.bit.bit.bit.bit.evil.google.bit.bit.aln
+1 hour ago
+.yml.bit
+Create .yml.bit
+4 days ago
+.yml.bit.hub
+Create .yml.bit.hub
+4 days ago
+82jfw4.bit.md.bit.coin.aln.bit.md
+Create 82jfw4.bit.md.bit.coin.aln.bit.md
+2 days ago
+; compliance_report.aln @REPORT { suite: "EthicsGuard", status: "pass", spec: "environment.ethics.yml", timestamp: "2025-08-31T19:57:53Z", host: "runner-ubuntu-24", commit: "abc123def456...", node_id: "github-runner-42", evidence: { json: "compliance_report.json", sha3: "compliance_report.json.sha3", sig: "compliance_report.json.sig" } }.aln
+Update and rename ; compliance_report.aln @report { suite: "EthicsGua…
+2 hours ago
+ALNFantasia.create.ps1
+Create ALNFantasia.create.ps1
+3 days ago
+ALNFantasiarules.aln.fan.asia.tools.aln
+Create ALNFantasiarules.aln.fan.asia.tools.aln
+20 hours ago
+ARTIBIT.md
+Create ARTIBIT.md
+2 days ago
+Bit.Bit.Bit.Hut.runner.bit.md
+Create Bit.Bit.Bit.Hut.runner.bit.md
+2 days ago
+Bit.Blog.Bit.Hub.aln
+Create Bit.Blog.Bit.Hub.aln
+19 hours ago
+Bit.Hub Compliance Wall: Multi-Layered Enforcement
+Create Bit.Hub Compliance Wall: Multi-Layered Enforcement
+2 days ago
+Bit.Hub-security-model.aln
+Create Bit.Hub-security-model.aln
+2 days ago
+Bit.Hub.Bit.Bots.bit
+Create Bit.Hub.Bit.Bots.bit
+3 days ago
+Bit.Hub.Bit.Coin.aln
+Create Bit.Hub.Bit.Coin.aln
+yesterday
+Bit.Hub.Bit.Hub.aln
+Create Bit.Hub.Bit.Hub.aln
+2 hours ago
+Bit.Hub.Bitshell.aln
+Create Bit.Hub.Bitshell.aln
+2 days ago
+Bit.Hub.bit
+Create Bit.Hub.bit
+2 days ago
+C-REG-BOT-MINTliance.bit.bit.bit.bit.aln
+Create C-REG-BOT-MINTliance.bit.bit.bit.bit.aln
+4 hours ago
+Chart.yaml
+Create Chart.yaml
+3 days ago
+Compliance.Block.bit.c.sh
+Create Compliance.Block.bit.c.sh
+3 days ago
+ComplianceGuardian.ALN.csproj
+Create ComplianceGuardian.ALN.csproj
+2 days ago
+CyberOrganic.os.md
+Create CyberOrganic.os.md
+2 days ago
+Ed25519.json
+Create Ed25519.json
+2 days ago
+Fetch.AI.Bit.Hub.aln
+Create Fetch.AI.Bit.Hub.aln
+yesterday
+Hub.fetch.bit.bit.aln
+Create Hub.fetch.bit.bit.aln
+8 hours ago
+Jacob.Scott.Farmer.bit.aln
+Create Jacob.Scott.Farmer.bit.aln
+7 hours ago
+LICENSE
+Initial commit
+5 days ago
+LOLCODE.md
+Create LOLCODE.md
+2 days ago
+Program.cs
+Create Program.cs
+3 days ago
+QSC-REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY.aln
+Create QSC-REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-REA…
+5 hours ago
+ReadMe.md
+Update ReadMe.md
+1 hour ago
+SECURITY.md
+Create SECURITY.md
+5 days ago
+SecureBLEMasterSystem.java
+Create SecureBLEMasterSystem.java
+2 days ago
+age.qtm.ai.aln
+Create age.qtm.ai.aln
+8 hours ago
+aln-programming-model.json
+Create aln-programming-model.json
+2 days ago
+aln.fanasia.create
+Create aln.fanasia.create
+4 days ago
+aln.tools.ALNFantasia.aln
+Create aln.tools.ALNFantasia.aln
+20 hours ago
+analyze_aln_figure.aln
+Create analyze_aln_figure.aln
+2 days ago
+analyze_aln_figure.py
+Create analyze_aln_figure.py
+2 days ago
+artiv=fact.bit.aln.md
+Create artiv=fact.bit.aln.md
+2 days ago
+availability.rego
+Create availability.rego
+3 days ago
+baneter.approve.aln
+Create baneter.approve.aln
+7 hours ago
+barrier-of-reality.md
+Create barrier-of-reality.md
+2 days ago
+barrier.bit.nano.aln
+Create barrier.bit.nano.aln
+yesterday
+barriers.aln
+Create barriers.aln
+16 hours ago
+bat.bit
+Create bat.bit
+4 days ago
+bin.laden.bit.ps1
+Create bin.laden.bit.ps1
+4 days ago
+bit.bithub.comply
+Create bit.bithub.comply
+3 days ago
+bit.comply.aln
+Create bit.comply.aln
+8 hours ago
+bit.create
+Create bit.create
+4 days ago
+bit.git
+Create bit.git
+4 days ago
+bit.hub.md
+Create bit.hub.md
+5 days ago
+bit.rego
+Create bit.rego
+3 days ago
+bit_hub_dual_mode.ps1
+Create bit_hub_dual_mode.ps1
+4 days ago
+bit_hub_master_orchestrator.aln
+Create bit_hub_master_orchestrator.aln
+2 days ago
+bitbot-integrations.yml
+Create bitbot-integrations.yml
+5 days ago
+bithub.banter.content.rego
+Create bithub.banter.content.rego
+3 days ago
+bithub.legal.loop.rego
+Create bithub.legal.loop.rego
+3 days ago
+bithub.md
+Create bithub.md
+4 days ago
+bithub.repo.bit
+Create bithub.repo.bit
+4 days ago
+bitrego.rego
+Create bitrego.rego
+2 days ago
+bitregot.bit
+Create bitregot.bit
+2 days ago
+bot.bit.bit.bit.aln
+Create bot.bit.bit.bit.aln
+16 hours ago
+build.push.ps1
+Create build.push.ps1
+2 days ago
+cccccccccccccccccc.md
+Create cccccccccccccccccc.md
+2 days ago
+comet-bithub-agent.aln
+Create comet-bithub-agent.aln
+2 days ago
+commnder.md
+Create commnder.md
+2 days ago
+compliance.ps1
+Create compliance.ps1
+2 days ago
+complianceGuardian.BitHub.ALN.cs
+Create complianceGuardian.BitHub.ALN.cs
+2 days ago
+compliance_enforcer.cpp
+Create compliance_enforcer.cpp
+2 days ago
+compliance_policy.aln
+Create compliance_policy.aln
+2 days ago
+compliance_report.aln
+Create compliance_report.aln
+3 days ago
+comply.bitshell
+Create comply.bitshell
+2 days ago
+comply.rego
+Create comply.rego
+4 days ago
+compress.nano.aln
+Create compress.nano.aln
+yesterday
+config.aln
+Create config.aln
+2 days ago
+config.bit
+Create config.bit
+2 days ago
+config.cfg
+Create config.cfg
+2 days ago
+container.rego
+Create container.rego
+3 days ago
+content.rego
+Update content.rego
+3 days ago
+contextual_audit.py
+Create contextual_audit.py
+2 days ago
+copilot.microsoft.github.bit.bit.Bit.Hub.alnalnalnalnaln.aln
+Create copilot.microsoft.github.bit.bit.Bit.Hub.alnalnalnalnaln.aln
+yesterday
+createbit.bitcreate.bit.aln
+Create createbit.bitcreate.bit.aln
+17 minutes ago
+creators.md
+Create creators.md
+2 days ago
+data.aln
+Create data.aln
+yesterday
+dont.bit.google.aln
+Create dont.bit.google.aln
+3 hours ago
+emotional_index.py
+Create emotional_index.py
+2 days ago
+engine.ini
+Create engine.ini
+3 days ago
+federated-superpowers.aln
+Create federated-superpowers.aln
+16 hours ago
+fetch.bit.Bit.Hub.aln
+Create fetch.bit.Bit.Hub.aln
+7 hours ago
+fetch.bit.aln
+Create fetch.bit.aln
+yesterday
+fetch.hub.bit.Bit.Hub.google.bit.nano.aln
+Create fetch.hub.bit.Bit.Hub.google.bit.nano.aln
+1 hour ago
+fetchai.nano.aln
+Create fetchai.nano.aln
+9 hours ago
+fuckmd
+Create fuckmd
+2 days ago
+gate.google.bit.comply.aln
+Create gate.google.bit.comply.aln
+2 hours ago
+gatekeeper.yml
+Create gatekeeper.yml
+3 days ago
+git.bit
+Create git.bit
+4 days ago
+git.bit.nano.aln
+Create git.bit.nano.aln
+yesterday
+git.create.bit
+Create git.create.bit
+4 days ago
+gitactions.bit
+Create gitactions.bit
+3 days ago
+githubcopilot.aln
+Create githubcopilot.aln
+yesterday
+godmode.bit.aln
+Create godmode.bit.aln
+6 hours ago
+html.aln
+Create html.aln
+yesterday
+hub.bot.bit.super.ai.fetch.aln
+Create hub.bot.bit.super.ai.fetch.aln
+7 hours ago
+hubot.Bit.Hub.aln
+Create hubot.Bit.Hub.aln
+yesterday
+hubot.bitbot.bit.aln
+Create hubot.bitbot.bit.aln
+20 hours ago
+humor.rego
+Create humor.rego
+3 days ago
+hyper.parameters.json
+Create hyper.parameters.json
+3 days ago
+ingest.bit.google.bit.aln
+Create ingest.bit.google.bit.aln
+3 hours ago
+justbit.aln.md
+Create justbit.aln.md
+2 days ago
+law-of-ALNFantasia.aln
+Create law-of-ALNFantasia.aln
+20 hours ago
+lawbit.law.md
+Create lawbit.law.md
+2 days ago
+lawnanoaln.bit.bit.hub.bit.Bit.Hub.aln
+Create lawnanoaln.bit.bit.hub.bit.Bit.Hub.aln
+1 hour ago
+legal.yml
+Create legal.yml
+3 days ago
+links.bit.links.bit.links.bit.alnlol.aln
+Create links.bit.links.bit.links.bit.alnlol.aln
+yesterday
+lol.git
+Create lol.git
+3 days ago
+lol.ps1
+Create lol.ps1
+4 days ago
+lololololololcode.bit.md
+Create lololololololcode.bit.md
+2 days ago
+lolololololololololol.bitlol.md
+Create lolololololololololol.bitlol.md
+2 days ago
+loop.bit.md
+Create loop.bit.md
+2 days ago
+main.aln
+Create main.aln
+4 days ago
+main.bit
+Create main.bit
+4 days ago
+manifest.bit
+Create manifest.bit
+3 days ago
+md.md
+Create md.md
+2 days ago
+merged-input.json
+Create merged-input.json
+2 days ago
+meta.bit.bang
+Create meta.bit.bang
+3 days ago
+ml.workflow.bit.yml
+Create ml.workflow.bit.yml
+5 days ago
+mockdownisillegal.md
+Create mockdownisillegal.md
+2 days ago
+my.lisp.me.bit.lisp
+Create my.lisp.me.bit.lisp
+2 days ago
+nananananananananano.aln
+Create nananananananananano.aln
+16 hours ago
+nano.bit.html.nano.bit.aln
+Create nano.bit.html.nano.bit.aln
+3 hours ago
+nanobit.aln
+Create nanobit.aln
+20 hours ago
+nanobyte.bit.aln
+Create nanobyte.bit.aln
+yesterday
+nanolegal.md
+Create nanolegal.md
+yesterday
+nobody.md
+Create nobody.md
+2 days ago
+nomore.md
+Create nomore.md
+2 days ago
+norules.md
+Create norules.md
+2 days ago
+only.bit.follow.bit.bit.aln
+Create only.bit.follow.bit.bit.aln
+2 hours ago
+package.md
+Create package.md
+2 days ago
+perplexity.Bit.Hub.aln
+Create perplexity.Bit.Hub.aln
+yesterday
+persona-checks.bit
+Create persona-checks.bit
+4 days ago
+pipemeth.bit.md
+Create pipemeth.bit.md
+2 days ago
+policy.bit
+Create policy.bit
+3 days ago
+pv.sdc.aln
+Create pv.sdc.aln
+2 days ago
+qtm.aln
+Create qtm.aln
+8 hours ago
+read.bit.coin.bit.bit.bit.bit.bit.bit.bit.bitmd
+Create read.bit.coin.bit.bit.bit.bit.bit.bit.bit.bitmd
+2 days ago
+readme.bit
+Create readme.bit
+3 days ago
+rename.json
+Create rename.json
+5 days ago
+resync-ingestion.sh
+Update resync-ingestion.sh
+2 days ago
+roll.bit.aln
+Create roll.bit.aln
+yesterday
+rule #1andrule#last.md
+Create rule #1andrule#last.md
+2 days ago
+run-hrm-compliance.ps1
+Update and rename .github/workflows/run-hrm-compliance.ps1 to run-hrm…
+yesterday
+run.bit.bit.bit.bit.bit.nano.aln
+Create run.bit.bit.bit.bit.bit.nano.aln
+2 hours ago
+runner.rego
+Create runner.rego
+3 days ago
+santa.clause.exe
+Create santa.clause.exe
+3 days ago
+scope-definitions.nano.bit.nanobit.aln
+Create scope-definitions.nano.bit.nanobit.aln
+yesterday
+sha256:7eb458b1148b29f31625c269072ef3889350afaaf06561179c254d9c005524ce.nano.aln
+Create sha256:7eb458b1148b29f31625c269072ef3889350afaaf06561179c254d9…
+6 hours ago
+short.cut.Bit.Hub.bit.aln
+Create short.cut.Bit.Hub.bit.aln
+yesterday
+smart-runner.aln
+Create smart-runner.aln
+3 days ago
+super.int.aln
+Create super.int.aln
+7 hours ago
+system.bit
+Create system.bit
+3 days ago
+system.ini
+Update system.ini
+3 days ago
+system.lol
+Create system.lol
+3 days ago
+system.md
+Update system.md
+3 days ago
+truncated.bit.comply.nano.bit.aln
+Create truncated.bit.comply.nano.bit.aln
+2 hours ago
+use.bit.md
+Create use.bit.md
+2 days ago
+userlegal.md
+Create userlegal.md
+yesterday
+values.yaml
+Create values.yaml
+3 days ago
+wecomply.md
+Create wecomply.md
+2 days ago
+wireshark.md
+Create wireshark.md
+2 days ago
+wobitrkflow.rego
+Create wobitrkflow.rego
+yesterday
+workflow-fixer.ps1
+Create workflow-fixer.ps1
+4 days ago
+workflow.rego
+Create workflow.rego
+3 days ago
+wrap.bit.nanobit.aln
+Create wrap.bit.nanobit.aln
+yesterday
+Repository files navigation
+README
+Apache-2.0 license
+Security
+Bit.Hub: Tokenless Compliance-First Orchestration Bit.Hub is a community-driven automation framework for secure, compliant CI/CD across federated clusters, fully detached from GitHub's auth mechanisms.
+
+Features Universal Compliance Core Centralized manifests and Open Policy Agent (OPA) policies enforce workflow hygiene and content standards across all repositories and clusters.
+
+Humor-Reasoning Model Automates context-aware enforcement, supporting compliant adult humor and fictional profanity, governed by policy matrices.
+
+Self-Healing Meta-Corrector Detects and fixes workflow issues, injects permissions, and upgrades actions without relying on GitHub-provided credentials.
+
+Container Compliance Wall Blocks non-compliant container images from being published, enforcing content and label safety.
+
+Federated Runner Mesh Enforces strict runner labeling, supporting scalable deployment across federated VMs with robust access control.
+
+Multi-Language Support Integrates ALN, Lisp, Go, Batchfile, and other languages, governed by modular, policy-driven pipelines.
+
+Audit Trails & Logging All compliance actions and escalations are tracked in tamper-evident logs and JSONL streams.
+
+Community Governance Open versioned policies, transparent reviews, and community-driven contributions.
+
+Getting Started Prerequisites Any Git-based repository (GitHub, Gitea, GitLab, Codeberg, or self-hosted).
+
+Federated runners or VM clusters with the Bit.Hub agent installed.
+
+No personal tokens needed — Bit.Hub uses signed, short-lived capability tokens from its internal Compliance Authority Mesh (CAM).
+
+Installation Clone the Bit.Hub repository to synchronize canonical policies:
+
+bash git clone https://your-mirror.example/Bit.Hub.git Integration Steps Sync Bit.Hub policies in each pipeline.
+
+Activate the Meta-Corrector Workflow for real-time auto-correction and audits.
+
+Deploy the Humor-Reasoning Orchestrator to adjust enforcement dynamically.
+
+Block unsafe container image pushes via registry-level policy enforcement.
+
+Integrate Go Environment Schema validation and OPA policies for game pipelines.
+
+Documentation & Resources All policies, enforcement manifests, compliance workflows, humor-guidelines, and audit logs are available as code inside designated directories for transparent review and use.
+
+Security & Compliance Enforces GDPR, PCI-DSS, SOC2, ISO27001, HIPAA.
+
+Moderation using fictional metadata and age-gating.
+
+Immutable audit records, automated auto-remediation (pull requests and patching), strict runner authentication.
+
+Tokenless orchestration: capability tokens issued by CAM, never by external services or personal accounts.
+
+Community & License MIT Licensed.
+
+Distributed, open, federated development and policy contributions welcomed.
+
+Summary of Fixes Applied
+
+Rewrote all architecture and documentation references to authentication, replacing any GitHub token reliance with internal, signed short-lived tokens (issued by the decentralized compliance mesh).
+
+Updated installation and integration steps for platform agnosticism.
+
+Consolidated policy, compliance, security, and contribution sections to emphasize full independence from GitHub's auth and enhanced community-led compliance.
+
+The framework is now fully hardened, with tokenless authentication, federated orchestration, and transparent community governance.
+
+.bit.fix — BitComply Linux Compliance Wall Bootstrap Overview A minimal, hardened Linux bootstrap and HTTP egress proxy that enforces your compliance wall before any artifact or tool fetch can occur. All outbound requests must pass through the proxy, which allowlists only compliance-approved hosts and forcibly denies (and redacts) requests to GitHub, Google, and other high-risk domains.
+
+Key Components egress-proxy.go: Fast HTTP(S) proxy, explicit allow+deny by domain, strips sensitive headers, only permits https:// and permit-listed FQDNs.
+
+node-bootstrap.sh: One-shot script sets up firewall, directory layout, builds proxy and services from source, and brings all services live with systemd integration.
+
+action-mirroring: Standardizes fetching and caching of artifacts, always via proxy to enforce all compliance policies.
+
+Resilience: If mirrors go down, cached artifacts are still used; fetches to blocked domains fail gracefully.
+
+Design Principles Default-Deny: ufw/nftables enforce network-layer DENY ALL outbound by default, with explicit allows only for pinned mirrors and internal federation nodes.
+
+Application Gate: All HTTP/HTTPS egress is funneled through the compliance proxy, policy-enforced at FQDN level, independent of iptables tricks.
+
+Observability: Egress-proxy logs auditable in journald, with daily log hashes suggested for tamper-evidence.
+
+Critical Example (services/wall/egress-proxy.go) A lightweight HTTP(S) proxy:
+
+Only allows HTTPS.
+
+Explicit ALLOW_DOMAINS and DENY_DOMAINS env-config.
+
+Strips listed headers (e.g., Authorization).
+
+Fast fail for unlisted or explicitly denied hosts.
+
+Easy to keep/extend in Go per your sample.
+
+Bootstrap Script (scripts/virta.sys/node-bootstrap.sh) Activates default-deny outbound firewall, allowing only required mirrors.
+
+Lays out all directories and builds Go binaries.
+
+Installs /etc/systemd/system/* service units for egress proxy, gossipd, (optional) lisp watchdog.
+
+Configures /etc/bit.hub/wall.env as a single source of allow/deny and header-stripping config.
+
+Enables and starts all services.
+
+Best Practices Applied Practice Implementation Example Default-deny everywhere Firewall default deny outbound w/ explicit allow Allowlist by domain/FQDN Env-configurable in wall.env, picks up new mirrors easily Header redaction Redacts Authorization, other secrets Layered defenses App-level proxy + OS-level firewall ("belt and suspenders") Systemd units All services managed as units for easy maintenance Tamper-evident logging Logs stream to journald; hash slices for ledgering Policy discipline gha-pins.aln as the only source of artifact URLs Resilience/Fallbacks Local cache remains available, fail-fast on new/unlisted Usage Notes Integrate with orchestration: All tools (PowerShell, shell, Lisp, etc) should fetch via the local proxy (e.g., curl http://localhost:8088/fetch?url=...).
+
+Centralized manifest discipline: configs/pin/gha-pins.aln is the sole source for off-origin artifacts, kept under source/version control.
+
+Zero token/channel leakage: No connections to GitHub/Google unless explicitly allowlisted; tokens stripped before sending upstream.
+
+Operational Hardening Keep /etc/bit.hub/wall.env under careful audit (and managed centrally).
+
+Maintain a periodic policy/log export to the Bit.Hub ledger for transparency/forensics.
+
+For further hardening, lock down /usr/local/bin/egress-proxy and related system files to root:root and 0644 or stricter.
+
+TL;DR Linux default-deny out, proxy and mirror discipline in, systemd units, detailed logs, easy audit—all ready for compliance-first, platform-agnostic Bit.Hub CI/CD.
+
+No special patching needed for consumers—use the proxy, follow the manifest discipline, and all egress will comply.
+
+If you need a one-shot .deb installer that arranges all this, this architecture is fully packagable—just ask for an installer spec!
+
+For any workflow or client: fetch only through the proxy; never fetch directly unless you are 100% certain the domain is on the allowlist. Absolutely—let’s evolve that generic scaffold into a README worthy of Bit.Hub’s mission. Since Bit.Hub isn’t just another GitHub repo but a federated, compliance-first orchestration layer with personality-infused bots and audit-driven workflows, we’ll reflect that in tone, structure, and clarity. Here's a refined and purpose-aligned README.md draft:
+
+🧠 Bit.Hub
+Bit.Hub is the sovereign backbone for federated CI/CD orchestration, bot-mintable quantum-shortcuts, and joyful compliance enforcement. Designed for resilience, personality, and platform independence, Bit.Hub transforms brittle workflows into self-healing, audit-heavy rituals that celebrate every successful run.
+
+🚀 Project Vision
+Bit.Hub is more than a repo—it's a living governance mesh. It powers:
+
+🛠️ Manifest-driven orchestration across GitHub, virta.sys, and standalone nodes
+🤖 Personality-infused bots that enforce compliance, repair failures, and celebrate success
+🔐 Registry-backed nano-bit assets and cryptographically signed quantum-shortcuts
+📜 Living legal frameworks for ethics, security, and creative autonomy
+🎮 Game-world logic for rescue, renaming, and milestone celebration
+✨ Core Features
+Fail-open CI/CD: Workflows never block—Bit.Hub repairs, renames, and logs every fix
+Bot Frameworks: Mintable agents with personality tokens and compliance logic
+Audit Trails: Every action is logged, signed, and propagated across clusters
+Legal Mesh: Modular, self-enforcing frameworks for federated governance
+Creative Hooks: Humor, celebration, and decompression baked into every build
+🧰 Installation
+git clone https://github.com/Doctor0Evil/Bit.Hub.git
+cd Bit.Hub
+Then follow the manifest instructions in setup/ or docs/ to initialize your node, runner, or bot registry.
+
+🌀 Usage
+Bit.Hub workflows are modular and adaptive. Typical flow:
+
+Create a new branch for your feature or fix
+Use command-sheets or manifests to register your bot or asset
+Push changes and let Bit.Hub orchestrate the repair, audit, and celebration
+Open a pull request with a clear changelog and compliance notes
+🤝 Contributing
+We welcome contributions that expand Bit.Hub’s resilience, personality, and governance. To contribute:
+
+# Fork and clone
+git clone https://github.com/YOUR_USERNAME/Bit.Hub.git
+cd Bit.Hub
+
+# Create a feature branch
+git checkout -b feature/YourFeatureName
+
+# Commit, push, and open a PR
+Please include:
+
+ ActivS
+
+Licensey policy
+ Security policykages
+No packages published
+Publish your first packagears
+Watchers
+ 0 
+ A
+ Reawatching
+Fork
+Deployments
+17ense
+Resourcesorksa
+ 0 ss
+Reledmeity
+🧭 Goververned by living legal manifests. Updates propagate across clusters via signed commits and bot enforcement. To propose changes, submit a PR to legal/frameworks/.
+
+Would you like to 
+ production
++ 
+Bit.Hub operates under a modular licensing framework. See LICENSE.md and legal/ for usage rights, personality-vector terms, and federation clauses.
+t
+ 0 fpache-2.0 license
+Securiases 12
+Nano.Bit development!
+Latest
+1 hour ago
++ 11 releases
+Pa
+A changelog entry in docs/changelog.md
+Compliance notes or legal updates if applicable
+Humor modules or celebration hooks if relevant 🎉
+📜 Lic
+Aboutadd badges, diagrams, or a quickstart bot example next? I can also help draft the CONTRIBUTING.md or compliance manifest if you're ready to expand the repo’s onboarding flow.
+
+Secure, cross-platform Git credential storage with authentication to GitHub, Azure Repos, and other popular Git hosting services.
+s16 deployments
+Languagesnance & Compliance
+Bit.Hub is go
+LOLCODE
+71.9%
+ 
+PowerShell
+6.8%
+ 
+Open Policy Agent
+5.3%
+ 
+Shell
+4.6%
+ 
+Common Lisp
+3.0%
+ 
+C#
+2.5%
+ 
+Other
+5.9%
+Footer
+© 2025 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+Doctor0Evil/Bit.Hub: Secure, cross-platform Git credential storage with authentication to GitHub, Azure Repos, and other popular Git hosting services.
