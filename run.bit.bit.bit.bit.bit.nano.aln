@@ -1,0 +1,44 @@
+Herep 6: 
+
+**Core Logic Preserved:**
+- Folder creation and navigation
+- Package download and integrity check
+- Extraction process
+- Runner configuration and execution
+
+***
+eion
+# Download runner package
+Invoke-W
+## Usage in Workflow 1: Create folder & navigate
+# StStep 2: ebRequest -Uri "https://github.com/actions/runner/releases/download/v2.328.0/actions-runner-win-x64-2.328.0.zip" -OutFile actions-runner-win-x64-2.328.0.zip
+s a **truncate Configure runner
+./config.cm
+# Step 3: Validate SHA256 hash
+if((Get-FileH
+mkdir act
+
+## Truncated GitHub Self-Hosted Runner Script
+d and clean version** of your PowerShell script, preserving only essential operations for installing and configuring a GitHub Actions self-hosted runner on Windows. All non-essential comments and excessive verbosity are removed, retaining only essential steps for scientific or experimental development contexts.
+
+***
+ash -Path actions-runner-win-x64-2.328.0.zip -Algorithm SHA256).Hash.ToUpper() -ne 'A73AE192B8B2B782E1D90C08923030930B0B96ED394FE56413A073CC6F694877'){ throw 'Computed checksum did not match' }
+
+# Step 4: Extract installer
+Add-Type -AssemblyName System.IO.Compression. id --url https://github.com/Doctor0Evil/Bit.Hub --token BT3OJSNERNQQUEFPCBESCOLIXCHAE
+
+# SteFileSystem
+[System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD/actions-runner-win-x64-2.328.0.zip", "$PWD")
+Start runner
+./run.cmd
+```
+# Step 5:
+```powershells-runner
+
+For each job in your workflow file, specify:pions-runner
+cd act
+```yaml
+runs-on: self-hosted
+```
+
+This truncated script excludes non-scientific commentary and retains only the necessary operations for deploying and running the GitHub Actions self-hosted runner.
