@@ -1,0 +1,28 @@
+tions/check: is not a valid attribute name: .gitattributes:55
+  path: is not a valid attribute name: .gitattributes:57
+  path: is not a valid attribute name: .gitattributes:59
+  path: is not a vhttps://github.com/Doctor0Evil/Bit.H
+/usr/bin/git log -1 --format=%H
+4bdf0ea05951f3ae8ef75342b448fae673ac1dbf
+1s
+Run set -euo piub
+   * [new ref]         4bdf0ea05951f3ae8ef75342b448fae673ac1dbf -> origin/main
+Determining the checkout info
+/usr/bin/git sparse-checkout disable
+/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Checking out the ref
+  /usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+  > is not a valid attribute name: .gitattributes:3
+  handling, is not a valid attalid attribute name: .gitattributes:61
+  SmartRunner/Laughter.exe is not a valid me: .gitattributes:5
+  # is not a valid attribute name: .gitattributes:36
+  attribute name: .gitattributes:74
+  auto‑resolved is not a valid attribute name: .gitattributes:75
+  strict/paranoid, is not a valid attribute name: .gitattributes:76
+  Switched to a new branch 'main'LE: .n/git -c {{ is not a valid attribute name: .gitattributes:48
+  ac
+  branch 'main' set up to track 'origin/main'.efail
+  % Total    % Received % Xferd  Average Speed   Time    Tprotocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +4bdf0ea05951f3ae8ef75342b448fae673ac1dbf:refs/remotes/origin/main
+  From ribute na# is not a valid attribute name: .gitattributes:37
+  wf-$out@v4 is not a valid attribute name: .gitattributes:51
+  path
