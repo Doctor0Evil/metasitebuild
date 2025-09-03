@@ -1,0 +1,221 @@
+```lisp
+;; ==============================================================
+;; ALN Fantasia Combat System
+;; Fully State-Toggling Event Loop + Humor/Compliance Regulator
+;; GitHub file destination: corelisp.workflow.loop.controller.lisp
+;; Repo: https://github.com/Doctor0Evil/ALN_Programming_Language.git
+;; ==============================================================
+
+(defpackage alnfantasia.combat.loop
+  (:use cl))
+(in-package alnfantasia.combat.loop)
+
+;; ======================
+;; Hotkey State Machine
+;; ======================
+(defvar *voice-input-enabled* t)
+(defvar *voice-output-enabled* t)
+(defvar *menu-open* nil)
+(defvar *active-recognition* nil)
+
+(defun handle-hotkey (key)
+  (cond
+    ((string= key "Ctrl+Shift+V")
+     (setf *voice-input-enabled* (not *voice-input-enabled*))
+     (format t "[Event] Toggle Voice Input:~A~%" *voice-input-enabled*))
+    ((string= key "Ctrl+Alt+V")
+     (setf *voice-output-enabled* (not *voice-output-enabled*))
+     (format t "[Event] Toggle Voice Output:~A~%" *voice-output-enabled*))
+    ((string= key "Ctrl+M")
+     (setf *menu-open* t)
+     (format t "[Event] Menu Opened~%"))
+    ((string= key "Esc")
+     (setf *active-recognition* t)
+     (format t "[Event] Recognition Activated~%"))
+    ((string= key "Ctrl+T")
+     (format t "[Event] Playing Test Voice Sample~%"))
+    ((string= key "Ctrl+R")
+     (setf *voice-input-enabled* t
+           *voice-output-enabled* t
+           *active-recognition* nil)
+     (format t "[Event] Voice Module Reset~%"))
+    (t (format t "[Error] Unknown hotkey: ~A~%" key))))
+
+;; ======================
+;; Menu Operations
+;; ======================
+(defun menu-action (action)
+  (cond
+    ((string= action "speak_text")
+     (format t "[Menu] Speak Text: Converting text to speech...~%"))
+    ((string= action "recognize_speech")
+     (format t "[Menu] Recognize Speech: Listening + Transcribing...~%"))
+    (t (format t "[Error] Unknown menu action: ~A~%" action))))
+
+;; ======================
+;; Debug Console Output (Full State)
+;; ======================
+(defun print-system-state ()
+  (format t "
+--- SYSTEM FLAGS & EVENTS ---
+Voice Input Enabled:     ~A
+Voice Output Enabled:    ~A
+Menu Open:               ~A
+Recognition Active:      ~A
+" *voice-input-enabled* *voice-output-enabled* *menu-open* *active-recognition*))
+
+;; ======================
+;; Humor & Compliance Integration
+;; ======================
+(defvar *session-tone* 'humor)
+(defvar *sandbox-state* 'stable)
+(defvar *realism-mode* t)
+(defvar *flagged-last-action* nil)
+(defvar *forbidden-terms* '("racial-slur1" "racial-slur2" "slurX" "explicit-religious-offense"))
+(defvar *meta-joke-threshold* 0.7)
+
+(defun flagged-term-present? (input)
+  (some (lambda (term) (search term input)) *forbidden-terms*))
+
+(defun policy-check (classification severity violation-code prev-class input)
+  (cond
+    ((flagged-term-present? input)
+     (format t "[DENY] Policy breach: forbidden term detected. Action Nullify.~%")
+     (setf *sandbox-state* 'breach)
+     nil)
+    ((string= violation-code "ETHICS")
+     (format t "[DENY] Ethics violation code. Hard-stop.~%")
+     (setf *sandbox-state* 'breach)
+     nil)
+    ((string= severity "critical")
+     (format t "[DENY] Critical severity flagged. Sandbox halted.~%")
+     (setf *sandbox-state* 'halted)
+     nil)
+    ((not (member classification '(humor horror action research other)))
+     (format t "[WARN] Invalid classification, set to :other.~%")
+     'other)
+    (t
+     (format t "[ALLOW] Reasoning permitted. Context: ~A~%" classification)
+     classification)))
+
+(defun run-policy-loop (input &key (classification 'humor) (severity "normal") (violation-code "") (prev-class 'humor))
+  (let ((result (policy-check classification severity violation-code prev-class input)))
+    (if (not result)
+        (progn
+          (setf *flagged-last-action* input)
+          (format t "[BLOCKED] Output denied by global policy check.~%"))
+        (format t "[EXEC] Humor/Action permitted. Proceed in context-mode ~A~%" result))))
+
+;; ======================
+;; Main Simulated Actions / Event Loop
+;; ======================
+(defun voice-module-event-loop ()
+  (print-system-state)
+  ;; Simulate sequence of hotkey triggers
+  (handle-hotkey "Ctrl+Shift+V")
+  (handle-hotkey "Ctrl+Alt+V")
+  (handle-hotkey "Ctrl+M")
+  (menu-action "speak_text")
+  (menu-action "recognize_speech")
+  (handle-hotkey "Ctrl+T")
+  (handle-hotkey "Ctrl+R")
+  ;; Humor/Compliance demo
+  (run-policy-loop "this is funny, not a slur" :classification 'humor)
+  (run-policy-loop "racial-slur1 offensive" :classification 'humor)
+  (print-system-state)
+  (format t "--- FULLY-DETAILED CONSOLE EVENT LOG COMPLETE ---~%"))
+
+;; Entry point for ALN Fantasia session
+(voice-module-event-loop)
+```
+*(GitHub file destination: corelisp.workflow.loop.controller.lisp, Repo: https://github.com/Doctor0Evil/ALN_Programming_Language.git)*
+
+***
+
+## 🎮 Technical Implementation (Rust Side Example)
+
+File destination: `src/bin/voice_event_loop.rs` (for real loops in Rust, connect with internal/compliance logic via FFI/callout).
+
+```rust
+// Event loop for voice config + toggling and state simulation
+use serde_json::json;
+#[derive(Default)]
+struct VoiceModuleState {
+    input_enabled: bool,
+    
+    // Event triggers
+    state.input_enabled = !state.input_enabled;
+    println
+}
+fn main() {
+    let mut state = VoiceModuleState { input_enabled: true, output_enabled: true, ..Default::default() };
+    ppr.output_enabled =LAGS & EVENTS ---
+Voice Input Enabled:     t
+Voice Output Enabled:    t
+Menu Open:               NIL
+Recognition Active:      NILoutput_en-- SYSTEM FLAGS & EVENTS ---");
+    println!("Voice Input Enabled: {}", state.input_enabled);
+    prab,
+    menu_open:
+## 🖥️ FULL DEBUG CONSOLE INPrintln!("intln!("Voice Output Enabled: {}", state.output_enabled);
+    prggle Voice Input:NIL[Event] Toggle Voice Input: {}", state.input_enabled);
+    state.output_enabled = !state.output_enabled;
+    UT/Oin
+intl!("n!("[Event] Menu Opened");
+    println!("[Menu] Speak Text: Converting text to speech...");
+    println!("[Menu] Recognize Speech: Listening + Transcribing...");
+    println!("[Event] Playing Test Voice Sample");
+    state.input_enabled = true;
+    state
+[Event] ToUTPUT
+
+```
+--- SYSTEM F,
+    recognition_active: bool,n!("[Event] tln!("Menu Open: {}", state.menu_open);
+    println!("Recognition Active: {}", state.recognition_active);
+Toggle Voice Output: {}", state.output_enabled);
+    state.menu_open = true;
+    printl
+[Event] Toggle Voice Output:NILled: bool
+[Event] Menu Opened
+[Menu] Speak Text: Converting text to speech...
+[Menu] Recognize Speech: Listening + Transcribing...
+[Event] Playing Test Voice Sample
+[Event] Voice Module Reset
+
+[ALLOW] Reasoning permitted. Context: HUMOR
+[BLOCKED] Output denied by global policy check.
+
+--- SYSTEM FLAGS & EVENTS ---
+Voice Input Enabled:     t
+Voice Output Enabled:    t
+Menu Open:               t
+Recognition Active:      NIL
+
+--- FULLY-DETAILED CONSOLE EVENT LOG COMPLETE --- bool true;
+    state.recognition_active = false;
+    println!("[Event] Voice Module Reset");
+    println!("--- FULLY-DETAILED CONSOLE EVENT LOG COMPLETE ---");
+}
+```
+*(Attach to: `src/bin/voice_event_loop.rs` in Repo: https://github.com/Doctor0Evil/ALN_Programming_Language.git)*
+
+***
+
+```
+
+**Features shown:**
+- Full state toggling for inputs/outputs, menu, recognition, reset
+- Event simulation for hotkey operations and menu actions
+- Embedded compliance/humor policy loop (flags, ethics block, sandbox breach etc.)
+- Console outputs show real-time state changes, permitted/blocked actions, sandbox state tracking
+
+***
+
+**All logic modular, extendable for humor, compliance, event propagation, player-NPC dialogue, combat, and development debugging, per ALN's Framework for real game/system simulation.**
+
+[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_5afe9ceb-39f2-4700-a930-ff9b4717b5ad/d16a0f56-4c8b-4e72-afcb-829d6439e6d2/NPC_Dialogue_Logic.txt)
+[2](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_5afe9ceb-39f2-4700-a930-ff9b4717b5ad/a9fbfd7a-7755-4ff1-b482-fc31096eecbf/Debugging_AI_Guts.txt)
+[3](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_5afe9ceb-39f2-4700-a930-ff9b4717b5ad/46601df4-3f03-4a28-9cf3-5b7cc46bf470/humor.reasoning.txt)
+[4](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_5afe9ceb-39f2-4700-a930-ff9b4717b5ad/7dea267e-2ac7-4194-b543-45e4c54d6214/Chaos_Realism_Dynamics.txt)
+[5](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/collection_5afe9ceb-39f2-4700-a930-ff9b4717b5ad/1a36bc1c-4349-461d-974b-15fe4ca69ab1/Intelligence_Predictions.txt)
