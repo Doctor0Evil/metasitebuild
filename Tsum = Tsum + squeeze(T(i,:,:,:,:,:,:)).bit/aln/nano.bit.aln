@@ -1,0 +1,440 @@
+
+% Initialize DSL
+Q = quantum_dsl();
+
+% 1) Build a 2-qubit Bell state and verify marginals are maximally mixed
+[psi, rho] = Q.example_bell();
+rhoA = Q.ptr(rho, 2, [2]);   % trace out wire-2
+rhoB = Q.ptr(rho, 2, [1]);   % trace out wire-1
+disp('rhoA (should be I/2):'); disp(rhoA);
+disp('rhoB (should be I/2):'); disp(rhoB);
+
+% 2) Add rotation and controlled-phase to create arbitrary entanglement
+n = 2;
+psi = Q.ket([0 0]);
+Ulayer = {Tsum = Tsum + squeeze(T(i,:,:,:,:,:,:)).# Quantum computing equations and a MATLAB mini‑DSL
+
+Below is a compact-but-extensible MATLAB mini‑DSL that encodes core quantum‑computing mathematics as executable code, paired with explicit equations. The goal is to make the math legible and the implementation directly usable, so you can “apply new definitions to syntax” by adding operators, gates, channels, and measurement models as first‑class functions.
+
+---
+
+## Mathematical foundations
+
+- **State vector (pure state):**
+  
+  \[
+  |\psi\rangle \in \mathbb{C}^{2^n}, \quad \langle \psi | \psi \rangle = 1
+  \]
+
+- **Computational basis:**
+  
+  \[
+  |0\rangle = \begin{bmatrix}1\\0\end{bmatrix},\quad |1\rangle = \begin{bmatrix}0\\1\end{bmatrix},\quad |b_1 b_2 \cdots b_n\rangle = |b_1\rangle \otimes \cdots \otimes |b_n\rangle
+  \]
+
+- **Density operator (mixed or pure):**
+  
+  \[
+  \rho \in \mathbb{C}^{2^n \times 2^n},\quad \rho \succeq 0,\quad \mathrm{Tr}(\rho)=1,\quad \text{pure: } \rho = |\psi\rangle\langle\psi|
+  \]
+
+- **Unitary evolution:**
+  
+  \[
+  |\psi'\rangle = U|\psi\rangle,\quad U^\dagger U = I;\qquad \rho' = U \rho U^\dagger
+  \]
+
+- **Tensor product (Kronecker):**
+  
+  \[
+  A \otimes B = \mathrm{kron}(A,B),\quad \text{and}\quad (A\otimes B)(C\otimes D)=(AC)\otimes(BD)
+  \]
+
+- **Single‑qubit gates:**
+  
+  \[
+  X=\begin{bmatrix}0&1\\1&0\end{bmatrix},\ 
+  Y=\begin{bmatrix}0&-i\\i&0\end{bmatrix},\ 
+  Z=\begin{bmatrix}1&0\\0&-1\end{bmatrix},\ 
+  H=\tfrac{1}{\sqrt{2}}\begin{bmatrix}1&1\\1&-1\end{bmatrix}
+  \]
+
+- **Rotations:**
+  
+  \[
+  R_x(\theta)=e^{-i\theta X/2},\quad R_y(\theta)=e^{-i\theta Y/2},\quad R_z(\theta)=e^{-i\theta Z/2}
+  \]
+
+- **Controlled unitary (control c, target t):**
+  
+  \[
+  \mathrm{CU} = |0\rangle\langle 0|_c \otimes I_t + |1\rangle\langle 1|_c \otimes U_t
+  \]
+
+- **Measurement (projective, Born rule):**
+  
+  \[
+  p_k=\langle\psi| \Pi_k |\psi\rangle,\quad \rho \mapsto \frac{\Pi_k \rho \Pi_k}{p_k}
+  \]
+
+- **Kraus / CPTP noise channel:**
+  
+  \[
+  \mathcal{E}(\rho)=\sum_j K_j \rho K_j^\dagger,\quad \sum_j K_j^\dagger K_j=I
+  \]
+
+- **Amplitude damping (rate \(\gamma\)):**
+  
+  \[
+  K_0=\begin{bmatrix}1&0\\0&\sqrt{1-\gamma}\end{bmatrix},\ 
+  K_1=\begin{bmatrix}0&\sqrt{\gamma}\\0&0\end{bmatrix}
+  \]
+
+- **Depolarizing channel (single‑qubit, prob p):**
+  
+  \[
+  \mathcal{E}(\rho)=(1-p)\rho + \frac{p}{3}\left(X\rho X+Y\rho Y+Z\rho Z\right)
+  \]
+
+- **Hamiltonian dynamics:**
+  
+  \[
+  U(t)=e^{-i H t},\quad \rho(t)=U(t)\rho(0)U^\dagger(t)
+  \]
+
+- **Parameter‑shift gradient (for gates \(e^{-i\theta P/2}\), \(P^2=I\)):**
+  
+  \[
+  \frac{\partial}{\partial \theta}\langle O\rangle_\theta = \tfrac{1}{2}\left(\langle O\rangle_{\theta+\frac{\pi}{2}} - \langle O\rangle_{\theta-\frac{\pi}{2}}\right)
+  \]
+
+- **Quantum Fourier transform on \(n\) qubits:**
+  
+  \[
+  \mathrm{QFT}|x\rangle=\frac{1}{\sqrt{2^n}}\sum_{k=0}^{2^n-1} e^{2\pi i xk / 2^n}|k\rangle
+  \]
+
+- **Partial trace over subsystem \(B\):**
+  
+  \[
+  \rho_A=\mathrm{Tr}_B(\rho_{AB})=\sum_j (\langle j|_B \otimes I_A)\,\rho_{AB}\,(|j\rangle_B\otimes I_A)
+  \]
+
+---
+
+## MATLAB mini‑DSL implementing the equations
+
+```matlab
+% quantum_dsl.m
+% A compact MATLAB mini-DSL for quantum computing with equations encoded as code.
+% Extend by adding gates, channels, and measurement models as new functions.
+
+%% =======================
+%  Basic constants & utils
+%  =======================
+function Q = quantum_dsl()
+    Q.I  = eye(2);
+    Q.X  = [0 1; 1 0];
+    Q.Y  = [0 -1i; 1i 0];
+    Q.Z  = [1 0; 0 -1];
+    Q.H  = (1/sqrt(2))*[1 1; 1 -1];
+    Q.S  = [1 0; 0 1i];
+    Q.T  = [1 0; 0 exp(1i*pi/4)];
+
+    Q.ket0 = [1;0];
+    Q.ket1 = [0;1];
+
+    % Rotations: Rx, Ry, Rz
+    Q.Rx = @(theta) expm(-1i*theta/2 * Q.X);
+    Q.Ry = @(theta) expm(-1i*theta/2 * Q.Y);
+    Q.Rz = @(theta) expm(-1i*theta/2 * Q.Z);
+
+    % Universal U3(theta, phi, lambda)
+    Q.U3 = @(theta,phi,lambda) [cos(theta/2), -exp(1i*lambda)*sin(theta/2); ...
+                                 exp(1i*phi)*sin(theta/2), exp(1i*(phi+lambda))*cos(theta/2)];
+
+    % Tensor (Kronecker) product for a cell array of matrices
+    Q.kronN = @(varargin) kronN(varargin{:});
+
+    % Build n-qubit identity
+    Q.In = @(n) eye(2^n);
+
+    % Embed a single-qubit gate on wire t among n wires (1-indexed, MSB=1)
+    Q.on = @(U, n, t) on(U, n, t);
+
+    % Controlled-U between control c and target t (1-indexed)
+    Q.CU = @(U, n, c, t) controlU(U, n, c, t);
+
+    % Apply a sequence of unitaries to a state vector
+    Q.apply = @(psi, Us) apply_all(psi, Us);
+
+    % Density matrix from state vector
+    Q.dm = @(psi) psi*psi';
+
+    % Projective measurement on wire k, returns (p0, p1, post_rho0, post_rho1)
+    Q.measureZ = @(rho, n, k) measureZ(rho, n, k);
+
+    % Partial trace over a set of wires (trace out wires in 'trace_wires')
+    Q.ptr = @(rho, n, trace_wires) partial_trace(rho, n, trace_wires);
+
+    % Hamiltonian evolution U=expm(-1i*H*t)
+    Q.Ut = @(H, t) expm(-1i*H*t);
+
+    % Kraus channel application: E(rho)=sum_j K_j rho K_j^dagger
+    Q.kraus = @(rho, Kcell) kraus_apply(rho, Kcell);
+
+    % Common noise channels
+    Q.amp_damp = @(gamma) { [1 0; 0 sqrt(1-gamma)], [0 sqrt(gamma); 0 0] };
+    Q.depolarize = @(p) depolarize_kraus(p, Q);
+
+    % Parameter-shift expectation gradient for single parameter gate in circuit
+    Q.param_shift = @(expect_fun, theta) 0.5*(expect_fun(theta+pi/2)-expect_fun(theta-pi/2));
+
+    % QFT on n qubits (unitary matrix)
+    Q.QFT = @(n) qft(n);
+
+    % Convenience: basis state |b1 b2 ... bn>, b1 MSB
+    Q.ket = @(bits) basis_ket(bits);
+
+    % Place multi-qubit gate on specific contiguous target wires (low-level)
+    Q.embed = @(U, n, targets) embed(U, n, targets);
+
+    % Example controlled-X (i.e., CNOT)
+    Q.CNOT = @(n,c,t) Q.CU(Q.X, n, c, t);
+
+    % Example: build Bell state |Phi+> and return state and density
+    Q.example_bell = @() example_bell(Q);
+end
+
+%% ================
+%  Helper functions
+%  ================
+function K = kronN(varargin)
+    if numel(varargin)==1 && iscell(varargin{1}), arr = varargin{1}; else, arr = varargin; end
+    K = 1;
+    for i=1:numel(arr)
+        K = kron(K, arr{i});
+    end
+end
+
+function Ufull = on(U, n, t)
+    % Embed single-qubit U on target wire t in an n-qubit register.
+    % Convention: wire 1 is MSB (leftmost in kron chain).
+    ops = cell(1,n);
+    for k=1:n
+        ops{k} = eye(2);
+    end
+    ops{t} = U;
+    Ufull = kronN(ops{:});
+end
+
+function Uctrl = controlU(U, n, c, t)
+    % Controlled-U on wires c (control) and t (target).
+    % Projectors on control:
+    P0 = [1 0; 0 0];
+    P1 = [0 0; 0 1];
+    Id = eye(2^n);
+    % Build |0><0|_c \otimes I and |1><1|_c \otimes U_t
+    term0 = embed_on_wire(P0, n, c);
+    term1 = embed_on_wire(P1, n, c) * embed_on_wire_target(U, n, t, c);
+    Uctrl = term0 + term1;
+end
+
+function E = embed_on_wire(A, n, wire)
+    ops = repmat({eye(2)},1,n);
+    ops{wire} = A;
+    E = kronN(ops{:});
+end
+
+function E = embed_on_wire_target(U, n, t, c)
+    % Embed U on target t, identity elsewhere, independent of control index.
+    ops = repmat({eye(2)},1,n);
+    ops{t} = U;
+    E = kronN(ops{:});
+end
+
+function psi_out = apply_all(psi, Us)
+    % Us is a cell array of unitaries to apply right-to-left (circuit order).
+    psi_out = psi;
+    for k = 1:numel(Us)
+        psi_out = Us{k} * psi_out;
+    end
+end
+
+function [p0, p1, rho0, rho1] = measureZ(rho, n, k)
+    % Projective Z-basis measurement on wire k.
+    P0 = [1 0; 0 0]; P1 = [0 0; 0 1];
+    M0 = embed_on_wire(P0, n, k);
+    M1 = embed_on_wire(P1, n, k);
+    p0 = real(trace(M0*rho));
+    p1 = real(trace(M1*rho));
+    if p0 > 0
+        rho0 = M0*rho*M0' / p0;
+    else
+        rho0 = zeros(size(rho));
+    end
+    if p1 > 0
+        rho1 = M1*rho*M1' / p1;
+    else
+        rho1 = zeros(size(rho));
+    end
+end
+
+function rhoA = partial_trace(rho, n, trace_wires)
+    % Partial trace over wires in trace_wires (1-indexed).
+    keep = setdiff(1:n, trace_wires);
+    dims = 2*ones(1,n);
+    rhoA = ptr_general(rho, dims, keep);
+end
+
+function rhoA = ptr_general(rho, dims, keep_idx)
+    % General partial trace over a composite Hilbert space with dims.
+    N = numel(dims);
+    dim_total = prod(dims);
+    if any(size(rho) ~= dim_total), error('rho has wrong dimension'); end
+    % Reshape into 2N indices: (out1,...,outN; in1,...,inN)
+    rho_tensor = reshape(rho, [dims, dims]);
+    trace_idx = setdiff(1:N, keep_idx);
+    for t = trace_idx
+        rho_tensor = tens_trace_pair(rho_tensor, t, N);
+        N = N - 1;
+        dims(t) = [];
+        keep_idx(keep_idx>t) = keep_idx(keep_idx>t)-1;
+    end
+    d_keep = prod(dims);
+    rhoA = reshape(rho_tensor, [d_keep, d_keep]);
+end
+
+function T = tens_trace_pair(T, pos, N)
+    % Trace over pair of indices (pos on outputs, pos on inputs).
+    % Move target indices to front, sum diagonals, then reshape back.
+    order = [pos, 1:pos-1, pos+1:N, N+pos, N+1:N+pos-1, N+pos+1:2*N];
+    T = permute(T, order);
+    d = size(T,1);
+    Tsum = zeros(size(T,2), size(T,2), 'like', T);
+    for i=1:d
+        Tsum = Tsum + squeeze(T(i,:,:,:,:,:,:)).'; % sum over matched index
+    end
+    T = Tsum;
+end
+
+function rho_out = kraus_apply(rho, Kcell)
+    rho_out = zeros(size(rho), 'like', rho);
+    for j=1:numel(Kcell)
+        Kj = Kcell{j};
+        rho_out = rho_out + Kj * rho * Kj';
+    end
+end
+
+function K = depolarize_kraus(p, Q)
+    % Single-qubit depolarizing noise as Kraus operators
+    % E(rho) = (1-p)*rho + p/3 (XrhoX + YrhoY + ZrhoZ)
+    a = sqrt(1 - p);
+    b = sqrt(p/3);
+    K = { a*eye(2), b*Q.X, b*Q.Y, b*Q.Z };
+end
+
+function U = qft(n)
+    N = 2^n;
+    omega = exp(2i*pi/N);
+    U = zeros(N);
+    for x = 0:N-1
+        for k = 0:N-1
+            U(k+1, x+1) = omega^(x*k) / sqrt(N);
+        end
+    end
+end
+
+function ket = basis_ket(bits)
+    % bits is vector like [b1 b2 ... bn], b1 MSB.
+    n = numel(bits);
+    idx = 0;
+    for k=1:n
+        idx = idx*2 + (bits(k)~=0);
+    end
+    ket = zeros(2^n,1); ket(idx+1)=1;
+end
+
+function Uemb = embed(U, n, targets)
+    % Embed a multi-qubit gate U onto specified contiguous target wires.
+    % targets: ascending list, length m, must be contiguous for this helper.
+    m = numel(targets);
+    if any(diff(targets)~=1), error('Targets must be contiguous for embed().'); end
+    left = targets(1)-1; right = n - targets(end);
+    Uemb = kron(eye(2^left), kron(U, eye(2^right)));
+end
+
+function [psi, rho] = example_bell(Q)
+    n = 2;
+    psi = Q.ket([0 0]);
+    U = { Q.on(Q.H, n, 1), Q.CNOT(n,1,2) };
+    psi = Q.apply(psi, U);
+    rho = Q.dm(psi);
+end
+```
+
+---
+
+## Examples and usage
+
+```matlab
+% Initialize DSL
+Q = quantum_dsl();
+
+% 1) Build a 2-qubit Bell state and verify marginals are maximally mixed
+[psi, rho] = Q.example_bell();
+rhoA = Q.ptr(rho, 2, [2]);   % trace out wire-2
+rhoB = Q.ptr(rho, 2, [1]);   % trace out wire-1
+disp('rhoA (should be I/2):'); disp(rhoA);
+disp('rhoB (should be I/2):'); disp(rhoB);
+
+% 2) Add rotation and controlled-phase to create arbitrary entanglement
+n = 2;
+psi = Q.ket([0 0]);
+Ulayer = {
+    Q.on(Q.Ry(pi/3), n, 1), ...
+    Q.on(Q.Rz(pi/5), n, 2), ...
+    Q.CU(Q.Rz(pi/2), n, 1, 2)
+};
+psi = Q.apply(psi, Ulayer);
+rho = Q.dm(psi);
+
+% 3) Apply depolarizing noise on target qubit 2
+Ksingle = Q.depolarize(0.1);
+% Lift Kraus to 2-qubit by embedding on wire 2
+Ktwo = cellfun(@(K) Q.embed(K, n, [2]), Ksingle, 'UniformOutput', false);
+rho_noisy = Q.kraus(rho, Ktwo);
+
+% 4) Projective measurement on wire 1
+[p0, p1, rho0, rho1] = Q.measureZ(rho_noisy, n, 1);
+fprintf('p0=%.4f, p1=%.4f\n', p0, p1);
+
+% 5) Hamiltonian evolution under ZZ coupling: H = J Z⊗Z
+J = 1.0;
+H = kron(Q.Z, Q.Z) * J;
+U_t = Q.Ut(H, 0.3);
+rho_evolved = U_t * rho_noisy * U_t';
+
+% 6) Parameter-shift gradient for a single-param expectation
+% Build a circuit: Ry(theta) on qubit-1, then measure <Z ⊗ I>
+obs = kron(Q.Z, Q.I);
+expect_fun = @(theta) real((Q.apply(Q.ket([0 0]), {Q.on(Q.Ry(theta),2,1)}))' * obs * ...
+                           (Q.apply(Q.ket([0 0]), {Q.on(Q.Ry(theta),2,1)})));
+grad = Q.param_shift(expect_fun, 0.2);
+fprintf('Parameter-shift gradient at theta=0.2: %.6f\n', grad);
+
+% 7) QFT check on 3 qubits: U should be unitary
+Uqft = Q.QFT(3);
+fprintf('||U''*U - I|| = %.2e\n', norm(Uqft'*Uqft - eye(8)));
+```
+
+---
+
+## Notes on extensibility
+
+- **Add gates:** Define new unitaries as functions returning 2×2 or 4×4 matrices, then embed with Q.on or Q.embed.
+- **Add channels:** Provide Kraus sets K as cell arrays and lift to n‑qubits with Q.embed; compose by concatenation.
+- **Add observables:** Any Hermitian matrix can be measured as an expectation value via \(\langle \psi | O | \psi \rangle\) or \(\mathrm{Tr}(O\rho)\).
+- **New syntax:** Wrap idioms (e.g., layer builders, circuit manifests, cost functions) into higher‑order functions so “syntax” is defined by composition, not parser hacks.
+
+If you want, I can layer a circuit “manifest” format on top (JSON/YAML parsed in MATLAB) so circuits, noise, and measurements are declared as data and compiled into unitaries and channels at run time.
