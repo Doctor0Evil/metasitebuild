@@ -1,0 +1,47 @@
+
+
+```
+QSC-REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY
+```
+
+***
+
+
+- **QSC**: Quantum Shortcut, per registry convention[1]
+- **REG**: Registry-backed, append-only[1]
+- **BOT-MINT**: Bot-created, on-demand minting[1]
+- **ED25519**: Signing/verification curve[1]
+  - `.bit.bots.create.bit.qtm.sht.cuts.bit QSC-REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY`
+- Direct asset path:  
+  - `.bit/assets/qsc/QS
+- **SIGNED-VER**: Signed and verifiable[1]
+- **INDEX**: Registry/index entry[1]
+- **2048**: Default recursive chain depth (shortcuts can override)[1]
+- **ALN-BIT-HUB**: Explicit context: ALN macro, Bit.Hub namespace[1]
+- **READY**: Certified for nano-bit activation, registry roundtrip[1]
+
+***
+
+## Usage Example
+***
+
+## Validity and Compliance
+
+- Fully **bot-mintable**; interpreted safely in all registry/dispatch workflows[1]
+- Format prevents **collision**, allows **future-compat** expansion (e.g. additional parameters)[1]
+- Directly **parseable** for governance/OPA policy checks (QSC, depth, type, namespace, status)[1]
+- Works as a **nano-bit**: ≤64 ASCII/UTF-8 characters, uppercased, registry-sanctioned[1]
+
+**File-destination-path (Bit.Hub):**
+`.bit/assets/qsc/QSC-REG-BOT-M
+
+***
+## Component Breakdown
+
+- Registry call:  C-REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY/QSC-REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY.js`
+INT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY/QSC-REG-BOT-MINT-ED25519-SIGNED-VER-INDEX-2048-ALN-BIT-HUB-READY.js`[1]
+
+**This string can now serve as a signed, registry-backed quantum-shortcut identifier compatible with all ALN, Bit.Bots, and nano-bit compliance systems.**[1]
+
+[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/66788286/211bcf57-0d1d-4cf6-b180-54b151a500cd/paste.txt)
+[2](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/66788286/1fe598da-80a8-4e8e-8a93-fcabdc9f3dc5/world.univers.txt)
