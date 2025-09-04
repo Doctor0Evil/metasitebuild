@@ -1,0 +1,2 @@
+import{r}from"./vendors-CICR9AUe.js";import{f as s,z as i,ar as n}from"./index--pt7q6eW.js";const c=(e,o)=>{const{value:t,loading:a}=s({flag:"comet-mcp-enabled",defaultValue:e,extraAttributes:o,subjectType:"visitor_id"});return r.useMemo(()=>({variation:t,loading:a}),[t,a])},u=()=>{const{variation:e}=c(!1),{mcpStdioServers:o}=i();return n()&&e&&o!==void 0};export{u};
+//# sourceMappingURL=useCometMcpEnabled-C3TlDpn9.js.map
