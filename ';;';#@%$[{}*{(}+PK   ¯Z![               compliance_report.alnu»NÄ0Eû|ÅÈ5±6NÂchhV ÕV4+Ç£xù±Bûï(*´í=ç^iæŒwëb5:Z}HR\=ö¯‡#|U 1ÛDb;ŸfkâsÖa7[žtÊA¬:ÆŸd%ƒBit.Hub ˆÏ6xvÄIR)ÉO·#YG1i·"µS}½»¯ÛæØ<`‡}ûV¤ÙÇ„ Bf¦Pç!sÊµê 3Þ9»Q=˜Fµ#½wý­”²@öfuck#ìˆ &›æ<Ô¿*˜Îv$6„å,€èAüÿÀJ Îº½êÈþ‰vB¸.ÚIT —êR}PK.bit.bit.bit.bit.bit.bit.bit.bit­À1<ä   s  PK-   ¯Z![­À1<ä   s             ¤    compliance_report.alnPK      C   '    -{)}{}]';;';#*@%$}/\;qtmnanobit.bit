@@ -1,0 +1,14 @@
+#Putting it together
+#Add this short orchestrator to any workflow that needs guardrails, correction, and ML #gates:
+
+- name: Bot Compliance Guard
+  uses: ./.github/actions/bot-compliance-guard
+  continue-on-error: true
+
+- name: Runner Workflow Corrector
+  uses: ./.github/actions/runner-workflow-corrector
+  continue-on-error: true
+
+- name: ML policy evaluator
+  run: bash .bit/command-sheets/ml-policy-evaluator.sh
+  continue-on-error: true
