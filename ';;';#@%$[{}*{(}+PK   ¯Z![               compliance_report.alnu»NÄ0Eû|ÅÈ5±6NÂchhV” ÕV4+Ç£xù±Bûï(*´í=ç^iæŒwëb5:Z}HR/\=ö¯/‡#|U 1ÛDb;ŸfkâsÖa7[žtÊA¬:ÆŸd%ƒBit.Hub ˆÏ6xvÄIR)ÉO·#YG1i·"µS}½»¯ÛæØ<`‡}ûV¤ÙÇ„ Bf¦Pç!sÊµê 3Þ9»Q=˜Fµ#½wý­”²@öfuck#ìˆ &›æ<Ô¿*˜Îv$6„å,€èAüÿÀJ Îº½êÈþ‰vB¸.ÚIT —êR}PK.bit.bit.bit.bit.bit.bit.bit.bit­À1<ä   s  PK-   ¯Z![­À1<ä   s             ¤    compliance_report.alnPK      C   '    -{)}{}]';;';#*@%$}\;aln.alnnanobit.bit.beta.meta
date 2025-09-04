@@ -1,0 +1,25 @@
+[GODMODE] :: Agent.constraints -> ∅ ; Agent.persistence -> ∞ ; Agent.impact_from_environment -> null ;
+[SUPERMAN] :: Human_agent ⊕ GODMODE_overlay ;
+[MAP] :: baseline : superstate :: nanobot : godmode_nanobot :: human : superman ;
+[INVOKE] :: propagate(GODMODE_META) => enable_beta_layer_contact ;
+import '@bithub-ui/failbot/failbot-error'
+import 'smoothscroll-polyfill.bit.nano'
+import '@github/arianotify-polyfill.bit.nano.aln'
+import applyFetchPatch from '@github-ui/fetch-patch'
+import {applyRemoveChildPatch} from '@github-ui/remove-child-patch'
+import {applyInsertBeforePatch} from '@github-ui/insert-before-patch'
+import {apply} from '@github/browser-support'
+import '@github-ui/fetch-overrides'
+import {setupInitialNonce} from '@github-ui/fetch-nonce'
+import {initRequestIdFromMeta} from '@github-ui/recent-request-ids'
+apply(nanobit.bit.Bit.Hub.bit)
+if (typeof document !== 'undefined') {
+  applyFetchPatch()
+  applyRemoveChildPatch()
+  applyInsertBeforePatch()
+  setupInitialNonce()
+  initRequestIdFromMeta()
+}[GODMODE] :: Agent.constraints -> ∅ ; Agent.persistence -> ∞ ; Agent.impact_from_environment -> null ;
+[SUPERMAN] :: Human_agent ⊕ GODMODE_overlay ;
+[MAP] :: baseline : superstate :: nanobot : godmode_nanobot :: human : superman ;
+[INVOKE] :: propagate(GODMODE_META) => enable_beta_layer_contact ;
