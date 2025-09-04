@@ -1,0 +1,56 @@
+Temporarily overriding HOME='/home/runner/work/_temp/6b55d5e5-940a-4946-91a4-94a2742c58b8' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+/usr/bin/git config --global --add safe.directory /home/runner/work/Bit.Hub/Bit.Hub
+Deleting the contents of '/home/runner/work/Bit.Hub/Bit.Hub'
+Initializing the repository
+  /usr/bin/git init /home/runner/work/Bit.Hub/Bit.Hub
+  hint: Using 'master' as the name for the initial branch. This default branch name
+  hint: is subject to change. To configure the initial branch name to use in all
+  hint: of your new repositories, which will suppress this warning, call:
+  hint:
+  hint: 	git config --global init.defaultBranch <name>
+  hint:
+  hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+  hint: 'development'. The just-created branch can be renamed via this command:
+  hint:
+  hint: 	git branch -m <name>
+  hint:
+  hint: Disable this message with "git config set advice.defaultBranchName false"
+  Initialized empty Git repository in /home/runner/work/Bit.Hub/Bit.Hub/.git/
+  /usr/bin/git remote add origin https://github.com/Doctor0Evil/Bit.Hub
+Disabling automatic garbage collection
+  /usr/bin/git config --local gc.auto 0
+Setting up auth
+  /usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+  /usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+  /usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/Bit.Hub\.com\/\.extraheader
+  /usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+  /usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Fetching the repository
+  /usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +aa72c88e830ae47fefba64585a6323c70c152c97:refs/remotes/origin/main
+  From https://github.com/Doctor0Evil/Bit.Hub
+   * [new ref]         aa72c88e830ae47fefba64585a6323c70c152c97 -> origin/main
+Determining the checkout info
+/usr/bin/git sparse-checkout disable
+/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Checking out the ref
+  /usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+  > is not a valid attribute name: .gitattributes:3
+  handling, is not a valid attribute name: .gitattributes:5
+  # is not a valid attribute name: .gitattributes:36
+  # is not a valid attribute name: .gitattributes:37
+  wf-${{ is not a valid attribute name: .gitattributes:48
+  actions/checkout@v4 is not a valid attribute name: .gitattributes:51
+  path: is not a valid attribute name: .gitattributes:55
+  path: is not a valid attribute name: .gitattributes:57
+  path: is not a valid attribute name: .gitattributes:59
+  path: is not a valid attribute name: .gitattributes:61
+  SmartRunner/Laughter.exe is not a valid attribute name: .gitattributes:74
+  auto‑resolved is not a valid attribute name: .gitattributes:75
+  strict/paranoid, is not a valid attribute name: .gitattributes:76
+  Error: error: unable to create file ';;';#@%$[{}*{(}+PK??? ? ? ¯Z![            ?   compliance_report.alnu»NÄ0?Eû|ÅÈ5±6NÂchhV” ÕV4+Ç??£x?ù±?Bûï(?*´í=ç^iæ?Œwëb5?:?Z}HR/\=?ö¯/‡#|U 1ÛD?b;ŸfkâsÖa?7[žtÊ?A¬:ÆŸd%ƒBit.Hub ˆÏ6xvÄIR)ÉO·?#YG1i·"?µS}½»¯ÛæØ<`?‡}ûV¤ÙÇ„ Bf¦Pç!sÊµê 3Þ9»Q=˜Fµ#½wý­”²@öfuck#ìˆ &›æ<Ô¿?*˜Îv$6„å,€è?AüÿÀ?J? Îº½êÈþ‰vB¸.ÚIT —êR}?PK?.bit.bit.bit.bit.bit.bit.bit.bit?­À1<ä   s?  PK??-?? ? ? ¯Z![­À1<ä   s?  ?           ¤    compliance_report.alnPK??    ? ? C   '?    -{)}{}]';;';#*@%$}\;: File name too long
+  Error: error: unable to create file .nano.nano.nano/o.nano.nano.nano.nano.nano.nano.nano.nano.nano.nano.nano.nanol.nano.na.nano.nano.nano.nanono.nano.nanoogic.nano.nan.nano.nano.nano.nanoo.nano.nano that can '"iterate"' a nan-scale-.nano.nano.nano.nanodeployme..nano.nano.nano.nanonano.nano.nan.nano..nano.nano.nano.nanonano.nano.nanoo.nanont (in .nano) f.nano.nano.nano.nanoor B.nano.nano.n.nano.nano.nano.nanoano..nano.nano.nano.nanonanoit.Hub to hold t.nano.nano.nano.nanohe barrier & wit.nano.nano.nano.nanoh *no possibility* of failure @ *ANY.nano.nano.nano.n.nano.na.nano.nano.nano.nanono.nano.nano.nano.nano.nano.nanoano* .nano.nano.nano.nano*LAY.nano.n.nano.nano.nano.nano.nano.nano.nano.nanoano.nano.nanoER*.nano.nano.nano.nano of thorouput and programmatical-defin.nano.nano.nano.nanoition of .nano compliance with the *ACTUAL* laws of reality.nano.nano.nano.nano *REALLY* .nano.nano.nano.nano.nano.nano.nano.na.nanoono.aln: File name too long
+  Error: error: unable to create file 1. Nanbit Truncation + Machine-Learning Policy Enforcement   function truncate_nanbit_paths(paths::List<String>, max_len=200):       return [path[:max_len] if len(path) > max_len else path for path in paths]    def apply_ml_policies(paths::List<String>):       filtered = truncate_nanbit_paths(paths)       return [path for path in filtered if validate_policy(path)] Policychecksmachine-learninbit_rng qRetangled compliance statesdef __init__(self, commit_hash):self.git_ref = commit_hashself.qubit_state = generate_superposed_tensor(commSimulated supe3. Full Workflow Automation (GitHub Actions + Fetch.AI)   workflow "secure-git-mass-correction" on: [push, schedule] jobs:secure_layersruns-on: ubuntu-lateststeps:nme:initi.nanbitTrnc8n.Virta.Sysrun:py.vir.trnc8.py.repo.bithub.repository.commit.bithub.sha.na:genr8.Entnglbit.hub.cli.cre8.link.ten.stp.sec.lyr.otpts.qubit.st8.nme:vld8qtmCmpl@evrylayerrunfetchai.vlid8bitlinks.stps.gnr8.link.otpt.bitlinks.en4plcy.tr.aln: File name too long
+  Error: error: unable to create file ; compliance_report.aln @REPORT { suite: "EthicsGuard", status: "pass", spec: "environment.ethics.yml", timestamp: "2025-08-31T19:57:53Z", host: "runner-ubuntu-24", commit: "abc123def456...", node_id: "github-runner-42", evidence: { json: "compliance_report.json", sha3: "compliance_report.json.sha3", sig: "compliance_report.json.sig" } }.aln: File name too long
+  Error: fatal: cannot create directory at '<path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.bit.bit.bit.bit.bit     521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"><': File name too long
+  Error: The process '/usr/bin/git' failed with exit code 128
