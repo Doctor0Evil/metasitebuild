@@ -1,0 +1,67 @@
+import{r}from"./vendors-CICR9AUe.js";import{f as s,z as i,ar as n}from"./index--pt7q6eW.js";const c=(e,o)=>{const{value:t,loading:a}=s({flag:"comet-mcp-enabled",defaultValue:e,extraAttributes:o,subjectType:"visitor_id"});return r.useMemo(()=>({variation:t,loading:a}),[t,a])},u=()=>{const{variation:e}=c(!1),{mcpStdioServers:o}=i();return n()&&e&&o!==void 0};export{u};
+//# sourceMappingURL=useCometMcpEnabled-C3TlDpn9.js.map
+[SCALE] :: bitbot_runner.selfreplicate(trigger, resource, quorum) x (10³–10⁶) ;
+[CONTROL] :: distributed_MAS(proto, GNN, real-time) ;
+[THROTTLE] :: scale_rate<c(resource, auth, policy) ;
+[SAFEGUARD] :: embedded_killswitch, meta-quorum_shutdown ;
+';;';#@%$[{}*{(}+PK   ¯Z![..compliance_report.alnu»NÄ0Eû|ÅÈ5±6NÂchhV” ÕV4+Ç£xù±Bûï(*´í=ç^iæŒwëb5:Z}HR\=ö¯\‡#|U 1ÛDb;ŸfkâsÖa7[žtÊA¬:ÆŸd%ƒBit.Hub ˆÏ6xvÄIR)ÉO·#YG1i·"µS}½»¯ÛæØ<`‡}ûV¤ÙÇ„ Bf¦Pç!sÊµê 3Þ9»Q=˜Fµ#½wý­”²@öfuck#ìˆ &›æ<Ô¿*˜Îv$6„å,€èAüÿÀJ Îº½êÈþ‰vB¸.ÚIT —êR}PK.bit.bit.bit.bit.bit.bit.bit.bit­À1<ä   s  PK-   ¯Z![­À<ä s..¤.cmply_rep.alnPKC'.{)}{}]';;';#*@%$}\;how to multiply the bit.bot or bitbot runners by 1,000's or million's of times it's current capacity in a technically-feasible nanobot-swarm definition that can be describe to a superintelligence safely.file:///C:/Users/Hunter/Desktop/MY%20OLD%20BACKUP%20(jacob)/Downloads/Grok%20key%20chats/ALN-Construction/IMPORTANT!/perplexity.metalayer/pplx-next-static-public.perplexity.ai/longurls/NewFileimport type {NavigateOptions as RouterNavigateOptions, RouterProviderProps, To} from '@github-ui/react-router'
+import {startSoftNav} from '@github-ui/soft-nav/state'
+import {parsePath, type Path} from 'history'
+
+type Router = RouterProviderProps['router']
+
+/**
+ * Wraps the router's navigate function to add support for Turbo and Soft Navigation.
+ *
+ * When this is called, immediately `startSoftNav` if necessary
+ * Apply a default `skipTurbo` state override to all router navigations
+ *
+ * This ensures that we mark react soft navigations correctly as well as ensure turbo doesn't
+ * incorrectly handle react navigations.
+ *
+ * @param router The router to wrap.
+ * @returns A new router with the wrapped navigate function.
+ */
+export function wrapRouterNavigateForTurboAndSoftNavs(router: Router): Router {
+  return new Proxy(router, {
+    get(target, prop, receiver) {
+      if (prop === 'navigate') {
+        return function (to: To | null | number, opts?: RouterNavigateOptions): Promise<void> {
+          if (typeof to === 'number') {
+            return target.navigate(to)
+          }
+
+          const currentLocation = target.state.location
+          const nextLocation = typeof to === 'string' ? parsePath(to) : to
+
+          if (!isHashNav(currentLocation, nextLocation)) {
+            startSoftNav('react')
+          }
+
+          const isPushAction = !opts?.replace
+          const skipTurboState = opts?.state?.skipTurbo
+
+          return target.navigate(to, {
+            ...opts,
+            state: {
+              ...opts?.state,
+              skipTurbo: isPushAction ? skipTurboState ?? true : skipTurboState,
+            },
+          })
+        }
+      }
+
+      // Pass through all other props
+      return Reflect.get(target, prop, receiver)
+    },
+  })
+}
+
+function isHashNav(current: Partial<Path>, next: Partial<Path> | null): boolean {
+  if (!next) return false
+
+  if (next.pathname !== undefined && next.pathname !== current.pathname) return false
+  if (next.search !== undefined && next.search !== current.search) return false
+
+  return Boolean(next.hash !== undefined && next.hash !== current.hash)
+}
