@@ -1,0 +1,3275 @@
+M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z
+
+Bit.Hub:228 Refused to load the font 'https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2' because it violates the following Content Security Policy directive: "font-src github.githubassets.com".
+
+injectedScript.bundle.js:2 Failed to inject getOfflineSigner from keplr. Probably, other wallet is trying to intercept Keplr
+r @ injectedScript.bundle.js:2
+(anonymous) @ injectedScript.bundle.js:2
+(anonymous) @ injectedScript.bundle.js:2
+(anonymous) @ injectedScript.bundle.js:2
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+/Doctor0Evil/Bit.Hub/tree/main/%20%5BException:%20TypeError:%20'caller',%20'callee',%20and%20'arguments'%20properties%20may%20not%20be%20accessed%20on%20strict%20mode%20functions%20or%20the%20arguments%20objects%20for%20calls%20to%20them%20at%20get%20arguments%20(%3Canonymous%3E)%20at%20set%20__proto__.invokeGetter%20(%3Canonymous%3E:3:28)%5D%20caller%20:%20%20%5BException:%20TypeError:%20'caller',%20'callee',%20and%20'arguments'%20properties%20may%20not%20be%20accessed%20on%20strict%20mode%20functions%20or%20the%20arguments%20objects%20for%20calls%20to%20them%20at%20get%20caller%20(%3Canonymous%3E)%20at%20set%20__proto__.invokeGetter%20(%3Canonymous%3E:3:28)%5D%20%5B%5BPrototype%5D%5D%20:%20%20%C6%92%20()%20apply%20:%20%20%C6%92%20apply()%20arguments%20:%20%20(...)%20bind%20:%20%20%C6%92%20bind()%20call%20:%20%20%C6%92%20call()%20caller%20:%20%20(...)%20constructor%20:%20%20%C6%92%20Function()%20length%20:%20%200%20name%20:%20%20%22%22%20toString%20:%20%20%C6%92%20toString()%20Symbol:1  Failed to load resource: the server responded with a status of 404 ()
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+[Violation] 'setTimeout' handler took <N>ms
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+[Violation] Forced reflow while executing JavaScript took <N>ms
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+[Violation] 'message' handler took <N>ms
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ BlobEditor.tsx:277
+oO @ react-dom.production.min.js:243
+uD @ react-dom.production.min.js:285
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uC @ react-dom.production.min.js:272
+r4 @ react-dom.production.min.js:127
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uw @ react-dom.production.min.js:268
+x @ scheduler.production.min.js:13
+N @ scheduler.production.min.js:14
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3006
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:458
+sync @ index.js:1546
+sync @ index.js:458
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+eu @ index.js:1052
+eh @ index.js:1068
+em @ index.js:1090
+v @ index.js:8778
+eQ @ index.js:8794
+keydown @ index.js:8662
+(anonymous) @ index.js:4377
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:458
+sync @ index.js:1546
+sync @ index.js:458
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+eu @ index.js:1052
+eh @ index.js:1068
+em @ index.js:1090
+v @ index.js:8778
+eQ @ index.js:8794
+keydown @ index.js:8662
+(anonymous) @ index.js:4377
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+d @ content.js:287
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3006
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+I @ index.js:571
+R @ index.js:578
+V @ index.js:591
+v @ index.js:8778
+eQ @ index.js:8794
+keydown @ index.js:8662
+(anonymous) @ index.js:4377
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+d @ content.js:287
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:458
+sync @ index.js:1546
+sync @ index.js:458
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+eu @ index.js:1052
+eh @ index.js:1068
+em @ index.js:1090
+v @ index.js:8778
+eQ @ index.js:8794
+keydown @ index.js:8662
+(anonymous) @ index.js:4377
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+d @ content.js:287
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3006
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+start @ index.js:4448
+ee.mousedown @ index.js:4686
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+[Violation] 'scroll' handler took <N>ms
+[Violation] 'scroll' handler took <N>ms
+[Violation] 'scroll' handler took <N>ms
+[Violation] 'scroll' handler took <N>ms
+[Violation] 'scroll' handler took <N>ms
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+temp1
+<meta name=​"visitor-payload" content=​"eyJyZWZlcnJlciI6Imh0dHBzOi8vZ2l0aHViLmNvbS9Eb2N0b3IwRXZpbC9CaXQuSHViL3RyZWUvbWFpbi91c3IvYmluL2dpdCUyMHNwYXJzZS1jaGVja291dGh0dHBzJTVDOiU1Qy8lNUMvQml0Lkh1YiU1Qy5jb20lNUMiLCJyZXF1ZXN0X2lkIjoiQ0FBODpGQzYzQjoxQzRDMDVDOjI1NEI4QTE6NjhCOEY2NjMiLCJ2aXNpdG9yX2lkIjoiMTA3MzkwMDk2NzE3ODkzNzUwMiIsInJlZ2lvbl9lZGdlIjoiaWFkIiwicmVnaW9uX3JlbmRlciI6ImlhZCJ9" data-turbo-transient>​
+temp2
+<meta name=​"visitor-payload" content=​"eyJyZWZlcnJlciI6Imh0dHBzOi8vZ2l0aHViLmNvbS9Eb2N0b3IwRXZpbC9CaXQuSHViL3RyZWUvbWFpbi91c3IvYmluL2dpdCUyMHNwYXJzZS1jaGVja291dGh0dHBzJTVDOiU1Qy8lNUMvQml0Lkh1YiU1Qy5jb20lNUMiLCJyZXF1ZXN0X2lkIjoiQ0FBODpGQzYzQjoxQzRDMDVDOjI1NEI4QTE6NjhCOEY2NjMiLCJ2aXNpdG9yX2lkIjoiMTA3MzkwMDk2NzE3ODkzNzUwMiIsInJlZ2lvbl9lZGdlIjoiaWFkIiwicmVnaW9uX3JlbmRlciI6ImlhZCJ9" data-turbo-transient>​
+Temporarily overriding HOME='/home/runner/work/_temp/6b55d5e5-940a-4946-91a4-94a2742c58b8' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+/usr/bin/git config --global --add safe.directory /home/runner/work/Bit.Hub/Bit.Hub
+Deleting the contents of '/home/runner/work/Bit.Hub/Bit.Hub'
+Initializing the repository
+  /usr/bin/git init /home/runner/work/Bit.Hub/Bit.Hub
+  hint: Using 'master' as the name for the initial branch. This default branch name
+  hint: is subject to change. To configure the initial branch name to use in all
+  hint: of your new repositories, which will suppress this warning, call:
+  hint:
+  hint: 	git config --global init.defaultBranch <name>
+  hint:
+  hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+  hint: 'development'. The just-created branch can be renamed via this command:
+  hint:
+  hint: 	git branch -m <name>
+  hint:
+  hint: Disable this message with "git config set advice.defaultBranchName false"
+  Initialized empty Git repository in /home/runner/work/Bit.Hub/Bit.Hub/.git/
+  /usr/bin/git remote add origin https://github.com/Doctor0Evil/Bit.Hub
+Disabling automatic garbage collection
+  /usr/bin/git config --local gc.auto 0
+Setting up auth
+  /usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+  /usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+  /usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+  /usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+  /usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Fetching the repository
+  /usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +aa72c88e830ae47fefba64585a6323c70c152c97:refs/remotes/origin/main
+  From https://github.com/Doctor0Evil/Bit.Hub
+   * [new ref]         aa72c88e830ae47fefba64585a6323c70c152c97 -> origin/main
+Determining the checkout info
+/usr/bin/git sparse-checkout disable
+/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Checking out the ref
+  /usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+  > is not a valid attribute name: .gitattributes:3
+  handling, is not a valid attribute name: .gitattributes:5
+  # is not a valid attribute name: .gitattributes:36
+  # is not a valid attribute name: .gitattributes:37
+  wf-${{ is not a valid attribute name: .gitattributes:48
+  actions/checkout@v4 is not a valid attribute name: .gitattributes:51
+  path: is not a valid attribute name: .gitattributes:55
+  path: is not a valid attribute name: .gitattributes:57
+  path: is not a valid attribute name: .gitattributes:59
+  path: is not a valid attribute name: .gitattributes:61
+  SmartRunner/Laughter.exe is not a valid attribute name: .gitattributes:74
+  auto‑resolved is not a valid attribute name: .gitattributes:75
+  strict/paranoid, is not a valid attribute name: .gitattributes:76
+  Error: error: unable to create file ';;';#@%$[{}*{(}+PK??? ? ? ¯Z![            ?   compliance_report.alnu�»NÄ0?Eû|ÅÈ5±6NÂchhV” ÕV4+Ç??£x?ù±?Bûï(?*´í=ç^iæ?Œwëb5?:?Z}HR/\=?ö¯/‡#|U 1ÛD?b;ŸfkâsÖa?7[žtÊ?A¬:ÆŸd%ƒBit.Hub ˆÏ6xvÄIR)ÉO·?#YG1i·"?µS}½»¯ÛæØ<`?‡}ûV¤ÙÇ„ Bf¦Pç!sÊµê 3Þ9»Q=˜Fµ#½wý­”²@öfuck#�ìˆ &›æ<Ô¿?�*˜Îv$6„å,€�è?AüÿÀ?J? Îº½êÈ�þ‰vB¸.ÚIT —êR}?PK?.bit.bit.bit.bit.bit.bit.bit.bit?­À1<ä   s?  PK??-?? ? ? ¯Z![­À1<ä   s?  ?           ¤�    compliance_report.alnPK??    ? ? C   '?    -{)}{}]';;';#*@%$}\;: File name too long
+  Error: error: unable to create file .nano.nano.nano/o.nano.nano.nano.nano.nano.nano.nano.nano.nano.nano.nano.nanol.nano.na.nano.nano.nano.nanono.nano.nanoogic.nano.nan.nano.nano.nano.nanoo.nano.nano that can '"iterate"' a nan-scale-.nano.nano.nano.nanodeployme..nano.nano.nano.nanonano.nano.nan.nano..nano.nano.nano.nanonano.nano.nanoo.nanont (in .nano) f.nano.nano.nano.nanoor B.nano.nano.n.nano.nano.nano.nanoano..nano.nano.nano.nanonanoit.Hub to hold t.nano.nano.nano.nanohe barrier & wit.nano.nano.nano.nanoh *no possibility* of failure @ *ANY.nano.nano.nano.n.nano.na.nano.nano.nano.nanono.nano.nano.nano.nano.nano.nanoano* .nano.nano.nano.nano*LAY.nano.n.nano.nano.nano.nano.nano.nano.nano.nanoano.nano.nanoER*.nano.nano.nano.nano of thorouput and programmatical-defin.nano.nano.nano.nanoition of .nano compliance with the *ACTUAL* laws of reality.nano.nano.nano.nano *REALLY* .nano.nano.nano.nano.nano.nano.nano.na.nanoono.aln: File name too long
+  Error: error: unable to create file 1. Nanbit Truncation + Machine-Learning Policy Enforcement   function truncate_nanbit_paths(paths::List<String>, max_len=200):       return [path[:max_len] if len(path) > max_len else path for path in paths]    def apply_ml_policies(paths::List<String>):       filtered = truncate_nanbit_paths(paths)       return [path for path in filtered if validate_policy(path)] Policychecksmachine-learninbit_rng qRetangled compliance statesdef __init__(self, commit_hash):self.git_ref = commit_hashself.qubit_state = generate_superposed_tensor(commSimulated supe3. Full Workflow Automation (GitHub Actions + Fetch.AI)   workflow "secure-git-mass-correction" on: [push, schedule] jobs:secure_layersruns-on: ubuntu-lateststeps:nme:initi.nanbitTrnc8n.Virta.Sysrun:py.vir.trnc8.py.repo.bithub.repository.commit.bithub.sha.na:genr8.Entnglbit.hub.cli.cre8.link.ten.stp.sec.lyr.otpts.qubit.st8.nme:vld8qtmCmpl@evrylayerrunfetchai.vlid8bitlinks.stps.gnr8.link.otpt.bitlinks.en4plcy.tr.aln: File name too long
+  Error: error: unable to create file ; compliance_report.aln @REPORT { suite: "EthicsGuard", status: "pass", spec: "environment.ethics.yml", timestamp: "2025-08-31T19:57:53Z", host: "runner-ubuntu-24", commit: "abc123def456...", node_id: "github-runner-42", evidence: { json: "compliance_report.json", sha3: "compliance_report.json.sha3", sig: "compliance_report.json.sig" } }.aln: File name too long
+  Error: fatal: cannot create directory at '<path d="M12 1C5.923 1 1 5.923 1 12c0 4.867 3.149 8.979 7.bit.bit.bit.bit.bit     521 10.436.55.096.756-.233.756-.522 0-.262-.013-1.128-.013-2.049-2.764.509-3.479-.674-3.699-1.292-.124-.317-.66-1.293-1.127-1.554-.385-.207-.936-.715-.014-.729.866-.014 1.485.797 1.691 1.128.99 1.663 2.571 1.196 3.204.907.096-.715.385-1.196.701-1.471-2.448-.275-5.005-1.224-5.005-5.432 0-1.196.426-2.186 1.128-2.956-.111-.275-.496-1.402.11-2.915 0 0 .921-.288 3.024 1.128a10.193 10.193 0 0 1 2.75-.371c.936 0 1.871.123 2.75.371 2.104-1.43 3.025-1.128 3.025-1.128.605 1.513.221 2.64.111 2.915.701.77 1.127 1.747 1.127 2.956 0 4.222-2.571 5.157-5.019 5.432.399.344.743 1.004.743 2.035 0 1.471-.014 2.654-.014 3.025 0 .289.206.632.756.522C19.851 20.979 23 16.854 23 12c0-6.077-4.922-11-11-11Z"><': File name too long
+  Error: The process '/usr/bin/git' failed with exit code 128
+
+VM41112:1 Uncaught SyntaxError: Unexpected identifier 'overriding'
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+[Violation] 'requestIdleCallback' handler took 155ms
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+temp3
+::before​
+temp4
+      :host {
+        --tooltip-top: var(--tool-tip-position-top, 0);
+        --tooltip-left: var(--tool-tip-position-left, 0);
+        padding: var(--overlay-paddingBlock-condensed) var(--overlay-padding-condensed) !important;
+        font: var(--text-body-shorthand-small);
+        color: var(--tooltip-fgColor, var(--fgColor-onEmphasis)) !important;
+        text-align: center;
+        text-decoration: none;
+        text-shadow: none;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: break-word;
+        white-space: pre;
+        background: var(--tooltip-bgColor, var(--bgColor-emphasis)) !important;
+        border-radius: var(--borderRadius-medium);
+        border: 0 !important;
+        opacity: 0;
+        max-width: var(--overlay-width-small);
+        word-wrap: break-word;
+        white-space: normal;
+        width: max-content !important;
+        inset: var(--tooltip-top) auto auto var(--tooltip-left) !important;
+        overflow: visible !important;
+        text-wrap: balance;
+      }
+
+      :host(:is(.tooltip-n, .tooltip-nw, .tooltip-ne)) {
+        --tooltip-top: calc(var(--tool-tip-position-top, 0) - var(--overlay-offset, 0.25rem));
+        --tooltip-left: var(--tool-tip-position-left);
+      }
+
+      :host(:is(.tooltip-s, .tooltip-sw, .tooltip-se)) {
+        --tooltip-top: calc(var(--tool-tip-position-top, 0) + var(--overlay-offset, 0.25rem));
+        --tooltip-left: var(--tool-tip-position-left);
+      }
+
+      :host(.tooltip-w) {
+        --tooltip-top: var(--tool-tip-position-top);
+        --tooltip-left: calc(var(--tool-tip-position-left, 0) - var(--overlay-offset, 0.25rem));
+      }
+
+      :host(.tooltip-e) {
+        --tooltip-top: var(--tool-tip-position-top);
+        --tooltip-left: calc(var(--tool-tip-position-left, 0) + var(--overlay-offset, 0.25rem));
+      }
+
+      :host:after{
+        position: absolute;
+        display: block;
+        right: 0;
+        left: 0;
+        height: var(--overlay-offset, 0.25rem);
+        content: "";
+      }
+
+      :host(.tooltip-s):after,
+      :host(.tooltip-se):after,
+      :host(.tooltip-sw):after {
+        bottom: 100%
+      }
+
+      :host(.tooltip-n):after,
+      :host(.tooltip-ne):after,
+      :host(.tooltip-nw):after {
+        top: 100%;
+      }
+
+      @keyframes tooltip-appear {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      :host(:popover-open),
+      :host(:popover-open):before {
+        animation-name: tooltip-appear;
+        animation-duration: .1s;
+        animation-fill-mode: forwards;
+        animation-timing-function: ease-in;
+      }
+
+      :host(.\:popover-open) {
+        animation-name: tooltip-appear;
+        animation-duration: .1s;
+        animation-fill-mode: forwards;
+        animation-timing-function: ease-in;
+      }
+
+      @media (forced-colors: active) {
+        :host {
+          outline: solid 1px transparent;
+        }
+
+        :host:before {
+          display: none;
+        }
+      }
+https\:\/\/Bit.Hub\.com\/\.extraheaderh-nI;S;m;l;H4#itte$Ew:\oq:::E:::n;At:::.2I.Im:/::Ae;;t%;M;;.mw:8(!+7^;.g=;jju;p;:;;1;ty_H:://w&@@e:dM01tCq;:E::r:n;At:::.2I.Im:/:k=:q;yRp;P;Y;Y:n%Cq;:E:ntC::n;At::Ewnt:.2I.Im:/::Ae;;t%;M;;.mw:8(!+7^;.g=gtp.e:=1/rs=;;:;;1:::O/a;y;&%:n%M01nta;ook1kA0:%$i14Mpl:t:ic:".:ss/c::d_/;mt::/dOa/_/;;iden++++=s::::S.;y;&%:8(!+7^:d&:ao;jju;::S.=hfcp;:;.g=gte$&:ao:;ty:O/a;y;&%:n%Ewn;1tp.e:=1/rs=;;;e;s;Htboq::te$&:ao;jju;p;:;;1id:ttpsU;O;7;;H:://w&tp.e:=1/rs=;;;e;s;Htb:Ae;;t%;M;;.mw;m;iboq-\\+tijs/6;8g;;e;s;Htboq::@@e;nta:\k=:;ook1kA0:%$i14Mpl:t:ic:".:ss/c::d_/;mt::/dOa/_/;;iden++++=s::::S.;&%:n%EwntC
+VM44387:1 Uncaught SyntaxError: Invalid or unexpected token
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+[Violation] 'click' handler took <N>ms
+[Violation] 'click' handler took <N>ms
+[Violation] 'click' handler took <N>ms
+[Violation] 'click' handler took <N>ms
+[Violation] 'click' handler took <N>ms
+[Violation] 'click' handler took <N>ms
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+frame.ts:128 Uncaught (in promise) AbortError: The user aborted a request.
+(anonymous) @ frame.ts:128
+await in (anonymous)
+m @ turbo.es2017-esm.js:383
+allowsImmediateRender @ turbo.es2017-esm.js:3546
+render @ turbo.es2017-esm.js:1042
+await in render
+loadResponse @ turbo.es2017-esm.js:3448
+await in loadResponse
+requestSucceededWithResponse @ turbo.es2017-esm.js:3513
+receive @ turbo.es2017-esm.js:579
+perform @ turbo.es2017-esm.js:554
+await in perform
+(anonymous) @ turbo.es2017-esm.js:3575
+visit @ turbo.es2017-esm.js:3569
+loadSourceURL @ turbo.es2017-esm.js:3420
+sourceURLChanged @ turbo.es2017-esm.js:3392
+attributeChangedCallback @ turbo.es2017-esm.js:149
+set src @ turbo.es2017-esm.js:165
+(anonymous) @ turbo.es2017-esm.js:3601
+withCurrentNavigationElement @ turbo.es2017-esm.js:3772
+navigateFrame @ turbo.es2017-esm.js:3600
+linkClickIntercepted @ turbo.es2017-esm.js:3485
+linkClickIntercepted @ turbo.es2017-esm.js:2203
+push.7332.LinkInterceptor.constructor.linkClicked @ turbo.es2017-esm.js:1107
+m @ turbo.es2017-esm.js:383
+notifyApplicationAfterClickingLinkToLocation @ turbo.es2017-esm.js:3128
+applicationAllowsFollowingLinkToLocation @ turbo.es2017-esm.js:3120
+willFollowLinkToLocation @ turbo.es2017-esm.js:3035
+push.7332.LinkClickObserver.constructor.clickBubbled @ turbo.es2017-esm.js:1147
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+[Violation] 'requestIdleCallback' handler took 105ms
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+fetch-patch.ts:10  POST https://github.com/repositories/check-name 422 (Unprocessable Content)
+(anonymous) @ fetch-patch.ts:10
+s @ verified-fetch.ts:29
+i @ check-repo-name.ts:39
+(anonymous) @ index.js:24
+setTimeout
+u @ index.js:22
+(anonymous) @ check-repo-name.ts:76
+(anonymous) @ RepoNameInput.tsx:35
+oO @ react-dom.production.min.js:243
+uD @ react-dom.production.min.js:285
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uC @ react-dom.production.min.js:272
+r4 @ react-dom.production.min.js:127
+uT @ react-dom.production.min.js:273
+eM @ react-dom.production.min.js:52
+ro @ react-dom.production.min.js:109
+tD @ react-dom.production.min.js:74
+tI @ react-dom.production.min.js:73
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+fetch-patch.ts:10  POST https://github.com/repositories/check-name 422 (Unprocessable Content)
+(anonymous) @ fetch-patch.ts:10
+s @ verified-fetch.ts:29
+i @ check-repo-name.ts:39
+(anonymous) @ index.js:24
+setTimeout
+u @ index.js:22
+(anonymous) @ check-repo-name.ts:76
+(anonymous) @ RepoNameInput.tsx:35
+oO @ react-dom.production.min.js:243
+uD @ react-dom.production.min.js:285
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uC @ react-dom.production.min.js:272
+r4 @ react-dom.production.min.js:127
+uT @ react-dom.production.min.js:273
+eM @ react-dom.production.min.js:52
+ro @ react-dom.production.min.js:109
+tD @ react-dom.production.min.js:74
+tI @ react-dom.production.min.js:73
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+fetch-patch.ts:10  POST https://github.com/repositories/check-name 422 (Unprocessable Content)
+(anonymous) @ fetch-patch.ts:10
+s @ verified-fetch.ts:29
+i @ check-repo-name.ts:39
+(anonymous) @ index.js:24
+setTimeout
+u @ index.js:22
+(anonymous) @ check-repo-name.ts:76
+(anonymous) @ RepoNameInput.tsx:35
+oO @ react-dom.production.min.js:243
+uD @ react-dom.production.min.js:285
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uC @ react-dom.production.min.js:272
+r4 @ react-dom.production.min.js:127
+uT @ react-dom.production.min.js:273
+eM @ react-dom.production.min.js:52
+ro @ react-dom.production.min.js:109
+tD @ react-dom.production.min.js:74
+tI @ react-dom.production.min.js:73
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+fetch-patch.ts:10  POST https://github.com/repositories/check-name 422 (Unprocessable Content)
+(anonymous) @ fetch-patch.ts:10
+s @ verified-fetch.ts:29
+i @ check-repo-name.ts:39
+(anonymous) @ index.js:24
+setTimeout
+u @ index.js:22
+(anonymous) @ check-repo-name.ts:76
+(anonymous) @ RepoNameInput.tsx:35
+oO @ react-dom.production.min.js:243
+uD @ react-dom.production.min.js:285
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uC @ react-dom.production.min.js:272
+r4 @ react-dom.production.min.js:127
+uT @ react-dom.production.min.js:273
+eM @ react-dom.production.min.js:52
+ro @ react-dom.production.min.js:109
+tD @ react-dom.production.min.js:74
+tI @ react-dom.production.min.js:73
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+temp5
+:host {
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+temp6
+:host {
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+packages_failbot_failbot_ts-7cdfcb8274ec.js:1 [Violation] 'requestIdleCallback' handler took 108ms
+temp7
+      .user-mention[href$="/Doctor0Evil"] {
+        color: var(--color-user-mention-fg);
+        background-color: var(--bgColor-attention-muted, var(--color-attention-subtle));
+        border-radius: 2px;
+        margin-left: -2px;
+        margin-right: -2px;
+      }
+      .user-mention[href$="/Doctor0Evil"]:before,
+      .user-mention[href$="/Doctor0Evil"]:after {
+        content: '';
+        display: inline-block;
+        width: 2px;
+      }
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+set @ react-dom.production.min.js:35
+en @ react-dom.production.min.js:39
+(anonymous) @ react-dom.production.min.js:230
+uI @ react-dom.production.min.js:237
+uL @ react-dom.production.min.js:279
+uM @ react-dom.production.min.js:279
+uC @ react-dom.production.min.js:272
+r4 @ react-dom.production.min.js:127
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uw @ react-dom.production.min.js:268
+x @ scheduler.production.min.js:13
+N @ scheduler.production.min.js:14
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ BlobEditor.tsx:277
+oO @ react-dom.production.min.js:243
+uD @ react-dom.production.min.js:285
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uC @ react-dom.production.min.js:272
+r4 @ react-dom.production.min.js:127
+(anonymous) @ react-dom.production.min.js:282
+uO @ react-dom.production.min.js:282
+uw @ react-dom.production.min.js:268
+x @ scheduler.production.min.js:13
+N @ scheduler.production.min.js:14
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3006
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3006
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:458
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3006
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:458
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+er @ index.js:4640
+ee.paste @ index.js:4865
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3006
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+start @ index.js:4448
+ee.mousedown @ index.js:4686
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ index.js:3014
+ignore @ index.js:6970
+updateSelection @ index.js:2984
+update @ index.js:7655
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+select @ index.js:4539
+move @ index.js:4455
+content.js:258 Uncaught Error: Extension context invalidated.
+    at o (content.js:258:24)
+    at content.js:239:7
+o @ content.js:258
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+sync @ index.js:770
+sync @ index.js:434
+sync @ index.js:1546
+sync @ index.js:434
+(anonymous) @ index.js:2869
+ignore @ index.js:6970
+updateInner @ index.js:2857
+update @ index.js:2845
+update @ index.js:7650
+(anonymous) @ index.js:7549
+dispatch @ index.js:7573
+ee.copy.ee.cut @ index.js:4919
+runHandlers @ index.js:4268
+handleEvent @ index.js:4258
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+temp8
+<link rel=​"sudo-modal" href=​"/​sessions/​sudo_modal">​
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught Error: Extension context invalidated.
+    at o (content.js:245:22)
+    at content.js:239:7
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+temp9
+'https://github.com/Doctor0Evil/Bit.Hub/tree/main/%7Breturn%20a.performance&&a.performance.now()%7C%7CDate.now()%7D%20var%20q=fu.navigator.serviceWot%20Google%20LLCight(e,h)%7Be!=null&&(Array.isArray(e)%3Fe.forEach(l=%3Ef(l,h))'
+content.js:245 Uncaught 
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught 
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught 
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught 
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ chunk-app_assets_mod…s_text-expander…:47
+oO @ react-lib-17ccbc80f53b.js:18
+uD @ react-lib-17ccbc80f53b.js:18
+(anonymous) @ react-lib-17ccbc80f53b.js:18
+uO @ react-lib-17ccbc80f53b.js:18
+uC @ react-lib-17ccbc80f53b.js:18
+r4 @ react-lib-17ccbc80f53b.js:16
+(anonymous) @ react-lib-17ccbc80f53b.js:18
+uO @ react-lib-17ccbc80f53b.js:18
+uw @ react-lib-17ccbc80f53b.js:18
+x @ react-lib-17ccbc80f53b.js:18
+N @ react-lib-17ccbc80f53b.js:18
+content.js:245 Uncaught 
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+(anonymous) @ content.js:281
+setTimeout
+s @ content.js:280
+content.js:245 Uncaught 
+o @ content.js:245
+(anonymous) @ content.js:239
+setTimeout
+t @ content.js:238
+selectionchange
+(anonymous) @ vendors-node_modules…s-03ec90930a56.js:7
+ignore @ vendors-node_modules…s-03ec90930a56.js:9
+updateSelection @ vendors-node_modules…s-03ec90930a56.js:7
+update @ vendors-node_modules…-03ec90930a56.js:10
+(anonymous) @ vendors-node_modules…-03ec90930a56.js:10
+dispatch @ vendors-node_modules…-03ec90930a56.js:10
+er @ vendors-node_modules…s-03ec90930a56.js:9
+ee.paste @ vendors-node_modules…s-03ec90930a56.js:9
+runHandlers @ vendors-node_modules…s-03ec90930a56.js:9
+handleEvent @ vendors-node_modules…s-03ec90930a56.js:9
