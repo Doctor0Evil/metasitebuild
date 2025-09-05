@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bit-hub-nanoswarm
+  labels:
+    app: bit-hub-meta-layer
+spec:
+  replicas: 1000
+  selector:
+    matchLabels:
+      app: bit-hub-meta-layer
+  template:
+    metadata:
+      labels:
+        app: bit-hub-meta-layer
+    spec:
+      containers:
+      - name: meta-layer-bot
+        image: fetchai/uagents:latest
+        env:
+        - name: GEO_ANCHOR_LAT
+          value: "33.5418414"
+        - name: GEO_ANCHOR_LON
+          value: "-112.1301747"
+        - name: QUANTUM_SHEBANG_HEADER
+          value: "#qss:nanobit-compression-v3"
+        - name: VOTING_THRESHOLD_PERCENT
+          value: "66.7"
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: "1"
+            memory: 512Mi
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bit-hub-webhook-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 443
+      targetPort: 8080
+  selector:
+    app: bit-hub-meta-layer
+
+fun onSwarmExpansionRequested(expansionSize: Int): Boolean {  
+    val votesRequired = (expansionSize * 0.667).toInt()  
+    val votesReceived = blockchain.queryVotingPower("bit.hub.nanoswarm.expansion")  
+    return votesReceived >= votesRequired && geoAnchorValidator.isPhoenixLocked()  
+}  
