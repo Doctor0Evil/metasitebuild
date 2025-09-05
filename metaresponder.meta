@@ -1,0 +1,18 @@
+module metaswarm-resiliency
+input events json
+output audittrail json
+
+rule monitor-stability
+  when events.new
+  do for event in events
+    if event.type in ["resource-spike", "service-error", "latency-out-of-threshold"]
+      then begin
+        trigger_remediation event
+        log-audit "Auto-remediation triggered" level warning
+      end
+    else continue
+
+rule nanoswarm-policy-enforce
+  when events.policy-violation
+  do apply_policy_fix event
+     log-audit "Policy correction applied" level info
