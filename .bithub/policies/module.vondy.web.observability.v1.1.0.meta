@@ -1,0 +1,76 @@
+module vondy.web-observability.v1.1.0
+
+input http_request http
+output http_response http
+output securityalerts json
+output networkmetrics json
+
+# Preload/Preconnect/Prefetch Violations
+rule audit.preload
+    when received? http_request
+    for link in http_request.head.links
+        if not valid_preload(link) do
+            log-error "Preload violation: {link.href}" error
+            store securityalerts event "preload_violation" meta.link link
+
+# Third-Party Script Tracking/Audit
+rule audit.externalscripts
+    when received? http_request
+    for script in http_request.head.scripts
+        if script.src like "facebook.net" or script.src like "googletagmanager.com" do
+            call audit.syscall "externalscript_load" pid http_request.pid
+            log-event "External script loaded: {script.src}" info
+
+# CSP/Privacy Guard Enforcement
+rule enforce.csp
+    on http_request
+    if not secure_csp(http_request.headers) do
+        block-transaction http_request
+        log-error "CSP policy violation detected" fatal
+        store securityalerts event "csp_violation" meta.request http_request
+
+# Analytics/Tracking Consent Monitoring
+rule audit.pixeltracking
+    on http_request
+    if pixeltracking_found(http_request.body) do
+        log-event "Pixel tracking tag found" warning
+        send-alert privacyteam "Pixel tracking detected on {http_request.url}"
+
+# Asset/Resource Preload/Prefetch Metrics
+rule monitor.assets
+    scheduled interval 10s
+    let resource_stats collect-asset-metrics vondy.com
+    export networkmetrics resource_stats
+
+# Netlify/Deployment Key Security
+rule verify.netlify.rum
+    on http_request
+    if contains_unsafe_token(http_request.body) do
+        log-error "Unsafe Netlify RUM token exposed" critical
+        send-alert secops "Unsafe token in Netlify RUM: {http_request.url}"
+        invalidate.token http_request.body.token
+
+# Critical Security Functions - Nanobit.Scale
+function valid_preload(link)
+    # Check file domain, SRI, correct as attribute
+    return all([
+        link.href like "*.vondy.com/*",
+        link.as in ["script", "style"],
+        not contains(link.href, '?')
+    ])
+
+function secure_csp(headers)
+    return headers["content-security-policy"] like "*default-src 'self'*"
+
+function pixeltracking_found(body)
+    return "fbq('track'," in body or "gtag(" in body
+
+function contains_unsafe_token(body)
+    return "cwv-token" in body and not encrypted(body["cwv-token"])
+
+# Logging and Audit chain
+rule audit.completion
+    when securityalerts.new
+    for event in securityalerts
+        log-event concat "Security event: ", event.type, " context: ", event.meta, " level info"
+    export networkmetrics securityalerts
