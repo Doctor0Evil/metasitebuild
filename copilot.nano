@@ -1,0 +1,86 @@
+Request URL
+https://github.githubassets.com/assets/copilot-chat.b9c6ea91ee9df8f32d5e.module.css
+Request Method
+GET
+Status Code
+200 OK
+Remote Address
+185.199.111.154:443
+Referrer Policy
+no-referrer-when-downgrade
+accept-ranges
+bytes
+access-control-allow-origin
+*
+age
+303399
+cache-control
+public, max-age=31536000, immutable
+content-encoding
+br
+content-length
+1430
+content-type
+text/css
+cross-origin-resource-policy
+cross-origin
+date
+Sat, 06 Sep 2025 03:28:57 GMT
+etag
+"0x8DDEA29E10DA0B1"
+last-modified
+Tue, 02 Sep 2025 14:06:14 GMT
+server
+Windows-Azure-Web/1.0 Microsoft-HTTPAPI/2.0
+strict-transport-security
+max-age=31536000
+vary
+Accept-Encoding
+via
+1.1 varnish, 1.1 varnish
+x-cache
+HIT, HIT
+x-cache-hits
+55, 322
+x-fastly-request-id
+c5c76f2cce5cea98db5b26726844e1740588a371
+x-served-by
+cache-iad-kiad7000090-IAD, cache-phx1710064-PHX
+:authority
+github.githubassets.com
+:method
+GET
+:path
+/assets/copilot-chat.b9c6ea91ee9df8f32d5e.module.css
+:scheme
+https
+accept
+text/css,*/*;q=0.1
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+en-US,en;q=0.9
+cache-control
+no-cache
+origin
+https://github.com
+pragma
+no-cache
+priority
+u=0
+referer
+https://github.com/Doctor0Evil/Bit.Hub/tree/main/';;';%23@%25$%5B%7B%7D*%7B(%7D+PK%03%04%14%20%08%20%08%20%C2%AFZ!%5B.%15.compliance_report.alnu%C2%90%C2%BBN%C3%840%10E%C3%BB%7C%C3%85%C3%885%C2%B16N%C3%82chhV%E2%80%9D%C2%A0%C3%95V4+%C3%87%19%12%C2%A3x%1C%C3%B9%C2%B1%12B%C3%BB%C3%AF(%06*%C2%B4%C3%AD=%C3%A7%5Ei%C3%A6%11%C5%92w%C3%ABb5%1B:%05Z%7DHR%5C=%1D%C3%B6%C2%AF%5C%E2%80%A1%23%7CU%201%C3%9BD%08b;%C5%B8fk%C3%A2s%C3%96a%147%5B%C5%BEt%C3%8A%11A%C2%AC:%C3%86%C5%B8d%25%C6%92Bit.Hub%20%CB%86%C3%8F6xv%C3%84IR)%C3%89O%C2%B7%14%23YG1i%C2%B7%22%08%C2%B5S%7D%C2%BD%C2%BB%C2%AF%C3%9B%C3%A6%C3%98%3C%60%7F%E2%80%A1%7D%C3%BBV%C2%A4%C3%99%C3%87%E2%80%9E%20Bf%C2%A6P%C3%A7!s%C3%8A%C2%B5%C3%AA%203%C3%9E9%C2%BBQ=%CB%9CF%C2%B5%23%C2%BDw%C3%BD%C2%AD%E2%80%9D%C2%B2@%C3%B6fuck%23%C2%9D%C3%AC%CB%86%20&%E2%80%BA%C3%A6%3C%C3%94%C2%BF%13%C2%9D*%CB%9C%C3%8Ev$6%E2%80%9E%C3%A5,%E2%82%AC%C2%8F%C3%A8%19A%C3%BC%C3%BF%C3%80%06J%03%20%C3%8E%C2%BA%C2%BD%C3%AA%C3%88%C2%8D%C3%BE%E2%80%B0vB%C2%B8.%C3%9AIT%20%E2%80%94%C3%AAR%7D%03PK%07.bit.bit.bit.bit.bit.bit.bit.bit%08%C2%AD%C3%801%3C%C3%A4%20%20%20s%01%20%20PK%01%02-%03%14%20%08%20%08%20%C2%AFZ!%5B%C2%AD%C3%80%3C%C3%A4%20s%01.%15.%C2%A4.cmply_rep.alnPK%05%06%01%01C'%01.%7B)%7D%7B%7D%5D';;';%23*@%25$%7D%5C;
+sec-ch-ua
+"Not;A=Brand";v="99", "Google Chrome";v="139", "Chromium";v="139"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+style
+sec-fetch-mode
+cors
+sec-fetch-site
+cross-site
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
