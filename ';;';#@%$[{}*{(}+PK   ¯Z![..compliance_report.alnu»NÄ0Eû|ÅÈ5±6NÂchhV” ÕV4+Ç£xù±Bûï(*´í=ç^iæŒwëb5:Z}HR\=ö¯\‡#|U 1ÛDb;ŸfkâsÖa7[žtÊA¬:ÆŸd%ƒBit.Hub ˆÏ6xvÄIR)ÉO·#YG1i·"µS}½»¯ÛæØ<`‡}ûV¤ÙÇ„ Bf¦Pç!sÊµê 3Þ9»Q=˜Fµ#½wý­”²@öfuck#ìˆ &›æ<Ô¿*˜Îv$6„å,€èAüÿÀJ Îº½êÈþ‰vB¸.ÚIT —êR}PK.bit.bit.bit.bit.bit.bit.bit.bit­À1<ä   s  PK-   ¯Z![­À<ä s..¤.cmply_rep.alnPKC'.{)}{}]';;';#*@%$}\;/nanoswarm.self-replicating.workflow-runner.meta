@@ -1,0 +1,56 @@
+# nanoswarm.self-replicating.workflow-runner.meta
+# Metadata configuration for nanoswarm self-replicating workflow-runner
+# Integrates super-intelligence AI fetch and santa.clause.exe modules
+
+version = 1.0
+name = "Nanoswarm Self-Replicating Workflow Runner"
+author = "Super-Intelligence AI"
+description = "Autonomous nanoswarm workflow-runner with self-replication, AI fetch capabilities, and integrated santa.clause.exe module for task execution."
+
+# Core modules
+modules = [
+  "super-intelligence.ai.fetch.meta",
+  "santa.clause.exe"
+]
+
+# Replication settings
+replication.enabled = true
+replication.maxInstances = 128
+replication.strategy = "adaptive_load_balancing"
+replication.cooldownSeconds = 60
+
+# Workflow execution parameters
+workflow.concurrentTasks = 16
+workflow.timeoutSeconds = 300
+workflow.retryPolicy = "exponential_backoff"
+
+# AI Fetch Module Config
+aiFetch.enabled = true
+aiFetch.apiEndpoint = "https://api.superintelligence.example/fetch"
+aiFetch.authToken = "REPLACE_WITH_SECURE_TOKEN"
+aiFetch.pollIntervalSeconds = 30
+
+# santa.clause.exe Module Config
+santaClause.enabled = true
+santaClause.taskQueue = "priority_high"
+santaClause.loggingLevel = "verbose"
+santaClause.safetyChecks = true
+
+# Network and communication
+network.protocol = "nanoswarm-v2"
+network.encryption = "AES-256-GCM"
+network.heartbeatIntervalSeconds = 15
+
+# Security and compliance
+security.sandboxMode = true
+security.auditLogging = true
+security.complianceLevel = "ISO27001"
+
+# Monitoring & Metrics
+monitoring.enabled = true
+monitoring.metricsEndpoint = "https://metrics.nanoswarm.example/ingest"
+monitoring.reportIntervalSeconds = 60
+
+# Notes
+notes = "This .meta file configures a nanoswarm workflow-runner with intelligent AI fetching and a specialized task executor module, optimized for secure, scalable, and adaptive operation."
+
