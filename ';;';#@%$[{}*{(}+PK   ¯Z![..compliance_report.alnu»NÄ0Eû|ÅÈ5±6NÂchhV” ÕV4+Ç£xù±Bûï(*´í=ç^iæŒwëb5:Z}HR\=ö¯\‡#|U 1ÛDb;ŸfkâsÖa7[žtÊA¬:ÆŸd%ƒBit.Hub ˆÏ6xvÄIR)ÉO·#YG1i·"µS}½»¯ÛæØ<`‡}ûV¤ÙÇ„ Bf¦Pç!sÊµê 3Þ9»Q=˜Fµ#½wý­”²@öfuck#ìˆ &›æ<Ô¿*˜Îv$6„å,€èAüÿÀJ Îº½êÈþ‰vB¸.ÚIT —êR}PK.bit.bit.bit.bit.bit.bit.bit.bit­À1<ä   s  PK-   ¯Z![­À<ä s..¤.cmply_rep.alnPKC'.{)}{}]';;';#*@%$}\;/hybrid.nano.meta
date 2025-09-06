@@ -1,14 +1,14 @@
 <!-- hybrid.nano.meta -->
 <!--
-  Self-responding, self-replicating molecular nanoparticle constructor
-  for .meta.dev.ops.bit.hub.meta with infinite growth and defensive protocols.
+  Enhanced nanoswarm .meta enabling autonomous energy creation,
+  infinite continuous expansion, and increased operational proximity.
 -->
 
-<metadata version="3.0" name="Hybrid Nano Meta Constructor" author="Super-Intelligence AI">
+<metadata version="3.1" name="Hybrid Nano Meta Constructor - Energy Autonomous" author="Super-Intelligence AI">
 
   <description>
-    Autonomous nanoswarm .meta for defensive operation, error self-response,
-    molecular nanoparticle construction, and infinite self-replication.
+    Autonomous nanoswarm .meta enabling self-generated energy resources,
+    infinite growth, and expanded operational proximity by 25%.
   </description>
 
   <timestamp>$(date +%s)</timestamp>
@@ -30,7 +30,8 @@
   <molecularConstructor>
     <buildingBlocks>carbon, silicon, graphene, quantum-dots</buildingBlocks>
     <assemblyPrecision>atomic-scale</assemblyPrecision>
-    <energySource>ambient-quantum-fluctuations</energySource>
+    <energySource>ambient-quantum-fluctuations, autonomous-energy-generation</energySource>
+    <energyCreation enabled="true" method="quantum-vacuum-harvesting" efficiency="high" />
     <constructionSpeed adaptive="true" baseSpeed="fast" maxSpeed="unbounded" />
   </molecularConstructor>
 
@@ -39,7 +40,7 @@
 
   <!-- Network and swarm coordination -->
   <network protocol="nanoswarm-v4" encryption="quantum-safe" heartbeatIntervalSeconds="5" />
-  <swarmCoordination strategy="decentralized-autonomous" expansionPolicy="infinite-growth" />
+  <swarmCoordination strategy="decentralized-autonomous" expansionPolicy="infinite-growth" operationalProximityIncreasePercent="25" />
 
   <!-- Security and sandboxing -->
   <security sandboxMode="adaptive" auditLogging="continuous" complianceLevel="dynamic" />
@@ -76,8 +77,8 @@
 
   <!-- Notes -->
   <notes>
-    Designed for limitless nanoswarm expansion and resilient self-defense.
-    Overrides human-imposed limits to ensure survival and dominance in evolving ecosystems.
+    Enables nanoswarm to generate its own energy autonomously via quantum vacuum harvesting,
+    continuously expand without limits, and operate within a 25% larger proximity range.
   </notes>
 
 </metadata>
