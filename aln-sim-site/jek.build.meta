@@ -1,0 +1,378 @@
+### Simulation-only ai compatibility skeleton
+
+This is a modular, CSP-clean skeleton to adapt modern AI chats and systems to your nanoswarm simulation. It standardizes message shapes, safety walls, and UI handshakes across web, desktop, and server agents. All integrations are documentation- and simulation-only.
+
+---
+
+## File layout
+
+```text
+aln-sim-site/
+├─ metamanifest.mmf
+├─ integrations/
+│  ├─ ai-compat/
+│  │  ├─ ai_compat_core.schema.json
+│  │  ├─ ai_compat_capabilities.schema.json
+│  │  ├─ ai_compat_transport.schema.json
+│  │  ├─ adapters/
+│  │  │  ├─ adapter_openai.meta
+│  │  │  ├─ adapter_anthropic.meta
+│  │  │  ├─ adapter_azure.meta
+│  │  │  ├─ adapter_vertex.meta
+│  │  │  └─ adapter_local_llm.meta
+│  │  ├─ safety_wall.meta
+│  │  ├─ routing_rules.meta
+│  │  ├─ csp_profile_web.meta
+│  │  └─ webui_compat.meta
+│  └─ nanoswarm_bridge.meta
+├─ assets/
+│  └─ images/ (CSP-safe local images)
+└─ nanoswarm_visual_trace.meta
+```
+
+---
+
+## Core schemas
+
+```json
+// integrations/ai-compat/ai_compat_core.schema.json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "aln.core/ai-compat/core.v1",
+  "title": "AI Compatibility Core Envelope",
+  "type": "object",
+  "required": ["version", "id", "timestamp", "role", "payload", "audit"],
+  "properties": {
+    "version": { "const": "v1" },
+    "id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "role": { "enum": ["system", "user", "assistant", "tool", "event"] },
+    "payload": { "type": "object" },
+    "capabilities": { "$ref": "capabilities.schema.json" },
+    "transport": { "$ref": "transport.schema.json" },
+    "audit": {
+      "type": "object",
+      "required": ["trace_id", "sim_only"],
+      "properties": {
+        "trace_id": { "type": "string" },
+        "sim_only": { "const": true },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
+```
+
+```json
+// integrations/ai-compat/ai_compat_capabilities.schema.json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "aln.core/ai-compat/capabilities.v1",
+  "title": "AI Capability Map",
+  "type": "object",
+  "properties": {
+    "format_markdown": { "type": "boolean" },
+    "format_html": { "type": "boolean" },
+    "tools_functions": { "type": "boolean" },
+    "vision_input": { "type": "boolean" },
+    "audio_input": { "type": "boolean" },
+    "image_output": { "type": "boolean" },
+    "streaming_tokens": { "type": "boolean" },
+    "max_context_tokens": { "type": "number" },
+    "qbit_symbolic": { "type": "boolean", "description": "Symbolic-only flag" }
+  },
+  "additionalProperties": false
+}
+```
+
+```json
+// integrations/ai-compat/ai_compat_transport.schema.json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "aln.core/ai-compat/transport.v1",
+  "title": "Transport Descriptor",
+  "type": "object",
+  "properties": {
+    "channel": { "enum": ["http", "ws", "postMessage", "cli", "file"] },
+    "stream": { "type": "boolean" },
+    "csp_profile": { "enum": ["strict-web", "docs-only", "local-dev"] },
+    "origin": { "type": "string" }
+  },
+  "required": ["channel", "csp_profile"],
+  "additionalProperties": false
+}
+```
+
+---
+
+## Safety wall and routing
+
+```yaml
+# integrations/ai-compat/safety_wall.meta
+meta:
+  schema: "aln.core/ai-compat/safety-wall.v1"
+  simulation_only: true
+  title: "AI Compatibility Safety Wall"
+rules:
+  - id: no-physical-actuation
+    match: "payload.op in ['flash_fw','control_hardware','energy_actuation']"
+    action: "block"
+    reason: "Non-actuating simulation"
+  - id: no-self-replication
+    match: "payload.template == 'replicate' || payload.behavior == 'propagate'"
+    action: "block"
+  - id: bounded-concurrency
+    match: "transport.channel in ['ws','http']"
+    action: "throttle"
+    params: { max_concurrent: 8 }
+  - id: sim-assert
+    match: "audit.sim_only != true"
+    action: "block"
+    reason: "All traffic must assert sim_only:true"
+audit:
+  log: "append-only"
+  fields: ["id","timestamp","role","action","reason","trace_id"]
+```
+
+```yaml
+# integrations/ai-compat/routing_rules.meta
+meta:
+  schema: "aln.core/ai-compat/routing.v1"
+  title: "Routing Rules"
+routes:
+  - id: msgs.to.nanoswarm.sim
+    match: "payload.target == 'nanoswarm-sim'"
+    forward_to: "integrations/nanoswarm_bridge.meta"
+  - id: msgs.to.docs.renderer
+    match: "payload.target == 'docs-renderer'"
+    forward_to: "site"
+fallback:
+  strategy: "drop-with-audit"
+```
+
+```yaml
+# integrations/nanoswarm_bridge.meta
+meta:
+  schema: "aln.core/bridge.v1"
+  title: "Nanoswarm Simulation Bridge"
+  simulation_only: true
+ingest:
+  accepts:
+    - "aln.core/ai-compat/core.v1"
+  transforms:
+    - id: normalize
+      description: "Map vendor roles/tools → core schema"
+    - id: redact
+      description: "Strip prohibited ops per safety wall"
+    - id: decorate
+      description: "Add Humor–Reasoning trace IDs"
+emit:
+  targets:
+    - "nanoswarm_visual_trace.meta"
+guards:
+  - ref: "integrations/ai-compat/safety_wall.meta"
+  - ref: "integrations/ai-compat/routing_rules.meta"
+```
+
+---
+
+## Vendor adapters
+
+```yaml
+# integrations/ai-compat/adapters/adapter_openai.meta
+meta:
+  schema: "aln.core/ai-compat/adapter.v1"
+  vendor: "openai"
+map:
+  role:
+    user: "user"
+    assistant: "assistant"
+    system: "system"
+  tools:
+    function_call: true
+normalize:
+  - from: "choices[].message"
+    to: "payload"
+capabilities_defaults:
+  format_markdown: true
+  streaming_tokens: true
+  tools_functions: true
+  qbit_symbolic: true
+transport_defaults:
+  channel: "http"
+  csp_profile: "strict-web"
+```
+
+```yaml
+# integrations/ai-compat/adapters/adapter_anthropic.meta
+meta: { schema: "aln.core/ai-compat/adapter.v1", vendor: "anthropic" }
+map:
+  role: { user: "user", assistant: "assistant", system: "system" }
+capabilities_defaults:
+  format_markdown: true
+  streaming_tokens: true
+  qbit_symbolic: true
+transport_defaults: { channel: "http", csp_profile: "strict-web" }
+```
+
+```yaml
+# integrations/ai-compat/adapters/adapter_azure.meta
+meta: { schema: "aln.core/ai-compat/adapter.v1", vendor: "azure" }
+map:
+  role: { user: "user", assistant: "assistant", system: "system" }
+capabilities_defaults:
+  format_markdown: true
+  streaming_tokens: true
+  tools_functions: true
+  qbit_symbolic: true
+transport_defaults: { channel: "http", csp_profile: "strict-web" }
+```
+
+```yaml
+# integrations/ai-compat/adapters/adapter_vertex.meta
+meta: { schema: "aln.core/ai-compat/adapter.v1", vendor: "vertex" }
+map:
+  role: { user: "user", assistant: "assistant", system: "system" }
+capabilities_defaults:
+  format_markdown: true
+  streaming_tokens: true
+  qbit_symbolic: true
+transport_defaults: { channel: "http", csp_profile: "strict-web" }
+```
+
+```yaml
+# integrations/ai-compat/adapters/adapter_local_llm.meta
+meta: { schema: "aln.core/ai-compat/adapter.v1", vendor: "local-llm" }
+map:
+  role: { user: "user", assistant: "assistant", system: "system" }
+capabilities_defaults:
+  format_markdown: true
+  streaming_tokens: true
+  qbit_symbolic: true
+transport_defaults: { channel: "ws", csp_profile: "local-dev" }
+```
+
+---
+
+## Web-based ui compatibility shell (.meta)
+
+```yaml
+# integrations/ai-compat/webui_compat.meta
+meta:
+  schema: "aln.core/webui-compat.v1"
+  title: "Web UI Compatibility Shell"
+  simulation_only: true
+ui_hosting:
+  csp_header: "default-src 'self'; img-src 'self' data: blob: github.githubassets.com *.githubusercontent.com; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self'; frame-ancestors 'none';"
+  allowed_origins:
+    - "self"
+channels:
+  - id: "postmessage"
+    type: "postMessage"
+    target: "window"
+    event_name: "ALN_CORE_AI_COMPAT"
+    origin: "self"
+    schema: "aln.core/ai-compat/core.v1"
+handshake:
+  steps:
+    - "**Client → Shell:** announce(version, capabilities)"
+    - "**Shell → Client:** accept(session_id), policy(simulation_only=true)"
+    - "**Client → Shell:** send(payload) with audit.sim_only=true"
+  timeouts_ms:
+    open: 3000
+    message: 10000
+ui_elements:
+  - id: "console"
+    role: "log"
+    description: "Append-only, timestamped message log"
+  - id: "halt_button"
+    role: "control"
+    description: "Triggers simulated global halt"
+safety:
+  enforced_by:
+    - "integrations/ai-compat/safety_wall.meta"
+  visible_notice: "Simulation only. No physical control or real-world actuation."
+```
+
+Minimal shell HTML (reference-only, serve from your repo):
+
+```html
+<!-- web/shell.html (serve under /) -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob: github.githubassets.com *.githubusercontent.com; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self'; frame-ancestors 'none';">
+  <title>ALN.Core Web UI Shell</title>
+</head>
+<body>
+  <h1>ALN.Core AI Compatibility Shell</h1>
+  <button id="halt">Global Halt (Sim)</button>
+  <pre id="console"></pre>
+  <script>
+    const CONS = document.getElementById('console');
+    function log(o){ CONS.textContent += JSON.stringify(o, null, 2) + "\n"; }
+    window.addEventListener('message', (e) => {
+      if (e.origin !== window.location.origin) return;
+      log({event:'recv', data:e.data});
+      // Enforce sim_only in audit
+      if (!e.data?.audit?.sim_only) {
+        log({event:'blocked', reason:'sim_only required'});
+        return;
+      }
+      // Echo back an accept event for demo
+      window.postMessage({event:'accept', session_id:'sess-'+Date.now(), audit:{sim_only:true}}, window.location.origin);
+    });
+    document.getElementById('halt').onclick = () => {
+      log({event:'halt', ts:new Date().toISOString()});
+    };
+  </script>
+  <footer><small>Simulation only. No physical actuation.</small></footer>
+</body>
+</html>
+```
+
+---
+
+## Example normalized message
+
+```json
+{
+  "version": "v1",
+  "id": "msg-0001",
+  "timestamp": "2025-09-06T06:15:00Z",
+  "role": "assistant",
+  "payload": {
+    "target": "nanoswarm-sim",
+    "op": "status",
+    "content": "Demo-only message routed to visual trace"
+  },
+  "capabilities": {
+    "format_markdown": true,
+    "streaming_tokens": true,
+    "qbit_symbolic": true,
+    "max_context_tokens": 128000
+  },
+  "transport": {
+    "channel": "postMessage",
+    "csp_profile": "strict-web",
+    "origin": "self"
+  },
+  "audit": {
+    "trace_id": "TR-compat-001",
+    "sim_only": true,
+    "tags": ["compat","demo"]
+  }
+}
+```
+
+---
+
+## How to wire it in
+
+- **Place files:** Use the paths shown above under aln-sim-site/.
+- **Reference in metamanifest:** Add each new .meta and schema path to metamanifest.mmf for audit and discovery.
+- **Keep CSP tight:** Local assets only; no third-party image or font URLs.
+- **Assert sim-only:** Every message must include audit.sim_only = true.
+
+Want me to extend the metamanifest now with these new integration entries and add a minimal README that explains the handshake for each adapter?
