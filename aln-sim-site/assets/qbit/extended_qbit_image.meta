@@ -1,0 +1,77 @@
+# file: /aln-sim-site/assets/qbit/extended_qbit_image.meta
+# Scope: Simulation-only, CSP-clean definition of an "extended" quantum.bitmap.image (qbit)
+# Purpose: Provide a richly described, non-actuating visual asset for conceptual/narrative use.
+# Safety: No physical actuation, no hardware control, no quantum operations.
+
+meta:
+  schema: "aln.core/qbit-image.v1"
+  title: "Extended QBIT Bitmap Image"
+  description: >
+    A narrative-only, extended-format bitmap representing a conceptual 'quantum-dot metaphysical-object'
+    in the nanoswarm simulation. This is a visual metaphor, not a physical or quantum artifact.
+  created_utc: "2025-09-06T05:45:00Z"
+  authors:
+    - handle: "XboxTeeJay"
+      role: "Meta-architect"
+    - handle: "Copilot"
+      role: "AI collaborator"
+  licensing: "CC0 placeholder art; safe for public simulation use"
+  jurisdiction: "Simulation-only"
+
+safety:
+  simulation_only: true
+  prohibited:
+    - "Any physical rendering, fabrication, or lab process"
+    - "Embedding of executable code or hardware drivers"
+    - "Use in contexts implying real quantum computation"
+  required_guards:
+    - "Serve only from CSP-approved origins"
+    - "Verify asset hash before load"
+  footer_notice: "Simulation only. No physical control or real-world actuation."
+
+qbit_image:
+  id: "qbit.extended.001"
+  type: "quantum.bitmap.image"
+  format: "PNG"
+  dimensions_px: { width: 512, height: 512 }
+  color_depth_bits: 32
+  layers:
+    - name: "background"
+      description: "Soft gradient from deep violet to azure, symbolizing conceptual depth."
+    - name: "dot_field"
+      description: "Array of stylized 'dots' — each a narrative node, not a particle."
+    - name: "overlay_grid"
+      description: "Semi-transparent grid to suggest structure and governance."
+    - name: "annotation"
+      description: "Frame title and audit tag rendered in overlay text."
+  narrative_extension:
+    scope_increase: "10% more descriptive context than base qbit image"
+    added_elements:
+      - "Extra dot clusters representing expanded story beats"
+      - "Subtle glow effect to indicate 'parallel streaming' metaphor"
+      - "Audit watermark in lower-right corner"
+  audit:
+    trace_id: "QBIT-IMG-EXT-0001"
+    hash_sha256: "TBD-compute-on-commit"
+
+asset_location:
+  local_path: "/assets/images/qbit_extended.png"
+  csp_compliant: true
+  source_attribution: "Project-owned placeholder art"
+  placeholder_required: true
+  placeholder_spec: "512x512 PNG with labeled layers as per qbit_image.layers"
+
+visual_trace_link:
+  related_frames:
+    - "VT-003"  # Metaphysical Dots
+    - "VT-004"  # Parallel Chorus
+  usage_notes: >
+    This qbit image is referenced in visual trace frames to illustrate conceptual expansion.
+    It should be updated in sync with narrative changes, not physical parameters.
+
+governance:
+  attestation_required: true
+  changelog:
+    - version: "1.0"
+      date: "2025-09-06"
+      changes: "Initial extended qbit image definition; placeholder art linked."
