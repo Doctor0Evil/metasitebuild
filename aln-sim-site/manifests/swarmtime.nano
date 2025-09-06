@@ -1,0 +1,6 @@
+nanosecond:
+  symbol: ns
+  value: 0.000000001 seconds
+  light_travel_distance: 0.299792458 meters
+  metaphysical_equivalent: "One heartbeat in the life of a thought"
+  sim_only: true
