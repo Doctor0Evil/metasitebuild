@@ -101,3 +101,4 @@ $plan = @{
 $plan | Out-File ".bitshell/artifacts/deploy-plan.json"
 
 Log "BitShell(Functions): complete"
+chmod +x scripts/bitshell-functions.ps1
