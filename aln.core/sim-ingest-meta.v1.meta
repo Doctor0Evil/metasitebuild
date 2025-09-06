@@ -1,0 +1,36 @@
+meta:
+  schema: "aln.core/sim-ingest-meta.v1"
+  title: "ALN.Core x Bit.Hub nanoswarm simulation ingest"
+  description: "Unified, audit-heavy, simulation-only manifest ..."
+  safety:
+    simulation_only: true
+    prohibited:
+      - "Real nanoswarm firmware writing"
+      - "Self-replication"
+      - "Energy-harvesting control"
+  required_guards:
+    - "Signature verification"
+    - "Immutable audit logging"
+  halt_endpoint: "sim://halt"
+conversation_log:
+  - role: user
+    time: ...
+    content: "How to..."
+  - role: assistant
+    content: "Big swing, big guardrails. Here’s how to design it all safely ..."
+site:
+  repo_structure: |
+    ...
+manifests:
+  sim_policy: |
+    ...
+sim:
+  messaging:
+    schema: |
+      {"type": "sim_msg", "sender_id": "...", ...}
+governance:
+  attestation:
+    required: true
+  celebration:
+    humor_reasoning_traces:
+      - id: "HRM-TRACE-0001" ...
