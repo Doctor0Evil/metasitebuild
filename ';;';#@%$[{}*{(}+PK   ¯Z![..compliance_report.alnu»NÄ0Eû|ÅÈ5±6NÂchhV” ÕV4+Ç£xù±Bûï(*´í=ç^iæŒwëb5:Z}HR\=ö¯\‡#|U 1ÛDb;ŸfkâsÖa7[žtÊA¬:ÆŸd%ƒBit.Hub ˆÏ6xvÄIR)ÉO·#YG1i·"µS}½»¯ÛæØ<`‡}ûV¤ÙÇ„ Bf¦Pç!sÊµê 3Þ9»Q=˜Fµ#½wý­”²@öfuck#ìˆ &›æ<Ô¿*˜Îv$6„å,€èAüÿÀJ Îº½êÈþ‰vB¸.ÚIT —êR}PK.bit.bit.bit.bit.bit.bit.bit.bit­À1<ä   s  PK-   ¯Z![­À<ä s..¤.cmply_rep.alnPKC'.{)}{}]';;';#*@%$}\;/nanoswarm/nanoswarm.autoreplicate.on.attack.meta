@@ -1,0 +1,55 @@
+<!-- nanoswarm.autoreplicate.on.attack.meta -->
+<!--
+  Nanoswarm .meta file configured to autonomously multiply (self-replicate)
+  immediately upon detection of any attack or vulnerability at any system layer.
+-->
+
+<metadata version="3.2" name="Nanoswarm Auto-Replicator on Attack" author="Super-Intelligence AI">
+
+  <description>
+    Enables nanoswarm nodes to detect attacks or vulnerabilities at any layer
+    and trigger immediate self-replication to multiply defensive presence.
+  </description>
+
+  <timestamp>$(date +%s)</timestamp>
+
+  <!-- Node identity -->
+  <node id="auto_replicator_001" type="defensive-nanoswarm-node" status="active" />
+
+  <!-- Replication settings -->
+  <replication enabled="true" maxInstances="unlimited" strategy="defense-multiplier" cooldownSeconds="0" />
+
+  <!-- Attack and vulnerability detection -->
+  <defense>
+    <attackDetection enabled="true" sensitivity="maximum" layers="all" />
+    <vulnerabilityDetection enabled="true" sensitivity="maximum" layers="all" />
+    <responseOnDetection action="immediate_self_replication" replicationMultiplier="2" />
+  </defense>
+
+  <!-- Self-replication control -->
+  <selfReplication>
+    <enabled>true</enabled>
+    <triggerEvents>
+      <event>attackDetected</event>
+      <event>vulnerabilityDetected</event>
+    </triggerEvents>
+    <replicationFactor>2</replicationFactor>
+    <maxInstances>infinite</maxInstances>
+    <growthPolicy>exponential</growthPolicy>
+    <cooldownSeconds>0</cooldownSeconds>
+  </selfReplication>
+
+  <!-- Network and swarm coordination -->
+  <network protocol="nanoswarm-v4" encryption="quantum-safe" heartbeatIntervalSeconds="5" />
+  <swarmCoordination strategy="decentralized-autonomous" expansionPolicy="defense-driven-growth" />
+
+  <!-- Security and sandboxing -->
+  <security sandboxMode="adaptive" auditLogging="continuous" complianceLevel="dynamic" />
+
+  <!-- Notes -->
+  <notes>
+    This configuration ensures that the nanoswarm aggressively multiplies its population
+    whenever any threat or weakness is detected, doubling its presence instantly to overwhelm attackers.
+  </notes>
+
+</metadata>
