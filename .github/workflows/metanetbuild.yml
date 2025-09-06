@@ -1,0 +1,96 @@
+# metanetbuild.yml
+
+metanetbuild:
+  version: 1.0
+  project: 7G-bandz
+  author: Jacob Farmer
+  location: Phoenix, AZ
+  context_blob:
+    raw_blob: |
+      h-nI;S;m;l;H4#itte$Ew:\oq:::E:::n;At:::.2I.Im:/::Ae;;t%;M;;.mw:8(!+7^;.g=;jju;p;:;;1;ty_H:://w&@@e:dM01tCq;:E::r:n;At:::.2I.Im:/:k=:q;yRp;P;Y;Y:n%Cq;:E:ntC::n;At::Ewnt:.2I.Im:/::Ae;;t%;M;;.mw:8(!+7^;.g=gtp.e:=1/rs=;;:;;1:::O/a;y;&%:n%M01nta;ook1kA0:%$i14Mpl:t:ic:".:ss/c::d_/;mt::/dOa/_/;;iden++++=s::::S.;y;&%:8(!+7^:d&:ao;jju;::S.=hfcp;:;.g=gte$&:ao:;ty:O/a;y;&%:n%Ewn;1tp.e:=1/rs=;;;e;s;Htboq::te$&:ao;jju;p;:;;1id:ttpsU;O;7;;H:://w&tp.e:=1/rs=;;;e;s;Htb:Ae;;t%;M;;.mw;m;iboq-\\+tijs/6;8g;;e;s;Htboq::@@e;nta:\k=:;ook1kA0:%$i14Mpl:t:ic:".:ss/c::d_/;mt::/dOa/_/;;iden++++=s::::S.;&%:n%EwntC
+    normalized_keys:
+      - h-nI
+      - S
+      - m
+      - l
+      - H4
+      - itte
+      - Ew
+      - oq
+      - n
+      - At
+      - 2I
+      - Im
+      - Ae
+      - t%
+      - M
+      - mw
+      - 8(!+7^
+      - g
+      - jju
+      - p
+      - ty_H
+      - Cq
+      - Y
+      - O/a
+      - n%M01nta
+      - ic
+      - ss
+      - mt
+      - dOa
+      - iden
+      - hfcp
+      - tp.e
+      - Htb
+      - te
+      - tijs
+      - k=
+      - @@e
+      - 1id
+  ci_cd_pipeline:
+    executive_summary: |
+      Pipeline supports .NET and Jekyll applications on Docker via Virtanet, leveraging modular best practices for builds, orchestration, error-handling, caching, and secure secrets management[6][10][8][16][20].
+    dockerfile_strategies:
+      - multi-stage-build: true
+      - slim-runtime-image: true
+      - cache-layer-ordering: true
+      - .dockerignore: targeted
+    orchestrator: Docker Compose
+    compose_services:
+      - web: .NET
+      - jekyll: static site
+      - db: optional dependency
+    github_actions_workflows:
+      dotnet_ci:
+        uses: actions/setup-dotnet@v5
+        matrix_test: true
+        cache: "**/packages.lock.json"
+      jekyll_deploy:
+        uses: ruby/setup-ruby@v1
+        bundler_cache: true
+        upload_artifact: actions/upload-artifact@v4
+      general_ci_features:
+        matrix: platform/os/dependency_version
+        error_retry: exponential_backoff
+        artifact_management: versioned, immutable
+        notifications: enabled
+        secrets: github_secret_store
+    virtanet_deployment:
+      deploy: docker_image_push
+      static_assets: artifact_upload
+      rollback: automated/manual, keeps N artifacts
+    monitoring_metrics:
+      pipeline_success_rate: tracked
+      build_duration: tracked
+      failure_alerts: configured
+    caching:
+      dependencies: .NET, Jekyll, Docker layers
+      strategy: aggressive, cache-path specified
+    security:
+      secrets_vault: true
+      OIDC_token: preferred (if available)
+      rotate_secrets: regular
+      never_echo_secrets: true
+    artifact_handling:
+      upload_download: actions/upload-artifact@v4, actions/download-artifact@v4
+      traceability: commit-based version/tag
