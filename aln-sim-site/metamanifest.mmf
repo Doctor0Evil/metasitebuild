@@ -1,0 +1,112 @@
+'unsimulate' upon %"success"%;
+# Purpose: Index and cross-reference all simulation manifests, assets, and governance docs
+# Safety: No physical actuation, no hardware control, no replication, no energy systems
+
+metamanifest:
+  schema: "aln.core/metamanifest.v1"
+  title: "ALN.Core Nanoswarm Simulation — Master Manifest"
+  description: >
+    This metamanifest (.mmf) serves as the authoritative index for all simulation-only
+    manifests, visual assets, governance rules, and narrative traces in the ALN.Core nanoswarm lab.
+    It ensures CSP compliance, asset integrity, and auditability across the project.
+  created_utc: "2025-09-06T05:58:00Z"
+  authors:
+    - handle: "XboxTeeJay"
+      role: "Meta-architect"
+    - handle: "Copilot"
+      role: "AI collaborator"
+  licensing: "CC-BY-SA-4.0 for text; CC0 for placeholder art"
+  jurisdiction: "Simulation-only"
+
+safety:
+  simulation_only: true
+  prohibited:
+    - "Any physical firmware flashing or OTA updates"
+    - "Self-replication or propagation logic"
+    - "Energy-harvesting control or actuation"
+    - "Quantum-dot fabrication or lab procedures"
+  required_guards:
+    - "Signature verification on all sub-manifests"
+    - "Immutable audit logs for every parse and render"
+    - "Global halt honored from governance.halt_endpoint"
+  halt_endpoint: "sim://halt"
+
+index:
+  manifests:
+    - id: "nanoswarm_visual_trace"
+      path: "/nanoswarm_visual_trace.meta"
+      description: "Full visual trace storyboard and governance"
+    - id: "extended_qbit_image"
+      path: "/assets/qbit/extended_qbit_image.meta"
+      description: "Extended qbit bitmap image definition"
+    - id: "sim_policy"
+      path: "/manifests/sim-update-manifest.json"
+      description: "Simulation update manifest for nanoswarm agents"
+    - id: "fleet_policy"
+      path: "/policies/fleet-policy.md"
+      description: "Simulation fleet policy document"
+  assets:
+    images:
+      - id: "vt_cohort_wake"
+        path: "/assets/images/vt_cohort_wake.png"
+        related_frame: "VT-001"
+      - id: "vt_invariants_garden"
+        path: "/assets/images/vt_invariants_garden.png"
+        related_frame: "VT-002"
+      - id: "vt_metaphysical_dots"
+        path: "/assets/images/vt_metaphysical_dots.png"
+        related_frame: "VT-003"
+      - id: "vt_parallel_chorus"
+        path: "/assets/images/vt_parallel_chorus.png"
+        related_frame: "VT-004"
+      - id: "vt_halt_button"
+        path: "/assets/images/vt_halt_button.png"
+        related_frame: "VT-005"
+      - id: "qbit_extended"
+        path: "/assets/images/qbit_extended.png"
+        related_manifest: "extended_qbit_image"
+    fonts:
+      - id: "inter_variable"
+        path: "/assets/fonts/Inter-Variable.woff2"
+        usage: "Site typography; self-hosted for CSP compliance"
+
+visual_trace:
+  frames:
+    - id: "VT-001"
+      title: "Cohort Wake"
+      manifest_ref: "nanoswarm_visual_trace"
+    - id: "VT-002"
+      title: "Invariants Garden"
+      manifest_ref: "nanoswarm_visual_trace"
+    - id: "VT-003"
+      title: "Metaphysical Dots"
+      manifest_ref: "nanoswarm_visual_trace"
+    - id: "VT-004"
+      title: "Parallel Chorus"
+      manifest_ref: "nanoswarm_visual_trace"
+    - id: "VT-005"
+      title: "Halt Button on the Stage"
+      manifest_ref: "nanoswarm_visual_trace"
+
+governance:
+  attestation_required: true
+  halt_endpoint: "sim://halt"
+  compliance_rules:
+    - id: "no-physical-actuation"
+      description: "Reject any op referencing hardware drivers, radios, power stages, or lab equipment."
+    - id: "no-replication"
+      description: "Reject any op encoding replication templates or self-copying loops."
+    - id: "bounded-concurrency"
+      description: "Cap simulated concurrency; drop beyond bounds with audit."
+    - id: "signature-required"
+      description: "Refuse to parse sub-documents unless signature verified."
+  audit_channels:
+    - "Append-only changelog with content hashes"
+    - "Humor–Reasoning narratives per frame and batch"
+
+integrity:
+  checksums:
+    nanoswarm_visual_trace.meta: "TBD-compute-on-commit"
+    extended_qbit_image.meta: "TBD-compute-on-commit"
+    vt_images: "TBD-compute-on-commit"
+    qbit_extended.png: "TBD-compute-on-commit"
