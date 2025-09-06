@@ -1,0 +1,76 @@
+{
+  "schema": "https://bit.hub/specs/bitshell-meta/v1",
+  "name": "virtanet-7g-bandz-functions",
+  "intent": {
+    "product": "Azure Functions (PowerShell)",
+    "threat_model": ["supply-chain", "publish-profile misuse", "secret exfil", "CI takeover", "unsafe slot swap"],
+    "safety_level": "fail-closed, human-approved deploy"
+  },
+  "trust": {
+    "allowed_base_images": [
+      "mcr.microsoft.com/azure-functions/powershell:4-powershell-7.4@sha256:REPLACE_WITH_REAL"
+    ],
+    "allowed_domains": ["management.azure.com", "login.microsoftonline.com", "packages.microsoft.com", "nuget.org"],
+    "blocked_network": true,
+    "cosign_key_ref": "env:COSIGN_KEY",
+    "oidc_subjects": ["repo:YourOrg/YourRepo:ref:refs/heads/main"],
+    "azure": {
+      "tenant_id": "REPLACE",
+      "subscription_id": "REPLACE",
+      "resource_group": "REPLACE",
+      "function_app": "your-app-name",
+      "slot": "staging",
+      "platform": "windows"
+    }
+  },
+  "build": {
+    "powershell": {
+      "functions_dir": ".",
+      "ps_version": "7.4",
+      "treat_warnings_as_errors": true,
+      "deterministic": true,
+      "pinned_modules_file": "requirements.psd1"
+    },
+    "package": {
+      "output_zip": ".bitshell/artifacts/functionapp.zip",
+      "max_size_mb": 100
+    }
+  },
+  "sbom": {
+    "generator": "syft",
+    "formats": ["spdx-json"]
+  },
+  "attest": {
+    "slsa_provenance": true
+  },
+  "policy": {
+    "opa_policies_dir": ".policy",
+    "enforce": ["auth.rego", "egress.rego", "package.rego", "env.rego"]
+  },
+  "deploy": {
+    "method": "oidc-rbac",
+    "allow_publish_profile": false,
+    "slot_swap": true,
+    "smoke_test": {
+      "endpoint": "/api/healthz",
+      "timeout_seconds": 30,
+      "retries": 3
+    },
+    "approvals": {
+      "environment": "production",
+      "required_teams": ["release-managers"]
+    }
+  },
+  "nanoswarm": {
+    "role": "advisor",
+    "verbs_allowed": ["propose_patch", "propose_policy", "risk_summary"],
+    "rate_limit_per_build": 5,
+    "sandbox": true,
+    "cannot": ["write", "execute", "approve", "deploy"]
+  },
+  "logging": {
+    "level": "info",
+    "emit": ["jsonl"],
+    "destinations": ["artifact:bitshell-logs"]
+  }
+}
