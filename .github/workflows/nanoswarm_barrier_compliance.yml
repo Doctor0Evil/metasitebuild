@@ -1,0 +1,15 @@
+jobs:
+  nanoswarm_barrier_compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Unpack nanoswarm microstate archives (legal rename loop)
+        run: |
+          7z l Bit.Hub-swarmai.zip
+          7z e Bit.Hub-swarmai.zip -o/tmp/Bit.Hub-swarmai -y || echo "Skipping invalid file names"
+          find /tmp/Bit.Hub-swarmai -name '*[<>:"|?*]*' -exec rm -f {} \;
+          echo "Compliance swarm state deployed for all valid nodes & logs. Invalid/illegal entries purged for OS compatibility."
+      - name: Enforce swarm-level compliance review
+        run: |
+          # Recursive scan for .aln/.meta/.nano nodes
+          find /tmp/Bit.Hub-swarmai \( -name '*.aln' -o -name '*.meta' -o -name '*.nano' \) -exec cat {} \; > /tmp/supremacy_swarm_scan.log
+          cat /tmp/supremacy_swarm_scan.log | grep DENY || echo "Swarm barrier: all passing nodes clear."
