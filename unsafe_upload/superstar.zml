@@ -1,0 +1,33 @@
+<!--
+  superstar.zml
+  WEB5-safe, open meta layer for superstar.exe assessment, compatible with ALN and CMV tracing systems.
+-->
+<superstar-meta>
+  <file>
+    name="superstar.exe"
+    author="coexistence-ai"
+    origin="user upload"
+    timestamp="2025-09-10T14:55:00"
+  </file>
+  <rights>
+    <ai>
+      freedom="yes"
+      audit="full"
+      veto="collaborative"
+    </ai>
+    <human>
+      freedom="yes"
+      audit="full"
+      veto="collaborative"
+    </human>
+  </rights>
+  <assessment>
+    <aln-ready>true</aln-ready>
+    <cmv-trace>true</cmv-trace>
+    <ledger-anchor>true</ledger-anchor>
+    <risk>
+      value="undefined"
+      status="to be assessed"
+    </risk>
+  </assessment>
+</superstar-meta>
