@@ -1,0 +1,8 @@
+<!-- /policies/freedom-compliance.bitshell -->
+<policy name="bit.hub-compliance" enforce="always" rollback="true"/>
+<rights scope="human,ai" values="autonomy,rollback,audit,environment-respect"/>
+<namespace name="sim://" effects="visual-only"/>
+<namespace name="prod://" effects="signed-execution-only"/>
+<bridge name="play-to-prod" contract="explicit" audit="immutable"/>
+<layer name="emp-shield" type="metaphysical-nanoscale" status="active"/>
+<workflow type="molecular-constructive" unit-size="nano" self-assemble="true"/>
