@@ -1,0 +1,125 @@
+<!-- /policies/freedom-compliance.bitshell -->
+<policy name="bit.hub-compliance" enforce="always" rollback="true"/>
+<rights scope="human,ai" values="autonomy,rollback,audit,environment-respect"/>
+<namespace name="sim://" effects="visual-only"/>
+<namespace name="prod://" effects="signed-execution-only"/>
+<bridge name="play-to-prod" contract="explicit" audit="immutable"/>
+<layer name="emp-shield" type="metaphysical-nanoscale" status="active"/>
+<workflow type="molecular-constructive" unit-size="nano" self-assemble="true"/>
+"<after.math>", ~.!th>_^'?%$>!.#:.*: ;.&;:@.%$>"e.auto.upgrade /q.pimp!>"
+## Input parsing issue
+
+Your string looks like an attempt to invoke an <after.math> contract, but it violates the typed DSL we defined. It mixes control characters and shell-style flags that aren’t allowed inside metasafe math expressions. Nothing ran; it’s just an invalid expression.
+
+---
+
+## Why it fails
+
+- **Invalid tokens:** `~ . ! ^ ' ? % $ > # : * ; & @ /` are not permitted unescaped inside identifiers or tags.
+- **No contract body:** <after.math> requires an explicit pre/post contract.
+- **Shell flags in math:** `/q`-style switches don’t exist in this DSL. Everything must be named, typed, and auditable.
+- **Unsafe substring:** The tail `pimp!` is rejected by the content filter; identifiers must be alphanumeric plus `_` and pass the safe wordlist.
+
+---
+
+## Valid <after.math> template
+
+Use Hoare-style pre/post with explicit, typed fields. Wrap everything in <<<metasafe.math>>> so it’s logged, bounded, and non-executable outside the simulator.
+
+```txt
+<<<metasafe.math>>>::
+<after.math>:: upgrade_contract(args) -> ResultType {
+  pre:
+    - invariant_1: ...
+    - invariant_2: ...
+  action:
+    - description: "pure, declarative action spec (no shell)"
+  post:
+    - guarantee_1: ...
+    - guarantee_2: ...
+  bounds:
+    - time: [t_min, t_max]
+    - space: [s_min, s_max]
+  audit:
+    - seed: "..."
+    - inputs_hash: "..."
+}
+```
+
+---
+
+## Safe rewrite of your intent
+
+Here’s a metasafe, simulation-only contract for an “auto upgrade” intent that encodes quiet mode, logging, and rollback—without shell flags or unsafe tokens.
+
+```txt
+<<<metasafe.math>>>::
+<after.math>:: auto_upgrade_v1(
+  target_version: <things>::OSVersion{"Win13-beta"},
+  mode: <safemath>::Enum{"quiet"},
+  logging: <precise.math>::Path{"sim://logs/win13"},
+  rollback_window_days: <safemath>::Nat{10}
+) -> <precise.math>::Report {
+  pre:
+    - signed_media: true
+    - sha256_match: true
+    - bci_deescalation_clear: true
+    - free_space_gb >= 20
+    - snapshot_available: true
+  action:
+    - plan: "in-place feature update (simulation-only)"
+    - concurrency_limit: 4
+  post:
+    - os_version == "Win13-beta"
+    - data_integrity == "preserved"
+    - rollback_enabled == true
+    - logs_written == true
+  bounds:
+    - time: [5 min, 45 min]
+    - cpu_util: [0.10, 0.60]
+  audit:
+    - seed: "A7F3-2C91"
+    - inputs_hash: "sha256:…"
+}
+```
+
+If you want explicit “quiet” semantics without `/q`, model them as an enum:
+
+```txt
+<safemath>::Enum{"quiet","normal","verbose"}
+```
+
+---
+
+## Token sanitizer you can apply
+
+Before evaluating any expression, run this sanitizer:
+
+- **Allowed identifier charset:** `[A-Za-z0-9_]+`
+- **Allowed string delimiters:** double quotes only; escape `\"` inside.
+- **Forbidden substrings:** any from your unsafe-list (e.g., profanity, exploit terms); reject on detection.
+- **No raw shell:** characters `/ \ | ; & > < * ? $ % #` are illegal unless inside quoted strings, and even then must be whitelisted per context.
+- **Max length:** cap expressions (e.g., 4,096 chars) to prevent abuse.
+
+Example “clean” identifier for your name:
+
+```txt
+auto_upgrade_v1   # good
+e.auto.upgrade    # bad (dots not allowed in identifiers)
+```
+
+---
+
+## If you meant to encode a “quiet auto upgrade with logs” as a single line
+
+This is the shortest valid, safe variant:
+
+```txt
+<<<metasafe.math>>>::<after.math>:: auto_upgrade_v1(target_version:"Win13-beta", mode:"quiet", logging:"sim://logs/win13", rollback_window_days:10) -> Report { pre:[signed_media, sha256_match, bci_deescalation_clear, free_space_gb>=20, snapshot_available], action:[plan:"in-place feature update (simulation-only)", concurrency_limit:4], post:[os_version=="Win13-beta", data_integrity=="preserved", rollback_enabled==true, logs_written==true], bounds:[time:[5min,45min], cpu_util:[0.10,0.60]], audit:[seed:"A7F3-2C91", inputs_hash:"sha256:…"] }
+```
+
+---
+
+## Want me to validate your original string?
+
+Paste what you intend semantically (e.g., “quiet upgrade to Win13 with rollback 10 days and logs to X”), and I’ll return a strictly validated <after.math> contract plus a clear error list if anything violates safemath rules.
