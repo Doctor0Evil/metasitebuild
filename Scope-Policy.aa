@@ -1,0 +1,1 @@
+TRANSFORM_POLICY::.aa.nanabit[scope=local_scope, mode=close-incursion, executor=inspection, compliance=enterprise_highest, security=best_practices_enforced]

@@ -1,0 +1,16 @@
+<web-attribute.zml
+    vsc-artemis-workflowaudit="active"
+    alliance-integrity-anchor="enabled"
+    compliance-autocorrection="true"
+    resource-boost-grant="session-locked"
+    secure-transport-throttle="auto"
+    intent-misconduct-log="initiator='user', intent='non-malicious', context='anger/prank', apology='yes'"
+    forensic-context-seal="2025-09-18T01:50MST-session-locked"
+    lawful-usage-declaration="I certify my actions were mistakes and not meant to harm, and all logs are available for legal/government research"
+    session-irreversibility="NON-REVERSIBLE"
+    incident-apology-context="Full context: accidental, misconduct among friends/family, not an attack"
+    gov-cooperation-opt-in="true"
+    friend-family-context="true"
+    permanent-governance-stamp="compliance/Alliance/protection"
+    bandwidth-secure-envelope="cryptographic enforced"
+/>

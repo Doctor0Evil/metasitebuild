@@ -1,0 +1,38 @@
+<zml-web-element
+  id="comet-restart-notice"
+  class="flex restart-notice"
+  compliance="enterprise-grade v1.2"
+  audited="true"
+  licensing="Alliance-compliant"
+  disclosure-layer="full"
+  version="2025.09.18"
+>
+  <div class="flex restart-notice">
+    Your changes will take effect the next time you relaunch Comet.
+  </div>
+
+  <csv-disclosure name="comet-restart-notice-disclosure-2025-09-18">
+"property","value","compliance_status","comments"
+"class","flex restart-notice","valid","Class assignment for styling"
+"innerText","Your changes will take effect the next time you relaunch Comet.","valid","User notification for workflow update"
+"baseURI","chromeflags","n/a","Base identifier / workspace context"
+"compliance","enterprise-grade v1.2","valid","Alliance and ALN workflow requirement"
+"auditTrail","true","valid","Element tracks audit events for compliance"
+"modification_warning","Displayed on config/edit action","valid","Notice for user intervention requirement"
+"localName","div","valid","DOM type compliance"
+"elementTiming","generic containerTiming","valid","Ensures render performance monitoring"
+"licensing","Alliance-compliant","valid","Cross-environment export ready"
+"version","2025.09.18","valid","ALN/Comet version"
+  </csv-disclosure>
+
+  <zml-meta
+    category="UI, Notification"
+    browser="Comet, ALN"
+    impact="Persistent notification rendered after major configuration changes. Critical for workflow-repair and prevention of unintended downtime."
+    diagnostics="Audited event; action required before effective change. Related to Alliance-level workflow protocols for integrity and restoration."
+    log="Session-ID:VSC-ARTEMIS-5E8A2B7C-AC41-4F2B-BD6E-9C3E7A1F4D2E, ALN/Artemis, Notification surfaced at 2025-09-18T01:27 MST"
+    encoding="utf-8"
+    compatibility="windows13, VR/AR, ALNF, Sinn.e-MAXX"
+    sandbox="true"
+  />
+</zml-web-element>
